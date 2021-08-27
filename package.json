@@ -9,6 +9,9 @@
     "lint": "eslint --ext .ts ./src/",
     "prettier": "prettier"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
