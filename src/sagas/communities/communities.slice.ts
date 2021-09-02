@@ -29,7 +29,6 @@ export const communitiesSlice = createSlice({
   name: StoreKeys.Communities,
   reducers: {
     addNewCommunity: (state, action: any) => {
-      console.log('addNewIdentity');
       communitiesAdapter.addOne(state, new Community(action.payload));
     },
     updateCommunity: (state, action: any) => {
