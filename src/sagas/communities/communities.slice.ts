@@ -68,6 +68,7 @@ export const communitiesSlice = createSlice({
         },
       });
     },
+    launchCommunity: (state, _action: PayloadAction<string>) => state,
   },
 });
 
