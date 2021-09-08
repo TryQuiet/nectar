@@ -2,7 +2,7 @@ import { put } from "typed-redux-saga";
 import { identityActions } from "../../identity/identity.slice";
 
 export function* responseCreateCommunitySaga (action: any): Generator {
-
+console.log('GOT RESPONSE AFTER CREATING COMMUNITY')
 const id = action.payload.id
 const hiddenService = action.payload.payload.hiddenService
 

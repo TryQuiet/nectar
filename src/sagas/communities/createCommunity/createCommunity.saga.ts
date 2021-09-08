@@ -7,6 +7,7 @@ import { SocketActionTypes } from "../../socket/const/actionTypes";
 import { generateId } from '../../../utils/cryptography/cryptography'
 
 export function* createCommunitySaga (socket, action: any): Generator {
+    console.log('creating communityyyy', action.payload)
 const rootCa = yield* call(createRootCA, new Time({ type: 1, value: new Date() }), new Time({ type: 1, value: new Date(2030, 1, 1) }), action.payload )
 const id = yield call(generateId)
 const payload = {id: id, CA: rootCa, name: action.payload }
