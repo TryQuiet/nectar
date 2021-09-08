@@ -1,8 +1,10 @@
 import { apply, select } from "typed-redux-saga";
 import { SocketActionTypes } from "../../socket/const/actionTypes";
 import { identitySelectors } from "../../identity/identity.selectors";
+import { communitiesSelectors } from "../communities.selectors";
 
-export function* launchRegistrar(_action, socket): Generator {
-    const selectedIdentity = yield* select(identitySelectors.selectById())
-    yield* apply(socket, socket.emit, [SocketActionTypes.LAUNCH_COMMUNITY, selectedIdentity.peerId, selectedIdentity.hiddenService])
+export function* launchRegistrarSaga(socket, _action): Generator {
+    const identity = yield* select(identitySelectors.selectById())
+    const community = yield* select(communitiesSelectors.currentCommunity())
+    yield* apply(socket, socket.emit, [SocketActionTypes.LAUNCH_REGISTRAR, identity.id ,identity.peerId.id, community.CA.rootCertString, community.CA.rootKeyString, community.privateKey])
 }

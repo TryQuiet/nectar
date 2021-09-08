@@ -25,7 +25,10 @@ export class Community {
   }
   public name: string = '';
   id: string = '';
-  CA: null | {} = null;
+  CA: null | {
+    rootCertString: string,
+    rootKeyString: string
+  } = null;
   public registrar: {
     privateKey: string
     address: string
@@ -52,9 +55,7 @@ export const communitiesSlice = createSlice({
         },
       });
     },
-    joinCommunity: (state, action: any) => {
-      communitiesAdapter.addOne(state.communities, new Community(action.payload));
-    },
+    joinCommunity: (state, _action: PayloadAction<string>) => state,
     createNewCommunity: (state, _action: PayloadAction<string>) => state,
     responseCreateCommunity: (
       state,
@@ -69,6 +70,7 @@ export const communitiesSlice = createSlice({
       });
     },
     launchCommunity: (state, _action: PayloadAction<string>) => state,
+    launchRegistrar: (state, _action: PayloadAction<string>) => state,
   },
 });
 
