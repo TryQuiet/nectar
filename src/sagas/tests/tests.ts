@@ -28,13 +28,9 @@ export const createPath = (dirName: string) => {
 }
 
 function testReducer(state = { value: 0 }, action) {
-  console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>', action.type)
   switch (action.type) {
-    case 'user1test':
-      return state
     default:
       return state
-
   }
 }
 
@@ -42,12 +38,12 @@ export function* handleTest(): Generator {
   console.log('handling test')
   yield all([
     takeEvery(
-      createAction('user1test'),
-      createCommunityAndSendMessageSaga,
+      createAction('userCreatingCommunity'),
+      createCommunityTestSaga,
     ),
     takeEvery(
-      createAction('user2test'),
-      registerUserAndJoinCommunitySaga,
+      createAction('userJoiningCommunity'),
+      joinCommunityTestSaga,
     ),
   ]);
 }
@@ -67,7 +63,7 @@ const prepareStore = (rootSaga) => {
   return store
 }
 
-const createApp = async (name: string, communityData: any = null) => {
+const createApp = async (name: string) => {
   const [dataServerPort1] = await fp(4677)
   const server1 = new waggle.DataServer(dataServerPort1)
   await server1.listen()
@@ -88,7 +84,6 @@ const createApp = async (name: string, communityData: any = null) => {
     ])
   }
   const store = prepareStore(root)
-  
 
   const [proxyPort] = await fp(1234)
   const [controlPort] = await fp(5555)
@@ -105,19 +100,9 @@ const createApp = async (name: string, communityData: any = null) => {
   })
   await manager1.init()
   return store
-  
 }
-// run waggle and socket server
-// create community
-// create csr, register
-// send message
 
-// run waggle and socket server
-// create csr
-// register username
-// join community
-
-function* createCommunityAndSendMessageSaga(payload): Generator { // this is first user
+function* createCommunityTestSaga(payload): Generator { // this is first user
   const userName = payload.payload.userName
   console.log(payload, '<- payload?')
   console.log('1. Start', userName)
@@ -135,13 +120,12 @@ function* createCommunityAndSendMessageSaga(payload): Generator { // this is fir
   })
   console.log('4. Created csr', userName)
   const currentCommunity = yield select(communitiesSelectors.currentCommunity())
-  // console.log(currentCommunity)
   // @ts-expect-error
   yield put(identityActions.storeUserCsr({userCsr: csrObj, communityId: createdCommunity.payload.id, registrarAddress: `http://${currentCommunity.onionAddress}.onion:${currentCommunity.port}`}))
   console.log('5. Registered user', userName)
 }
 
-function* registerUserAndJoinCommunitySaga(payload): Generator {  // this is second user
+function* joinCommunityTestSaga(payload): Generator {  // this is second user
   const {registrarAddress, communityId, userName} = payload.payload
   console.log('1. Start', userName)
   const csrObj = yield call(createUserCsr, {
@@ -152,30 +136,38 @@ function* registerUserAndJoinCommunitySaga(payload): Generator {  // this is sec
     signAlg: configCrypto.signAlg,
     hashAlg: configCrypto.hashAlg
   })
-  console.log(csrObj)
+  console.log('PAYLOAD:', registrarAddress, communityId, userName)
   // @ts-expect-error
-  yield put(identityActions.storeUserCsr({userCsr: csrObj.userCsr, communityId, registrarAddress}))
+  yield put(identityActions.storeUserCsr({userCsr: csrObj, communityId, registrarAddress}))
   console.log('2. Registered user?', userName)
   yield put(communitiesActions.joinCommunity(registrarAddress))
   console.log('3. Joined community')
+  // const createdCommunity = yield take(communitiesActions.responseCreateCommunity)
+  // console.log('... ', createdCommunity)
+  console.log('4. Joined community - response')
 }
 
 const test = async () => {
   const store1 = await createApp('First')
-  store1.dispatch({'type': 'user1test', 'payload': {'userName': 'User1'}})
+  const store2 = await createApp('Second')
+
+  store1.dispatch({type: 'userCreatingCommunity', payload: {userName: 'Owner'}})
 
   const unsubscribe = store1.subscribe(async () => {
-    const communities = store1.getState()['Communities'].communities
-    const mainCommunityId = store1.getState()['Communities'].currentCommunity
+    const communitiesState = store1.getState()['Communities']
+    const communities = communitiesState.communities
+    const mainCommunityId = communitiesState.currentCommunity
     if (mainCommunityId && communities.entities[mainCommunityId].onionAddress) {
-      const store2 = await createApp('Second')  // Ports need to be passed to createApp
-      const community = communities.entities[mainCommunityId]
-      console.log('COMMUNITYYY', community)
-      const registrarAddress = `http://${community.onionAddress}.onion:${community.port}`
-      store2.dispatch({'type': 'user2test', 'payload': {userName: 'User2', registrarAddress, communityId: community.id}})
       unsubscribe()
+      const community = communities.entities[mainCommunityId]
+      const registrarAddress = `http://${community.onionAddress}.onion:${community.port}`
+      store2.dispatch({type: 'userJoiningCommunity', payload: {userName: 'User', registrarAddress, communityId: community.id}})
     }
-  })  
+  })
+
+  store2.subscribe(() => {
+    console.log('store 2 state', store2.getState())
+  })
 }
 
 test().catch(e => console.error('oops', e))
