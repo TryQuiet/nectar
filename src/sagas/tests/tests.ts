@@ -8,16 +8,17 @@ import fp from 'find-free-port'
 import tmp from 'tmp'
 import path from 'path'
 import thunk from 'redux-thunk'
-import { communities, storeKeys } from "../../index"
+import { communities, storeKeys, identity, users, errors } from "../../index"
 import { handleActions, useIO } from '../../sagas/socket/startConnection/startConnection.saga'
 import { createCommunitySaga } from "../../sagas/communities/createCommunity/createCommunity.saga"
 import { communitiesActions } from "../../sagas/communities/communities.slice"
 import { communitiesSelectors } from "../../sagas/communities/communities.selectors"
 import { identityMasterSaga } from "../../sagas/identity/identity.master.saga"
-import { identityActions, identityReducer } from "../../sagas/identity/identity.slice"
+// import { identityActions, identityReducer } from "../../sagas/identity/identity.slice"
 import { createUserCsr, configCrypto } from "@zbayapp/identity"
 import { UserCsr } from "@zbayapp/identity/lib/requestCertificate"
 import { messagesMasterSaga } from "../messages/messages.master.saga"
+// import {communities}
 
 export const createTmpDir = (prefix: string) => {
   return tmp.dirSync({ mode: 0o750, prefix, unsafeCleanup: true })
@@ -51,7 +52,9 @@ export function* handleTest(): Generator {
 const prepareStore = (rootSaga) => {
   const reducers = {
     [storeKeys.Communities]: communities.reducer,
-    [storeKeys.Identity]: identityReducer,
+    [storeKeys.Identity]: identity.reducer,
+    [storeKeys.Users]: users.reducer,
+    [storeKeys.Errors]: users.reducer,
     'test': testReducer
   }
   const combinedReducers = combineReducers(reducers)
@@ -110,19 +113,20 @@ function* createCommunityTestSaga(payload): Generator {
   console.log('2. Creating new community?', userName)
   const createdCommunity = yield take(communitiesActions.responseCreateCommunity)
   console.log('3. Created new community', userName)
-  yield put(identityActions.registerUsername(userName))
+  yield put(identity.actions.registerUsername(userName))
   yield select(communitiesSelectors.currentCommunity())
   console.log('5. Registered user', userName)
 }
 
 function* joinCommunityTestSaga(payload): Generator {  // this is second user
   const {registrarAddress, communityId, userName} = payload.payload
-    console.log('PAYLOAD:', registrarAddress, communityId, userName)
+  console.log('PAYLOAD:', registrarAddress, communityId, userName)
   console.log('1. Start', userName)
   yield put(communitiesActions.joinCommunity(registrarAddress))
+  console.log('2. after join community action', userName)
   const createdCommunity = yield take(communitiesActions.responseCreateCommunity)
-  console.log('2. Joined community', userName, createdCommunity)
-  yield put(identityActions.registerUsername(userName))
+  console.log('3. Joined community', userName, createdCommunity)
+  yield put(identity.actions.registerUsername(userName))
 }
 
 const test = async () => {
@@ -132,10 +136,14 @@ const test = async () => {
   store1.dispatch({type: 'userCreatingCommunity', payload: {userName: 'Owner'}})
 
   const unsubscribe = store1.subscribe(async () => {
-    const communitiesState = store1.getState()['Communities']
+    const communitiesState = store1.getState().Communities
+    const identityState = store1.getState().Identity
+    const useridentity = identityState.entities[identityState.ids[0]]
     const communities = communitiesState.communities
     const mainCommunityId = communitiesState.currentCommunity
-    if (mainCommunityId && communities.entities[mainCommunityId].onionAddress) {
+
+    // TODO: simplify this ^
+    if (mainCommunityId && communities.entities[mainCommunityId].onionAddress && useridentity && useridentity.userCertificate) {
       unsubscribe()
       const community = communities.entities[mainCommunityId]
       const registrarAddress = `http://${community.onionAddress}.onion:${community.port}`
@@ -143,8 +151,9 @@ const test = async () => {
     }
   })
 
-  // store2.subscribe(() => {
-  //   console.log('store 2 state', store2.getState())
+  // store1.subscribe(() => {
+  //   const identityState = store1.getState().Identity
+  //   console.log('store 1 state', identityState.entities[identityState.ids[0]])
   // })
 }
 
