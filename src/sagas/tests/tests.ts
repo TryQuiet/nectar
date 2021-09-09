@@ -14,7 +14,7 @@ import { createCommunitySaga } from "../../sagas/communities/createCommunity/cre
 import { communitiesActions } from "../../sagas/communities/communities.slice"
 import { communitiesSelectors } from "../../sagas/communities/communities.selectors"
 import { identityMasterSaga } from "../../sagas/identity/identity.master.saga"
-import { identityActions } from "../../sagas/identity/identity.slice"
+import { identityActions, identityReducer } from "../../sagas/identity/identity.slice"
 import { createUserCsr, configCrypto } from "@zbayapp/identity"
 import { UserCsr } from "@zbayapp/identity/lib/requestCertificate"
 import { messagesMasterSaga } from "../messages/messages.master.saga"
@@ -51,6 +51,7 @@ export function* handleTest(): Generator {
 const prepareStore = (rootSaga) => {
   const reducers = {
     [storeKeys.Communities]: communities.reducer,
+    [storeKeys.Identity]: identityReducer,
     'test': testReducer
   }
   const combinedReducers = combineReducers(reducers)
@@ -102,49 +103,26 @@ const createApp = async (name: string) => {
   return store
 }
 
-function* createCommunityTestSaga(payload): Generator { // this is first user
+function* createCommunityTestSaga(payload): Generator {
   const userName = payload.payload.userName
-  console.log(payload, '<- payload?')
   console.log('1. Start', userName)
-  const sth = yield put(communitiesActions.createNewCommunity('CommunityName'))
+  yield put(communitiesActions.createNewCommunity('CommunityName'))
   console.log('2. Creating new community?', userName)
   const createdCommunity = yield take(communitiesActions.responseCreateCommunity)
   console.log('3. Created new community', userName)
-  const csrObj = yield call(createUserCsr, {
-    zbayNickname: userName, 
-    commonName: 'CommunityName', 
-    peerId: 'asdasdasdsad', 
-    dmPublicKey: '12321312', 
-    signAlg: configCrypto.signAlg,
-    hashAlg: configCrypto.hashAlg
-  })
-  console.log('4. Created csr', userName)
-  const currentCommunity = yield select(communitiesSelectors.currentCommunity())
-  // @ts-expect-error
-  yield put(identityActions.storeUserCsr({userCsr: csrObj, communityId: createdCommunity.payload.id, registrarAddress: `http://${currentCommunity.onionAddress}.onion:${currentCommunity.port}`}))
+  yield put(identityActions.registerUsername(userName))
+  yield select(communitiesSelectors.currentCommunity())
   console.log('5. Registered user', userName)
 }
 
 function* joinCommunityTestSaga(payload): Generator {  // this is second user
   const {registrarAddress, communityId, userName} = payload.payload
+    console.log('PAYLOAD:', registrarAddress, communityId, userName)
   console.log('1. Start', userName)
-  const csrObj = yield call(createUserCsr, {
-    zbayNickname: userName, 
-    commonName: 'CommunityName', 
-    peerId: 'zxczxczxc',
-    dmPublicKey: '6578678678', 
-    signAlg: configCrypto.signAlg,
-    hashAlg: configCrypto.hashAlg
-  })
-  console.log('PAYLOAD:', registrarAddress, communityId, userName)
-  // @ts-expect-error
-  yield put(identityActions.storeUserCsr({userCsr: csrObj, communityId, registrarAddress}))
-  console.log('2. Registered user?', userName)
   yield put(communitiesActions.joinCommunity(registrarAddress))
-  console.log('3. Joined community')
-  // const createdCommunity = yield take(communitiesActions.responseCreateCommunity)
-  // console.log('... ', createdCommunity)
-  console.log('4. Joined community - response')
+  const createdCommunity = yield take(communitiesActions.responseCreateCommunity)
+  console.log('2. Joined community', userName, createdCommunity)
+  yield put(identityActions.registerUsername(userName))
 }
 
 const test = async () => {
@@ -165,9 +143,9 @@ const test = async () => {
     }
   })
 
-  store2.subscribe(() => {
-    console.log('store 2 state', store2.getState())
-  })
+  // store2.subscribe(() => {
+  //   console.log('store 2 state', store2.getState())
+  // })
 }
 
 test().catch(e => console.error('oops', e))
