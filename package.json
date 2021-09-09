@@ -27,7 +27,7 @@
     "@babel/core": "^7.15.0",
     "@babel/preset-env": "^7.15.0",
     "@babel/preset-typescript": "^7.15.0",
-    "@types/jest": "^26.0.24",
+    "@types/jest": "^26.0.24", 
     "@types/luxon": "^2.0.0",
     "@types/pkijs": "0.0.10",
     "@types/redux-saga": "^0.10.5",

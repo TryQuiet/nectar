@@ -10,8 +10,8 @@ export function* checkForMessagesSaga(): Generator {
   if (missingMessages.length > 0) {
     yield* put(
       publicChannelsActions.askForMessages({
-        channelAddress: currentChannel,
-        ids: missingMessages,
+        channelAddress: 'currentChannel',
+        ids: ['missingMessages'],
       })
     );
   }

@@ -20,8 +20,6 @@ describe('joinCommunity', () => {
       id: 'id',
     };
     await expectSaga(launchCommunitySaga, socket, communitiesActions.launchCommunity())
-
-
       .apply(socket, socket.emit, [
         SocketActionTypes.CREATE_COMMUNITY,
         communityPayload,

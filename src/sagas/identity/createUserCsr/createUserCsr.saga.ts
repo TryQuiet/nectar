@@ -19,7 +19,7 @@ export function* createUserCsrSaga(
   let csr: UserCsr;
 
   try {
-    csr = yield* call(createUserCsr, action.payload) as any;
+    csr = yield* call(createUserCsr, action.payload)
   } catch (e) {
     console.error(e);
     return;

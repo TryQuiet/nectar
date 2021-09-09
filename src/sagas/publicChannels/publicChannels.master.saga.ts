@@ -22,10 +22,10 @@ export function* publicChannelsMasterSaga(socket: Socket): Generator {
       subscribeForTopicSaga,
       socket
     ),
-    takeEvery(
-      publicChannelsActions.responseSendMessagesIds.type,
-      checkForMessagesSaga
-    ),
+    // takeEvery(
+    //   publicChannelsActions.responseSendMessagesIds.type,
+    //   checkForMessagesSaga
+    // ),
     takeEvery(
       publicChannelsActions.askForMessages.type,
       askForMessagesSaga,
