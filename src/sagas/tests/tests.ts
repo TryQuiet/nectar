@@ -1,6 +1,7 @@
 import { applyMiddleware, combineReducers, createAction, createStore, PayloadAction } from "@reduxjs/toolkit"
 import createSagaMiddleware from "redux-saga"
-import { all, call, fork, put, select, take, takeEvery } from "redux-saga/effects"
+import { all, fork, put, select, take, takeEvery } from "redux-saga/effects"
+import { call } from "typed-redux-saga"
 import { communitiesMasterSaga } from '../../sagas/communities/communities.master.saga'
 import waggle from 'waggle'
 import { io, Socket } from 'socket.io-client'
@@ -29,10 +30,7 @@ export const createPath = (dirName: string) => {
 }
 
 function testReducer(state = { value: 0 }, action) {
-  switch (action.type) {
-    default:
-      return state
-  }
+  return state
 }
 
 export function* handleTest(): Generator {
@@ -54,7 +52,7 @@ const prepareStore = (rootSaga) => {
     [storeKeys.Communities]: communities.reducer,
     [storeKeys.Identity]: identity.reducer,
     [storeKeys.Users]: users.reducer,
-    [storeKeys.Errors]: users.reducer,
+    [storeKeys.Errors]: errors.reducer,
     'test': testReducer
   }
   const combinedReducers = combineReducers(reducers)
@@ -63,31 +61,24 @@ const prepareStore = (rootSaga) => {
     combinedReducers,
     applyMiddleware(...[sagaMiddleware, thunk])
   )
-  sagaMiddleware.run(rootSaga)
-  return store
+
+  return { store, runSagas: () =>sagaMiddleware.run(rootSaga) }
+}
+
+const connectToDataport = (url, name): Socket => {
+  const socket = io(url)
+  socket.on('connect', async () => {
+    console.log(`websocket connection is ready for ${name}`)
+  })
+  return socket
 }
 
 const createApp = async (name: string) => {
   const [dataServerPort1] = await fp(4677)
   const server1 = new waggle.DataServer(dataServerPort1)
   await server1.listen()
-  
-  const socket = io(`http://localhost:${dataServerPort1}`)
-  socket.on('connect', async () => {
-    console.log(`websocket connection is ready for ${name}`)
-  })
-  function* root(): Generator {
-    console.log('root saga')
-    yield all([
-      fork(handleActions, socket),
-      fork(handleTest),
-      // fork(publicChannelsMasterSaga, socket),
-      fork(messagesMasterSaga, socket),
-      fork(identityMasterSaga, socket),
-      fork(communitiesMasterSaga, socket)
-    ])
-  }
-  const store = prepareStore(root)
+
+  const  { store, runSagas } = prepareStore(root)
 
   const [proxyPort] = await fp(1234)
   const [controlPort] = await fp(5555)
@@ -103,6 +94,22 @@ const createApp = async (name: string) => {
     io: server1.io
   })
   await manager1.init()
+
+  runSagas()
+  
+  function* root(): Generator {
+    console.log('root saga')
+    const socket = yield* call(connectToDataport, `http://localhost:${dataServerPort1}`, name);
+    yield all([
+      fork(handleActions, socket),
+      fork(handleTest),
+      // fork(publicChannelsMasterSaga, socket),
+      fork(messagesMasterSaga, socket),
+      fork(identityMasterSaga, socket),
+      fork(communitiesMasterSaga, socket)
+    ])
+  }
+  
   return store
 }
 
@@ -114,12 +121,12 @@ function* createCommunityTestSaga(payload): Generator {
   const createdCommunity = yield take(communitiesActions.responseCreateCommunity)
   console.log('3. Created new community', userName)
   yield put(identity.actions.registerUsername(userName))
-  yield select(communitiesSelectors.currentCommunity())
+  // yield select(communitiesSelectors.currentCommunity())
   console.log('5. Registered user', userName)
 }
 
 function* joinCommunityTestSaga(payload): Generator {  // this is second user
-  const {registrarAddress, communityId, userName} = payload.payload
+  const { registrarAddress, communityId, userName } = payload.payload
   console.log('PAYLOAD:', registrarAddress, communityId, userName)
   console.log('1. Start', userName)
   yield put(communitiesActions.joinCommunity(registrarAddress))
@@ -133,7 +140,7 @@ const test = async () => {
   const store1 = await createApp('First')
   const store2 = await createApp('Second')
 
-  store1.dispatch({type: 'userCreatingCommunity', payload: {userName: 'Owner'}})
+  store1.dispatch({ type: 'userCreatingCommunity', payload: { userName: 'Owner' } })
 
   const unsubscribe = store1.subscribe(async () => {
     const communitiesState = store1.getState().Communities
@@ -146,14 +153,15 @@ const test = async () => {
     if (mainCommunityId && communities.entities[mainCommunityId].onionAddress && useridentity && useridentity.userCertificate) {
       unsubscribe()
       const community = communities.entities[mainCommunityId]
-      const registrarAddress = `http://${community.onionAddress}.onion:${community.port}`
-      store2.dispatch({type: 'userJoiningCommunity', payload: {userName: 'User', registrarAddress, communityId: community.id}})
+      const registrarAddress = community.onionAddress
+      store2.dispatch({ type: 'userJoiningCommunity', payload: { userName: 'User', registrarAddress, communityId: community.id } })
     }
   })
 
-  // store1.subscribe(() => {
-  //   const identityState = store1.getState().Identity
-  //   console.log('store 1 state', identityState.entities[identityState.ids[0]])
+  // store2.subscribe(() => {
+  //   // const identityState = store1.getState().Identity
+  //   // console.log('store 1 state', identityState.entities[identityState.ids[0]])
+  //   console.log('STORE2:', store2.getState())
   // })
 }
 
