@@ -48,12 +48,12 @@ export function subscribe(socket: Socket) {
     | ReturnType<typeof usersActions.responseSendCertificates>
     | ReturnType<typeof communitiesActions.responseCreateCommunity>
   >((emit) => {
-    // socket.on(
-    //   SocketActionTypes.RESPONSE_GET_PUBLIC_CHANNELS,
-    //   (payload: GetPublicChannelsResponse) => {
-    //     emit(publicChannelsActions.responseGetPublicChannels(payload));
-    //   }
-    // );
+    socket.on(
+      SocketActionTypes.RESPONSE_GET_PUBLIC_CHANNELS,
+      (payload: GetPublicChannelsResponse) => {
+        emit(publicChannelsActions.responseGetPublicChannels(payload));
+      }
+    );
     // socket.on(
     //   SocketActionTypes.SEND_MESSAGES_IDS,
     //   (payload: ChannelMessagesIdsResponse) => {

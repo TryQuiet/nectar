@@ -1,4 +1,4 @@
-import { combineReducers, EntityState } from '@reduxjs/toolkit';
+import { combineReducers } from '@reduxjs/toolkit';
 import { expectSaga } from 'redux-saga-test-plan';
 import { Socket } from 'socket.io-client';
 import { generateId } from '../../../utils/cryptography/cryptography';

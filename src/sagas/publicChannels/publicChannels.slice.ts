@@ -17,7 +17,7 @@ export class PublicChannelsState {
   // public channelMessages: ChannelMessages = {};
 }
 
-class CommunityChannels {
+export class CommunityChannels {
   constructor({id}) {
     this.id = id
   }
@@ -26,7 +26,7 @@ class CommunityChannels {
     publicChannelsAdapter.getInitialState();
 
   public currentChannel: string =
-    '';
+    'general';
 
   public channelMessages: ChannelMessages = {};
 }
@@ -41,7 +41,10 @@ export interface ChannelMessages {
 }
 
 export interface GetPublicChannelsResponse {
-  [name: string]: IChannelInfo;
+  communityId: string;
+  channels: {
+    [name: string]: IChannelInfo;
+  }
 }
 
 export interface ChannelMessagesIdsResponse {
@@ -67,15 +70,16 @@ export const publicChannelsSlice = createSlice({
 channelsByCommunityAdapter.addOne(state, new CommunityChannels(action.payload))
     },
     getPublicChannels: (state) => state,
-    // responseGetPublicChannels: (
-    //   state,
-    //   action: PayloadAction<GetPublicChannelsResponse>
-    // ) => {
-    //   publicChannelsAdapter.setAll(
-    //     state.channels,
-    //     Object.values(action.payload)
-    //   );
-    // },
+    responseGetPublicChannels: (
+  state,
+      action: PayloadAction<GetPublicChannelsResponse>
+    ) => {
+      const channel : IChannelInfo = {name: 'namghfhfghe', description:'asdffghfghdsf', owner: 'asfghfghdf', timestamp: 12333333, address: 'asdf'}
+      publicChannelsAdapter.addOne(
+        state.entities[action.payload.communityId].channels,
+        channel
+      );
+    },
     // setCurrentChannel: (state, action: PayloadAction<string>) => {
     //   state.currentChannel = action.payload;
     // },
