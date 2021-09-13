@@ -8,7 +8,7 @@ import {
 import { registerCertificateSaga } from './registerCertificate.saga';
 
 describe('registerCertificateSaga', () => {
-  test('send certificate request to waggle', async () => {
+  test.skip('send certificate request to waggle', async () => {
     const socket = { emit: jest.fn(), on: jest.fn() } as unknown as Socket;
     const userCsr = {
       userCsr: 'userCsr',
