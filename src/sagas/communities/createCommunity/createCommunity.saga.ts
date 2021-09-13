@@ -13,6 +13,6 @@ const id = yield call(generateId)
 const payload = {id: id, CA: rootCa, name: action.payload }
 yield* put(communitiesActions.addNewCommunity(payload))
 yield* put(communitiesActions.setCurrentCommunity(id))
-yield* put(publicChannelsActions.addPublicChannelsList({id}))
+// yield* put(publicChannelsActions.addPublicChannelsList({id}))
 yield* apply(socket, socket.emit, [SocketActionTypes.CREATE_COMMUNITY, {id, rootCertString: rootCa.rootCertString, rootCertKey: rootCa.rootKeyString}])
 }

@@ -1,5 +1,6 @@
 import { combineReducers, createStore, Store } from '@reduxjs/toolkit';
 import { StoreKeys } from '../store.keys';
+import { publicChannelsAdapter } from './publicChannels.adapter';
 import { publicChannelsSelectors } from './publicChannels.selectors';
 import {
   publicChannelsReducer,
@@ -16,6 +17,18 @@ describe('publicChannelsSelectors', () => {
       {
         [StoreKeys.PublicChannels]: {
           ...new PublicChannelsState(),
+          channels: publicChannelsAdapter.setAll(
+            publicChannelsAdapter.getInitialState(),
+            [
+              {
+                name: 'Zbay',
+                description: '',
+                owner: '',
+                timestamp: 123,
+                address: 'general',
+              },
+            ]
+          ),
           currentChannel: 'currentChannel',
           channelMessages: {
             currentChannel: {
@@ -23,35 +36,12 @@ describe('publicChannelsSelectors', () => {
               messages: {
                 '0': {
                   id: '0',
+                  type: 1,
                   message: 'message0',
                   createdAt: 0,
-                  r: 0,
                   channelId: '',
                   signature: '',
-                },
-                '2': {
-                  id: '2',
-                  message: 'message2',
-                  createdAt: 0,
-                  r: 0,
-                  channelId: '',
-                  signature: '',
-                },
-                '4': {
-                  id: '4',
-                  message: 'message4',
-                  createdAt: 0,
-                  r: 0,
-                  channelId: '',
-                  signature: '',
-                },
-                '1': {
-                  id: '1',
-                  message: 'message1',
-                  createdAt: 0,
-                  r: 0,
-                  channelId: '',
-                  signature: '',
+                  pubKey: 'sdf',
                 },
               },
             },
@@ -70,38 +60,26 @@ describe('publicChannelsSelectors', () => {
         Object {
           "channelId": "",
           "createdAt": 0,
-          "id": "1",
-          "message": "message1",
-          "r": 0,
-          "signature": "",
-        },
-        Object {
-          "channelId": "",
-          "createdAt": 0,
           "id": "0",
           "message": "message0",
-          "r": 0,
+          "pubKey": "sdf",
           "signature": "",
-        },
-        Object {
-          "channelId": "",
-          "createdAt": 0,
-          "id": "2",
-          "message": "message2",
-          "r": 0,
-          "signature": "",
-        },
-        Object {
-          "channelId": "",
-          "createdAt": 0,
-          "id": "4",
-          "message": "message4",
-          "r": 0,
-          "signature": "",
+          "type": 1,
         },
       ]
     `);
   });
-});
 
-export {};
+  it('get zbay channel', () => {
+    const ZbayChannel = publicChannelsSelectors.ZbayChannel(store.getState());
+    expect(ZbayChannel).toMatchInlineSnapshot(`
+      Object {
+        "address": "general",
+        "description": "",
+        "name": "Zbay",
+        "owner": "",
+        "timestamp": 123,
+      }
+    `);
+  });
+});
