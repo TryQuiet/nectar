@@ -45,9 +45,9 @@ export function* createUserCsrSaga(
     return;
   }
 
-  console.log(
-    'before storing user csr', csr
-  )
+  // console.log(
+  //   'before storing user csr', csr
+  // )
   // TODO: Temporary hack - configure persistor
 
   //console.log(JSON.stringify(csr.pkcs10.privateKey), 'privateKey - strinfigy')
@@ -63,12 +63,12 @@ export function* createUserCsrSaga(
   //yield* put(identityActions.storeOwnCertKey(csr.userKey))
 
   const currentCommunity = yield* select(communitiesSelectors.currentCommunity())
-  
 
   const payload = {
     communityId: currentCommunity.id,
     userCsr: csr,
-  registrarAddress: 'http://' + currentCommunity.onionAddress + '.onion:7789'  }
+    registrarAddress: yield* select(communitiesSelectors.registrarUrl())
+  }
 
   yield* put(identityActions.storeUserCsr(payload));
 }

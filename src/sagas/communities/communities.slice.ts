@@ -20,7 +20,7 @@ export class Community {
       this.name = name;
     }
     if (registrarUrl) {
-      this.onionAddress = registrarUrl;
+      this.registrarUrl = registrarUrl;
     }
   }
   public name: string = '';
@@ -32,6 +32,8 @@ export class Community {
   }
   privateKey: string = '';
   onionAddress: string = '';
+  registrarUrl: string = ''
+  port: number
 }
 
 export const communitiesSlice = createSlice({
@@ -52,9 +54,7 @@ export const communitiesSlice = createSlice({
         },
       });
     },
-    joinCommunity: (state, action: any) => {
-      communitiesAdapter.addOne(state.communities, new Community(action.payload));
-    },
+    joinCommunity: (state, _action: any) => state,
     createNewCommunity: (state, _action: PayloadAction<string>) => state,
     responseCreateCommunity: (
       state,

@@ -5,8 +5,8 @@ import { SocketActionTypes } from '../../socket/const/actionTypes';
 import { generateId } from '../../../utils/cryptography/cryptography';
 
 export function* joinCommunitySaga(socket: Socket, action: any): Generator {
-  const id = yield call(generateId);
-  const payload = { id: id, registrarUrl: action.payload };
+  const id = yield* call(generateId);
+  const payload = { id, registrarUrl: action.payload };
   yield* put(communitiesActions.addNewCommunity(payload));
   yield* put(communitiesActions.setCurrentCommunity(id));
   yield* apply(socket, socket.emit, [

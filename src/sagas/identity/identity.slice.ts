@@ -112,7 +112,7 @@ export const identitySlice = createSlice({
     },
     storeUserCertificate: (
       state,
-      action: PayloadAction<{ userCertificate: string; communityId: string }>
+      action: PayloadAction<{ userCertificate: string; communityId: string; peers: string[] }>
     ) => {
       identityAdapter.updateOne(state, {
         id: action.payload.communityId,

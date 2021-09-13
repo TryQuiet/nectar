@@ -39,7 +39,7 @@ export function subscribe(socket: Socket) {
       (payload: any) => {
         console.log('storeUserCertificate')
         console.log(payload)
-        emit(identityActions.storeUserCertificate({userCertificate: payload.payload.certificate, communityId: payload.id}));
+        emit(identityActions.storeUserCertificate({userCertificate: payload.payload.certificate, communityId: payload.id, peers: payload.payload.peers}));
       }
     );
     socket.on(
