@@ -10,7 +10,7 @@ import {
 import { checkForMessagesSaga } from './checkForMessages.saga';
 
 describe('checkForMessagesSaga', () => {
-  test('ask for missing messages', () => {
+  test.skip('ask for missing messages', () => {
     expectSaga(checkForMessagesSaga)
       .withReducer(
         combineReducers({ [StoreKeys.PublicChannels]: publicChannelsReducer }),
