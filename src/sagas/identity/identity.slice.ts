@@ -1,13 +1,10 @@
 import {
-  createImmutableStateInvariantMiddleware,
   createSlice,
   EntityState,
   PayloadAction,
 } from '@reduxjs/toolkit';
-import { generateDmKeyPair } from '../../utils/cryptography/cryptography';
 import { identityAdapter } from './identity.adapter';
 import { StoreKeys } from '../store.keys';
-
 
 export class IdentityState {
   public identities: EntityState<Identity> = identityAdapter.getInitialState();
@@ -22,16 +19,11 @@ export class Identity {
   }
 
   public id: string = '';
-
   public zbayNickname: string = '';
-
   public hiddenService : HiddenService
   public dmKeys: DmKeys
-
   public peerId: PeerId
-
   public userCsr: UserCsr | null = null;
-
   public userCertificate: string | null = null;
 }
 
@@ -113,7 +105,7 @@ export const identitySlice = createSlice({
     },
     storeUserCsr: (
       state,
-      action: PayloadAction<{ userCsr: UserCsr; communityId: string }>
+      action: PayloadAction<{ userCsr: UserCsr; communityId: string, registrarAddress: string }>
     ) => {
       identityAdapter.updateOne(state, {
         id: action.payload.communityId,
