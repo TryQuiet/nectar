@@ -8,7 +8,7 @@ import {
 import { registerCertificateSaga } from './registerCertificate.saga';
 
 describe('registerCertificateSaga', () => {
-  test.skip('send certificate request to waggle', async () => {
+  test('send certificate request to waggle', async () => {
     const socket = { emit: jest.fn(), on: jest.fn() } as unknown as Socket;
     const userCsr = {
       userCsr: 'userCsr',
@@ -20,7 +20,7 @@ describe('registerCertificateSaga', () => {
     await expectSaga(
       registerCertificateSaga,
       socket,
-      identityActions.storeUserCsr(<{userCsr: UserCsr, communityId: 'string',registrarUrl: string}>(<unknown>{ registrarAddress, userCsr, communityId }))
+      identityActions.storeUserCsr(<{userCsr: UserCsr, communityId: 'string',registrarAddress: string}>(<unknown>{ registrarAddress, userCsr, communityId }))
     )
       .apply(socket, socket.emit, [
         SocketActionTypes.REGISTER_USER_CERTIFICATE,
