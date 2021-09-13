@@ -42,6 +42,6 @@ describe('checkForMessagesSaga', () => {
           ids: ['2', '3'],
         }),
       )
-      .run();
+      .silentRun();
   });
 });
