@@ -34,17 +34,3 @@ export function* createUserCsrSaga(
 
   yield* put(identityActions.storeUserCsr(payload));
 }
-
-export const initCryptoEngine = () => {
-  // TODO
-  return;
-  // setEngine(
-  //   'newEngine',
-  //   crypto,
-  //   new CryptoEngine({
-  //     name: '',
-  //     crypto,
-  //     subtle: crypto.subtle,
-  //   })
-  // );
-};

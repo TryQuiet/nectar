@@ -6,7 +6,6 @@ const selectSelf = (state) => state;
 export const certificateRegistration = createSelector(
   selectSelf,
   (reducerState: ErrorsState) => {
-    console.log(`inside errors selector ${reducerState}`)
     return reducerState.certificateRegistration;
   }
 );

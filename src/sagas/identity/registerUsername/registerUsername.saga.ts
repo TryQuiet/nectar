@@ -1,9 +1,7 @@
 import { PayloadAction } from '@reduxjs/toolkit';
-import { call, select, put } from 'typed-redux-saga';
-// import { ScreenNames } from '../../../const/ScreenNames.enum';
-// import { navigateTo } from '../../../utils/functions/navigateTo/navigateTo';
+import { select, put } from 'typed-redux-saga';
 import { identitySelectors } from '../identity.selectors';
-import { identityActions } from '../identity.slice';
+import { identityActions, identityReducer } from '../identity.slice';
 import {errorsActions} from '../../errors/errors.slice'
 import {config} from '../../users/const/certFieldTypes'
 
@@ -12,11 +10,7 @@ export function* registerUsernameSaga(
     ReturnType<any>['payload']
   >
 ): Generator {
-  console.log('registerUsernameSaga');
-
   const identity = yield* select(identitySelectors.currentIdentity)
-
-  // @ts-ignore
   const commonName = identity.hiddenService.onionAddress
   const peerId = identity.peerId.id
   const dmPublicKey = identity.dmKeys.publicKey
@@ -30,7 +24,7 @@ export function* registerUsernameSaga(
     return;
   }
 
-  console.log(action.payload, 'nickname is nectar')
+  yield* put(identityActions.updateUsername({communityId: identity.id, nickname: action.payload}))
 
   const payload = {
     zbayNickname: action.payload,

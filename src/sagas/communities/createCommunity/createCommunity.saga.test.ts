@@ -45,10 +45,14 @@ describe('createCommunitySaga', () => {
       .hasFinalState(
         {
           [StoreKeys.Communities]: {
-              ids: ['id'],
-              entities: {
-                'id': community
-          },
+        ...new CommunitiesState(),
+        currentCommunity: 'id',
+        communities: {
+          ids: ['id'],
+          entities: {
+            id: community
+          }
+        }
         }}
       )
       .silentRun();

@@ -1,24 +1,57 @@
 import { expectSaga } from 'redux-saga-test-plan';
 import { Socket } from 'socket.io-client';
 import { SocketActionTypes } from '../../socket/const/actionTypes';
+import {identityAdapter} from '../../identity/identity.adapter'
+import { launchCommunitySaga } from './launchCommunity.saga';
+import { combineReducers } from '@reduxjs/toolkit';
+import { StoreKeys } from '../../store.keys';
 import {
   communitiesActions,
+  communitiesReducer,
   Community,
+  CommunitiesState
 } from '../communities.slice';
-import { launchCommunitySaga } from './launchCommunity.saga';
+import {communitiesAdapter} from '../communities.adapter'
+import { Identity, identityReducer } from '../../identity/identity.slice';
 
-describe('joinCommunity', () => {
-  test('join the existing community', async () => {
+describe('launchCommunity', () => {
+  test('launch community', async () => {
     const socket = { emit: jest.fn(), on: jest.fn() } as unknown as Socket;
-    const communityPayload = {
+    const launchCommunityPayload = {
       id: 'id',
+      peerId: {id: 'peerId', pubKey: 'pubKey', privKey: 'privKey'},
+      hiddenService: {onionAddress: 'onionAddress', privateKey: 'privateKey'}
     };
+    const community = new Community({name: '', id: 'id', registrarUrl:'registrarUrl', CA: {}})
+    const identity = new Identity({id: 'id', hiddenService: {onionAddress: 'onionAddress', privateKey: 'privateKey'}, dmKeys: {publicKey: 'publicKey', privateKey: 'privateKey'}, peerId: {id: 'peerId', pubKey: 'pubKey', privKey: 'privKey'}})
+
     await expectSaga(launchCommunitySaga, socket, communitiesActions.launchCommunity())
+    .withReducer(
+      combineReducers({ [StoreKeys.Communities]: communitiesReducer, [StoreKeys.Identity]: identityReducer }),
+      {
+        [StoreKeys.Communities]: {
+          ...new CommunitiesState(),
+          currentCommunity: 'id',
+          communities: communitiesAdapter.setAll(
+            communitiesAdapter.getInitialState(),
+            [community]
+          ),
+        },
+        [StoreKeys.Identity]: {
+          ...identityAdapter.setAll(
+            identityAdapter.getInitialState(),
+            [identity]
+          )
+        }
+      }
+    )
       .apply(socket, socket.emit, [
         SocketActionTypes.LAUNCH_COMMUNITY,
-        communityPayload,
-      ])
+      launchCommunityPayload.id,
+      launchCommunityPayload.peerId,
+      launchCommunityPayload.hiddenService
 
+      ])
       .silentRun();
   });
 });

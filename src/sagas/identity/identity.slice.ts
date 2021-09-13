@@ -14,11 +14,11 @@ export class IdentityState {
 }
 
 export class Identity {
-  constructor({id, hiddenService, peerId}: AddNewIdentityPayload) {
+  constructor({id, hiddenService, peerId, dmKeys}: AddNewIdentityPayload) {
       this.id = id,
-      this.dmKeys = generateDmKeyPair(),
       this.peerId = peerId,
       this.hiddenService = hiddenService
+      this.dmKeys = dmKeys
   }
 
   public id: string = '';
@@ -26,10 +26,7 @@ export class Identity {
   public zbayNickname: string = '';
 
   public hiddenService : HiddenService
-  public dmKeys: {
-    publicKey: string,
-    privateKey: string
-  }
+  public dmKeys: DmKeys
 
   public peerId: PeerId
 
@@ -66,10 +63,16 @@ pubKey: string,
 privKey: string
 }
 
+export interface DmKeys {
+  publicKey: string,
+  privateKey: string
+}
+
 export interface AddNewIdentityPayload {
   id: string,
   hiddenService: HiddenService,
   peerId: PeerId
+  dmKeys: DmKeys
 }
 
 export interface CreateUserCsrPayload {
@@ -97,8 +100,17 @@ export const identitySlice = createSlice({
     },
     createUserCsr: (state, _action: PayloadAction<CreateUserCsrPayload>) =>
       state,
-    registerUsername: (state, _action: PayloadAction<any>) =>
+    registerUsername: (state, _action: PayloadAction<string>) =>
       state,
+    updateUsername: (state, action: PayloadAction<{communityId: string, nickname: string}>) =>
+    {
+      identityAdapter.updateOne(state, {
+        id: action.payload.communityId,
+        changes: {
+          zbayNickname: action.payload.nickname,
+        }
+      });
+    },
     storeUserCsr: (
       state,
       action: PayloadAction<{ userCsr: UserCsr; communityId: string }>

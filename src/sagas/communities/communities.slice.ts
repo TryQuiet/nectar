@@ -1,14 +1,12 @@
 import { createSlice, EntityState, PayloadAction } from '@reduxjs/toolkit';
 import { StoreKeys } from '../store.keys';
 import { communitiesAdapter } from './communities.adapter';
-import { createRootCA } from '@zbayapp/identity';
 
 export class CommunitiesState {
   public currentCommunity: string = ''
   public communities: EntityState<Community> =
     communitiesAdapter.getInitialState();
 }
-
 
 export class Community {
   constructor({ id, CA, name, registrarUrl }) {
@@ -24,6 +22,7 @@ export class Community {
     }
   }
   public name: string = '';
+  peerList: string[] = [];
   id: string = '';
   CA: null | {
     rootCertString: string,
@@ -47,7 +46,7 @@ export const communitiesSlice = createSlice({
     addNewCommunity: (state, action: any) => {
       communitiesAdapter.addOne(state.communities, new Community(action.payload));
     },
-    updateCommunity: (state, action: any) => {
+    updateCommunity: (state, action: PayloadAction<Partial<Community>>) => {
       communitiesAdapter.updateOne(state.communities, {
         id: action.payload.id,
         changes: {
@@ -66,6 +65,14 @@ export const communitiesSlice = createSlice({
         id: action.payload.id,
         changes: {
           ...action.payload.payload,
+        },
+      });
+    },
+    storePeerList: (state, action: PayloadAction<{communityId: string, peerList: string[]}>) => {
+      communitiesAdapter.updateOne(state.communities, {
+        id: action.payload.communityId,
+        changes: {
+          ...action.payload,
         },
       });
     },

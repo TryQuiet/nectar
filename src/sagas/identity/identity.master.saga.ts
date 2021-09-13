@@ -4,7 +4,6 @@ import { all, call, takeEvery } from 'typed-redux-saga';
 // import { ScreenNames } from '../../const/ScreenNames.enum';
 // import { replaceScreen } from '../../utils/functions/replaceScreen/replaceScreen';
 import { createUserCsrSaga } from './createUserCsr/createUserCsr.saga';
-import { handleIdentityError } from './handleIdentityError/handleIdentityError.saga';
 import { identityActions } from './identity.slice';
 import { registerCertificateSaga } from './registerCertificate/registerCertificate.saga';
 import { registerUsernameSaga } from './registerUsername/registerUsername.saga';

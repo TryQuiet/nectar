@@ -11,12 +11,13 @@ import {
   Community,
   CommunitiesState
 } from '../communities.slice';
+import {communitiesAdapter} from '../communities.adapter'
 import { joinCommunitySaga } from './joinCommunity.saga';
 
 describe('joinCommunity', () => {
   test('join the existing community', async () => {
     const socket = { emit: jest.fn(), on: jest.fn() } as unknown as Socket;
-    const community = new Community({name: '', id: 'id', registrarUrl:'registrarUrl', CA: null})
+    const community = new Community({name: '', id: 'id', registrarUrl:'registrarUrl', CA: {}})
 
     const communityPayload = {
       id: 'id',
@@ -35,15 +36,17 @@ describe('joinCommunity', () => {
         SocketActionTypes.CREATE_COMMUNITY,
         communityPayload,
       ])
-      .hasFinalState(
-        {
-          [StoreKeys.Communities]: {
-              ids: ['id'],
-              entities: {
-                'id': community
-          },
-        }}
-      )
+      .hasFinalState({
+        [StoreKeys.Communities]: {
+          ...new CommunitiesState(),
+          currentCommunity: 'id',
+          communities: communitiesAdapter.setAll(
+            communitiesAdapter.getInitialState(),
+            [community]
+          ),
+        },
+      })
       .silentRun();
+
   });
 });
