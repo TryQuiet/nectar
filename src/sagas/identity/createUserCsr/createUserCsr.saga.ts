@@ -25,7 +25,7 @@ export function* createUserCsrSaga(
     return;
   }
 
-  const currentCommunity = yield* select(communitiesSelectors.currentCommunity())
+  const currentCommunity = yield* select(communitiesSelectors.currentCommunity)
   
   const payload = {
     communityId: currentCommunity.id,
