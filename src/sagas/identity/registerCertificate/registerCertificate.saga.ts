@@ -39,7 +39,6 @@ export function subscribe(socket: Socket) {
     socket.on(
       SocketActionTypes.SEND_USER_CERTIFICATE,
       (payload: {id: string, payload: {peers: string[], certificate: string}}) => {
-        console.log('RECEIVED CERT', payload)
         emit(communitiesActions.storePeerList({communityId: payload.id, peerList: payload.payload.peers}))
         emit(identityActions.storeUserCertificate({userCertificate: payload.payload.certificate, communityId: payload.id}));
       }

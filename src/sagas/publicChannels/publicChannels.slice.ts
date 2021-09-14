@@ -1,4 +1,5 @@
 import { createSlice, EntityState, PayloadAction } from '@reduxjs/toolkit';
+import { mainChannelName } from '../config';
 
 import { StoreKeys } from '../store.keys';
 
@@ -9,7 +10,7 @@ export class PublicChannelsState {
   public channels: EntityState<IChannelInfo> =
     publicChannelsAdapter.getInitialState();
 
-  public currentChannel: string = 'general';
+  public currentChannel: string = mainChannelName;
 
   public channelMessages: ChannelMessages = {};
 }

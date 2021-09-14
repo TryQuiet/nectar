@@ -9,7 +9,7 @@ import {
 import {identityAdapter} from '../identity.adapter'
 import { registerUsernameSaga } from './registerUsername.saga';
 import {config} from '../../users/const/certFieldTypes'
-import {errorsActions} from '../../errors/errors.slice'
+import {errorsActions, errorsReducer, ErrorsState} from '../../errors/errors.slice'
 import { communitiesReducer, CommunitiesState, Community } from '../../communities/communities.slice';
 import {communitiesAdapter} from '../../communities/communities.adapter'
 
@@ -53,32 +53,54 @@ describe('registerUsernameSaga', () => {
       )
       .run();
   });
-  // test('throw error if missing data', () => {
-  //   expectSaga(
-  //     registerUsernameSaga,
-  //     identityActions.registerUsername('username')
-  //   )
-  //     .withReducer(combineReducers({ [StoreKeys.Identity]: identityReducer, [StoreKeys.Communities]: communitiesReducer }), {
-  //       [StoreKeys.Identity]: {
-  //         ...identityAdapter.setAll(
-  //           identityAdapter.getInitialState(),
-  //           [identityWithoutPeerId]
-  //         )
-  //       },
-  //       [StoreKeys.Communities]: {
-  //         ...new CommunitiesState(),
-  //         currentCommunity: 'id',
-  //         communities: communitiesAdapter.setAll(
-  //           communitiesAdapter.getInitialState(),
-  //           [community]
-  //         )
-  //       }
-  //     })
-  //     .put(
-  //       errorsActions.certificateRegistration(
-  //         "You're not connected with other peers."
-  //       )
-  //     )
-  //     .run();
-  // });
+  test('throw error if missing data', () => {
+    expectSaga(
+      registerUsernameSaga,
+      identityActions.registerUsername('username')
+    )
+      .withReducer(combineReducers({ [StoreKeys.Identity]: identityReducer, [StoreKeys.Communities]: communitiesReducer, [StoreKeys.Errors]: errorsReducer }), {
+        [StoreKeys.Identity]: {
+          ...identityAdapter.setAll(
+            identityAdapter.getInitialState(),
+            [identityWithoutPeerId]
+          )
+        },
+        [StoreKeys.Communities]: {
+          ...new CommunitiesState(),
+          currentCommunity: 'id',
+          communities: communitiesAdapter.setAll(
+            communitiesAdapter.getInitialState(),
+            [community]
+          )
+        },
+        [StoreKeys.Errors]: {
+          ...new ErrorsState()
+        }
+      })
+      .put(
+        errorsActions.certificateRegistration(
+          "You're not connected with other peers."
+        )
+      )
+      .hasFinalState({[StoreKeys.Identity]: {
+        ...identityAdapter.setAll(
+          identityAdapter.getInitialState(),
+          [identityWithoutPeerId]
+        )
+      },
+      [StoreKeys.Communities]: {
+        ...new CommunitiesState(),
+        currentCommunity: 'id',
+        communities: communitiesAdapter.setAll(
+          communitiesAdapter.getInitialState(),
+          [community]
+        )
+      },
+      [StoreKeys.Errors]: {
+        ...new ErrorsState(),
+        certificateRegistration: "You're not connected with other peers."
+      }
+    })
+      .run();
+  });
 });

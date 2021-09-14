@@ -1,6 +1,7 @@
 
 import { combineReducers } from '@reduxjs/toolkit';
 import { expectSaga } from 'redux-saga-test-plan';
+import { mainChannelName } from '../../config';
 import { StoreKeys } from '../../store.keys';
 import {
   publicChannelsActions,
@@ -18,7 +19,7 @@ describe('checkForMessagesSaga', () => {
           [StoreKeys.PublicChannels]: {
             ...new PublicChannelsState(),
             channelMessages: {
-              ['general']: {
+              [mainChannelName]: {
                 ids: ['1', '2', '3'],
                 messages: {
                   id: {
@@ -38,7 +39,7 @@ describe('checkForMessagesSaga', () => {
       )
       .put(
         publicChannelsActions.askForMessages({
-          channelAddress: 'general',
+          channelAddress: mainChannelName,
           ids: ['2', '3'],
         }),
       )

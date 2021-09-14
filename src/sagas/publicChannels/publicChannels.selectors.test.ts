@@ -1,4 +1,5 @@
 import { combineReducers, createStore, Store } from '@reduxjs/toolkit';
+import { mainChannelName } from '../config';
 import { StoreKeys } from '../store.keys';
 import { publicChannelsAdapter } from './publicChannels.adapter';
 import { publicChannelsSelectors } from './publicChannels.selectors';
@@ -25,7 +26,7 @@ describe('publicChannelsSelectors', () => {
                 description: '',
                 owner: '',
                 timestamp: 123,
-                address: 'general',
+                address: mainChannelName,
               },
             ]
           ),

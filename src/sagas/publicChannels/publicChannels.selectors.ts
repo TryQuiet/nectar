@@ -4,6 +4,7 @@ import { selectReducer } from '../store.utils';
 import { publicChannelsAdapter } from './publicChannels.adapter';
 import { formatMessageDisplayDate } from '../../utils/functions/formatMessageDisplayDate/formatMessageDisplayDate';
 import { certificatesMapping } from '../users/users.selectors';
+import { mainChannelName } from '../config';
 
 export const publicChannels = createSelector(
   selectReducer(StoreKeys.PublicChannels),
@@ -22,7 +23,7 @@ export const ZbayChannel = createSelector(
       .selectAll(reducerState.channels);
 
     return publicChannelsList.find(
-      channel => channel.address === 'general',
+      channel => channel.address === mainChannelName,
     );
   },
 );
