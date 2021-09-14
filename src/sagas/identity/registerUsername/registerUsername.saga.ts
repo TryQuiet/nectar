@@ -1,14 +1,12 @@
 import { PayloadAction } from '@reduxjs/toolkit';
 import { select, put } from 'typed-redux-saga';
 import { identitySelectors } from '../identity.selectors';
-import { identityActions, identityReducer } from '../identity.slice';
+import { identityActions } from '../identity.slice';
 import {errorsActions} from '../../errors/errors.slice'
 import {config} from '../../users/const/certFieldTypes'
 
 export function* registerUsernameSaga(
-  action: PayloadAction<
-    ReturnType<any>['payload']
-  >
+  action: PayloadAction<string>
 ): Generator {
   const identity = yield* select(identitySelectors.currentIdentity)
   const commonName = identity.hiddenService.onionAddress

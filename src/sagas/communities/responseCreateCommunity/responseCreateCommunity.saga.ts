@@ -1,9 +1,10 @@
 import { put,call } from "typed-redux-saga";
 import { identityActions } from "../../identity/identity.slice";
 import { generateDmKeyPair } from '../../../utils/cryptography/cryptography';
+import {ResponseCreateCommunityPayload} from '../../communities/communities.slice'
+import { PayloadAction } from "@reduxjs/toolkit";
 
-
-export function* responseCreateCommunitySaga (action: any): Generator {
+export function* responseCreateCommunitySaga (action: PayloadAction<ResponseCreateCommunityPayload> ): Generator {
 
 const id = action.payload.id
 const hiddenService = action.payload.payload.hiddenService
