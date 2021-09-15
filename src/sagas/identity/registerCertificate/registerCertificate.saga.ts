@@ -13,7 +13,8 @@ export function* registerCertificateSaga(
     ReturnType<typeof identityActions.storeUserCsr>['payload']
   >
 ): Generator {
-  yield* fork(handleCertificateActions, socket);
+  // yield* fork(handleCertificateActions, socket);
+  //TODO: REGISTER_OWNER_CERTIFICATE
   yield* apply(socket, socket.emit, [
     SocketActionTypes.REGISTER_USER_CERTIFICATE,
     action.payload.registrarAddress,
@@ -22,32 +23,35 @@ export function* registerCertificateSaga(
   ]);
 }
 
-export function* handleCertificateActions(socket: Socket): Generator {
-  const socketChannel = yield* call(subscribe, socket);
-  while (true) {
-    const action = yield* take(socketChannel);
-    yield put(action);
-  }
-}
+// MOVING TO SOCKET
+// export function* handleCertificateActions(socket: Socket): Generator {
+//   const socketChannel = yield* call(subscribe, socket);
+//   while (true) {
+//     const action = yield* take(socketChannel);
+//     yield put(action);
+//   }
+// }
 
-export function subscribe(socket: Socket) {
-  return eventChannel<
-    | ReturnType<typeof identityActions.storeUserCertificate>
-    | ReturnType<typeof identityActions.throwIdentityError>
-    | ReturnType<typeof communitiesActions.storePeerList>
-  >((emit) => {
-    socket.on(
-      SocketActionTypes.SEND_USER_CERTIFICATE,
-      (payload: {id: string, payload: {peers: string[], certificate: string}}) => {
-        emit(communitiesActions.storePeerList({communityId: payload.id, peerList: payload.payload.peers}))
-        emit(identityActions.storeUserCertificate({userCertificate: payload.payload.certificate, communityId: payload.id}));
-      }
-    );
-    socket.on(
-      SocketActionTypes.CERTIFICATE_REGISTRATION_ERROR,
-      (message: string) => {
-        emit(errorsActions.certificateRegistration(message));
-      }
-    );
-    return () => {};
-  })};
+// export function subscribe(socket: Socket) {
+//   return eventChannel<
+//     | ReturnType<typeof identityActions.storeUserCertificate>
+//     | ReturnType<typeof identityActions.throwIdentityError>
+//     | ReturnType<typeof communitiesActions.storePeerList>
+//   >((emit) => {
+//     socket.on(
+//       SocketActionTypes.SEND_USER_CERTIFICATE,
+//       (payload: {id: string, payload: {peers: string[], certificate: string}}) => {
+//         emit(communitiesActions.storePeerList({communityId: payload.id, peerList: payload.payload.peers}))
+//         emit(identityActions.storeUserCertificate({userCertificate: payload.payload.certificate, communityId: payload.id}));
+//         emit(communitiesActions.launchRegistrar())
+//         emit(communitiesActions.launchCommunity())
+//       }
+//     );
+//     socket.on(
+//       SocketActionTypes.CERTIFICATE_REGISTRATION_ERROR,
+//       (message: string) => {
+//         emit(errorsActions.certificateRegistration(message));
+//       }
+//     );
+//     return () => {};
+//   })};

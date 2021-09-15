@@ -19,11 +19,8 @@ describe('createCommunitySaga', () => {
     const socket = { emit: jest.fn(), on: jest.fn() } as unknown as Socket;
     const community = new Community({name: 'communityName', id: 'id', CA: { rootCertString: 'certString', rootKeyString: 'keyString' }, registrarUrl:''})
 
-    const communityPayload = {
-      id: 'id',
-      rootCertString: 'certString',
-      rootCertKey: 'keyString',
-    };
+    const id = 'id'
+
     await expectSaga(createCommunitySaga, socket, communitiesActions.createNewCommunity('communityName'))
       .withReducer(
         combineReducers({ [StoreKeys.Communities]: communitiesReducer }),
@@ -39,8 +36,8 @@ describe('createCommunitySaga', () => {
         ],
       ])
       .apply(socket, socket.emit, [
-        SocketActionTypes.CREATE_COMMUNITY,
-        communityPayload,
+        SocketActionTypes.CREATE_NETWORK,
+        id,
       ])
       .hasFinalState(
         {

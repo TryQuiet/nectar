@@ -10,6 +10,7 @@ import {
   publicChannelsActions,
 } from '../../publicChannels/publicChannels.slice';
 import { publicChannelsMasterSaga } from '../../publicChannels/publicChannels.master.saga';
+import {errorsActions} from '../../errors/errors.slice'
 import { identityActions } from '../../identity/identity.slice';
 import { identityMasterSaga } from '../../identity/identity.master.saga';
 import { messagesMasterSaga } from '../../messages/messages.master.saga';
@@ -47,6 +48,9 @@ export function subscribe(socket: Socket) {
     // | ReturnType<typeof publicChannelsActions.onMessagePosted>
     | ReturnType<typeof usersActions.responseSendCertificates>
     | ReturnType<typeof communitiesActions.responseCreateCommunity>
+    | ReturnType<typeof identityActions.storeUserCertificate>
+    | ReturnType<typeof identityActions.throwIdentityError>
+    | ReturnType<typeof communitiesActions.storePeerList>
   >((emit) => {
     // socket.on(
     //   SocketActionTypes.RESPONSE_GET_PUBLIC_CHANNELS,
@@ -92,11 +96,34 @@ export function subscribe(socket: Socket) {
       }
     );
     socket.on(
+      SocketActionTypes.NETWORK,
+      (payload: any) => {
+        console.log('created NETWORK')
+        console.log(payload)
+        emit(communitiesActions.responseCreateCommunity(payload));
+      }
+    );
+    socket.on(
       SocketActionTypes.REGISTRAR_ERROR,
       (payload: {id:string, network: string}) => {
         console.log('createdCommunity')
         console.log(payload)
         // emit(communitiesActions.responseCreateCommunity(payload));
+      }
+    );
+    socket.on(
+      SocketActionTypes.SEND_USER_CERTIFICATE,
+      (payload: {id: string, payload: {peers: string[], certificate: string}}) => {
+        emit(communitiesActions.storePeerList({communityId: payload.id, peerList: payload.payload.peers}))
+        emit(identityActions.storeUserCertificate({userCertificate: payload.payload.certificate, communityId: payload.id}));
+        emit(communitiesActions.launchRegistrar())
+        emit(communitiesActions.launchCommunity())
+      }
+    );
+    socket.on(
+      SocketActionTypes.CERTIFICATE_REGISTRATION_ERROR,
+      (message: string) => {
+        emit(errorsActions.certificateRegistration(message));
       }
     );
   
