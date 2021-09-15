@@ -22,8 +22,7 @@ export const currentCommunityId = createSelector(
     (reducerState) => reducerState.currentCommunity
 );
 
-export const registrarUrl = () =>
-  createSelector(currentCommunity, (community) => {
+export const registrarUrl = createSelector(currentCommunity, (community) => {
     let registrarAddress: string = ''
     if (community.onionAddress && community.port) {
       registrarAddress = `http://${community.onionAddress}.onion:${community.port}`
