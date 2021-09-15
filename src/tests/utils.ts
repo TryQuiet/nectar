@@ -1,4 +1,3 @@
-
 import { applyMiddleware, combineReducers, createStore } from "@reduxjs/toolkit"
 import assert from 'assert'
 import fp from 'find-free-port'
@@ -16,8 +15,14 @@ import { identityMasterSaga } from "../sagas/identity/identity.master.saga"
 import { messagesMasterSaga } from "../sagas/messages/messages.master.saga"
 import { handleActions } from '../sagas/socket/startConnection/startConnection.saga'
 
-function testReducer(state = { value: 0 }, _action) {
-  return state
+function testReducer(state = { done: false }, action) {
+  console.log('TEST REDUCER -> ', action.type)
+  switch (action.type) {
+    case 'setDone':
+      return {done: true}
+    default:
+      return state
+  }
 }
 
 export const createTmpDir = (prefix: string) => {
@@ -74,9 +79,11 @@ export const createApp = async (name: string, handleTestActions) => {
     agentPort: proxyPort,
     options: {
       env: {
-        appDataPath: path.join(createTmpDir(`nectarIntegrationTest${name}`).name, '.nectar')
+        appDataPath: path.join(createTmpDir(`nectarIntegrationTest${name}`).name, '.nectar'),
+        
       },
-      torControlPort: controlPort
+      torControlPort: controlPort,
+      useLocalTorFiles: true
     },
     io: server1.io
   })
@@ -99,7 +106,6 @@ export const createApp = async (name: string, handleTestActions) => {
 }
 
 export const assertListElementMatches = (actual: any[], match: RegExp) => {
-  console.log(actual, match)
   let counter = 0
   for (const item of actual) {
     try {

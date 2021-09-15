@@ -1,7 +1,6 @@
 import { createAction } from "@reduxjs/toolkit"
 import assert from 'assert'
-import { all, put, take, takeEvery } from "redux-saga/effects"
-import { select } from "typed-redux-saga"
+import { select, put, all, take, takeEvery } from "typed-redux-saga"
 import { identity } from "../index"
 import { communitiesSelectors } from "../sagas/communities/communities.selectors"
 import { communitiesActions } from "../sagas/communities/communities.slice"
@@ -25,15 +24,15 @@ export function* handleTestActions(): Generator {
 function* createCommunityTestSaga(payload): Generator {
   const userName = payload.payload.userName
   const communityName = 'CommunityName'
-  yield put(communitiesActions.createNewCommunity(communityName))
-  yield take(communitiesActions.responseCreateCommunity)
+  yield* put(communitiesActions.createNewCommunity(communityName))
+  yield* take(communitiesActions.responseCreateCommunity)
   const currentCommunity = yield* select(communitiesSelectors.currentCommunity())
   assert.equal(currentCommunity.name, communityName)
   assert(currentCommunity.onionAddress)
   assert(currentCommunity.port)
   assert(currentCommunity.privateKey)
-  yield put(identityActions.registerUsername(userName))
-  yield take(identityActions.storeUserCertificate)
+  yield* put(identityActions.registerUsername(userName))
+  yield* take(identityActions.storeUserCertificate)
   // TODO: how to check for registration (and other) errors?
   // const certificateRegistrationError = yield* select(errorsSelectors.certificateRegistration)
   // console.log(certificateRegistrationError)
@@ -45,17 +44,17 @@ function* createCommunityTestSaga(payload): Generator {
   assert.notEqual(createdIdentity.peerId, undefined)
   assert.notEqual(createdIdentity.userCertificate, undefined)
   assert.notEqual(createdIdentity.hiddenService, undefined)
+  yield* put({type: 'setDone'}) // TODO: use this method to check if part of test is ready
   // TODO: check if identity contains zbaynickname
 }
 
 function* joinCommunityTestSaga(payload): Generator {
   const { registrarAddress, userName, ownerPeerId } = payload.payload
-  yield put(communitiesActions.joinCommunity(registrarAddress))
-  yield take(communitiesActions.responseCreateCommunity)
+  yield* put(communitiesActions.joinCommunity(registrarAddress))
+  yield* take(communitiesActions.responseCreateCommunity)
   const currentCommunity = yield* select(communitiesSelectors.currentCommunity())
-  yield put(identity.actions.registerUsername(userName))
-  const responseCreatedUserCert = yield take(identityActions.storeUserCertificate)
-  // @ts-expect-error
+  yield* put(identity.actions.registerUsername(userName))
+  const responseCreatedUserCert = yield* take(identityActions.storeUserCertificate)
   const bootstrapPeers = responseCreatedUserCert.payload.peers
   const createdIdentity = yield* select(identitySelectors.currentIdentity)
   // TODO: check storePeerList instead
@@ -87,10 +86,12 @@ const main = async () => {
 
   // Owner creates community and registers
   store1.dispatch({ type: 'userCreatingCommunity', payload: { userName: 'Owner' } })
+  // store1.dispatch({type: 'setDone'})
 
   const unsubscribe = store1.subscribe(async () => {
+    
     const ownerStoreState = store1.getState()
-
+    console.log('STATE:', ownerStoreState)
     // User joins community and registers as soon as the owner finishes registering
     if (isOwnerAppReady(ownerStoreState)) {
       unsubscribe()
@@ -109,4 +110,10 @@ const main = async () => {
   })
 }
 
-main().catch(e => console.error('oops', e))
+main().then(() => {}, (e) => {
+  console.log('Test failed: ', e)
+  process.exit(1)
+}).catch(e => {
+  console.error('Test failed:', e)
+  process.exit(1)
+})
