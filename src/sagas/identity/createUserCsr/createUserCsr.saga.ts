@@ -32,5 +32,7 @@ export function* createUserCsrSaga(
     userCsr: csr,
   registrarAddress: 'http://' + currentCommunity.onionAddress + '.onion:7789'  }
 
+  console.log('createUserCsrSaga')
+
   yield* put(identityActions.storeUserCsr(payload));
 }

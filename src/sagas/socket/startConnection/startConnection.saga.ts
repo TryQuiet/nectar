@@ -51,6 +51,7 @@ export function subscribe(socket: Socket) {
     | ReturnType<typeof identityActions.storeUserCertificate>
     | ReturnType<typeof identityActions.throwIdentityError>
     | ReturnType<typeof communitiesActions.storePeerList>
+    | ReturnType<typeof communitiesActions.updateCommunity>
   >((emit) => {
     // socket.on(
     //   SocketActionTypes.RESPONSE_GET_PUBLIC_CHANNELS,
@@ -104,6 +105,14 @@ export function subscribe(socket: Socket) {
       }
     );
     socket.on(
+      SocketActionTypes.COMMUNITY,
+      (payload: any) => {
+        console.log('COMMUNITY')
+        console.log(payload)
+        emit(communitiesActions.community());
+      }
+    );
+    socket.on(
       SocketActionTypes.REGISTRAR_ERROR,
       (payload: {id:string, network: string}) => {
         console.log('createdCommunity')
@@ -113,10 +122,11 @@ export function subscribe(socket: Socket) {
     );
     socket.on(
       SocketActionTypes.SEND_USER_CERTIFICATE,
-      (payload: {id: string, payload: {peers: string[], certificate: string}}) => {
+      (payload: {id: string, payload: {peers: string[], certificate: string, rootCa:string}}) => {
+        console.log('gor response with cert', payload.payload.certificate )
         emit(communitiesActions.storePeerList({communityId: payload.id, peerList: payload.payload.peers}))
-        emit(identityActions.storeUserCertificate({userCertificate: payload.payload.certificate, communityId: payload.id}));
-        emit(communitiesActions.launchRegistrar())
+        emit(identityActions.storeUserCertificate({userCertificate: payload.payload.certificate, communityId: payload.id}))
+        emit(communitiesActions.updateCommunity({id: payload.id, rootCa: payload.payload.rootCa }))
         emit(communitiesActions.launchCommunity())
       }
     );

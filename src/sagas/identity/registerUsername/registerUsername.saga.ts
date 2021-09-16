@@ -13,6 +13,8 @@ export function* registerUsernameSaga(
   const peerId = identity.peerId.id
   const dmPublicKey = identity.dmKeys.publicKey
 
+  console.log('registerUsernameSaga')
+
   if (!commonName || !peerId) {
     yield* put(
       errorsActions.certificateRegistration(

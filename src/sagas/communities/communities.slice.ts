@@ -27,6 +27,7 @@ export class Community {
   public name: string = '';
   peerList: string[] = [];
   id: string = '';
+  rootCa:string=  '';
   CA: null | {
     rootCertString: string;
     rootKeyString: string;
@@ -83,6 +84,7 @@ export const communitiesSlice = createSlice({
       });
     },
     joinCommunity: (state, _action: PayloadAction<string>) => state,
+    community: (state, _action: PayloadAction<string>) => state,
     createNetwork: (state, _action: PayloadAction<string>) => state,
     createNewCommunity: (state, _action: PayloadAction<string>) => state,
     responseCreateCommunity: (state, _action: PayloadAction<ResponseCreateCommunityPayload>) => state,
