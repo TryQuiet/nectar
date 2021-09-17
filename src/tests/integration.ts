@@ -26,7 +26,7 @@ function* createCommunityTestSaga(payload): Generator {
   const communityName = 'CommunityName'
   yield* put(communitiesActions.createNewCommunity(communityName))
   yield* take(communitiesActions.responseCreateCommunity)
-  const currentCommunity = yield* select(communitiesSelectors.currentCommunity())
+  const currentCommunity = yield* select(communitiesSelectors.currentCommunity)
   assert.equal(currentCommunity.name, communityName)
   assert(currentCommunity.onionAddress)
   assert(currentCommunity.port)
@@ -52,7 +52,7 @@ function* joinCommunityTestSaga(payload): Generator {
   const { registrarAddress, userName, ownerPeerId } = payload.payload
   yield* put(communitiesActions.joinCommunity(registrarAddress))
   yield* take(communitiesActions.responseCreateCommunity)
-  const currentCommunity = yield* select(communitiesSelectors.currentCommunity())
+  const currentCommunity = yield* select(communitiesSelectors.currentCommunity)
   yield* put(identity.actions.registerUsername(userName))
   const responseCreatedUserCert = yield* take(identityActions.storeUserCertificate)
   const bootstrapPeers = responseCreatedUserCert.payload.peers
