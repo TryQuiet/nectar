@@ -20,6 +20,8 @@ import {
 import { IMessage } from '../../publicChannels/publicChannels.types';
 import { communitiesMasterSaga } from '../../communities/communities.master.saga';
 import {communitiesActions, ResponseCreateCommunityPayload, ResponseRegistrarPayload} from '../../communities/communities.slice'
+import { ErrorPayload, errorsActions } from '../../errors/errors.slice';
+import { errorsMasterSaga } from '../../errors/errors.master.saga';
 
 export function* useIO(socket: Socket): Generator {
   yield all([
@@ -27,7 +29,8 @@ export function* useIO(socket: Socket): Generator {
     fork(publicChannelsMasterSaga, socket),
     fork(messagesMasterSaga, socket),
     fork(identityMasterSaga, socket),
-    fork(communitiesMasterSaga, socket)
+    fork(communitiesMasterSaga, socket),
+    fork(errorsMasterSaga, socket)
   ]);
 }
 
@@ -47,6 +50,7 @@ export function subscribe(socket: Socket) {
     // | ReturnType<typeof publicChannelsActions.onMessagePosted>
     | ReturnType<typeof usersActions.responseSendCertificates>
     | ReturnType<typeof communitiesActions.responseCreateCommunity>
+    | ReturnType<typeof errorsActions.setError>
   >((emit) => {
     // socket.on(
     //   SocketActionTypes.RESPONSE_GET_PUBLIC_CHANNELS,
@@ -92,11 +96,11 @@ export function subscribe(socket: Socket) {
       }
     );
     socket.on(
-      SocketActionTypes.REGISTRAR_ERROR,
-      (payload: {id:string, network: string}) => {
-        console.log('createdCommunity')
+      SocketActionTypes.ERROR,
+      (payload: ErrorPayload) => {
+        console.log('Got Error')
         console.log(payload)
-        // emit(communitiesActions.responseCreateCommunity(payload));
+        emit(errorsActions.setError(payload))
       }
     );
   
