@@ -3,6 +3,8 @@ import { createSlice, EntityState, PayloadAction } from '@reduxjs/toolkit';
 import { StoreKeys } from '../store.keys';
 import { errorAdapter, errorsAdapter } from './errors.adapter';
 
+export const GENERAL_ERRORS = 'general'
+
 export class ErrorState {
   type: string;
 
@@ -28,7 +30,7 @@ export class ErrorsState {
   constructor({ communityId = null, type, code, message }) {
     this.id = communityId;
     if (!communityId) {
-      this.id = 'general'; // Error not connected with community
+      this.id = GENERAL_ERRORS; // Error not connected with community
     }
     this.errors = errorAdapter.addOne(
       errorAdapter.getInitialState(),

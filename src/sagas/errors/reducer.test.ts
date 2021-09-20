@@ -1,5 +1,5 @@
 import { errorsAdapter } from './errors.adapter';
-import { errorsActions, errorsReducer } from './errors.slice';
+import { errorsActions, errorsReducer, GENERAL_ERRORS } from './errors.slice';
 
 test('errors reducer should set errors', () => {
   const errorPayload = {
@@ -36,7 +36,7 @@ test('errors reducer should set errors', () => {
     errorsActions.addError(errorPayloadGeneral)
   );
   expect(state4).toEqual({
-    ids: [errorPayload.communityId, errorPayload3.communityId, 'general'],
+    ids: [errorPayload.communityId, errorPayload3.communityId, GENERAL_ERRORS],
     entities: {
       [errorPayload.communityId]: {
         id: errorPayload.communityId,
@@ -64,7 +64,7 @@ test('errors reducer should set errors', () => {
         },
       },
       general: {
-        id: 'general',
+        id: GENERAL_ERRORS,
         errors: {
           ids: [errorPayloadGeneral.type],
           entities: {
