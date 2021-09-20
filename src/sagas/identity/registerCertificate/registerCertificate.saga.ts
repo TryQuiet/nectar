@@ -1,5 +1,5 @@
 import { Socket } from 'socket.io-client';
-import { PayloadAction } from '@reduxjs/toolkit';
+import { current, PayloadAction } from '@reduxjs/toolkit';
 import { apply, select } from 'typed-redux-saga';
 import { identityActions } from '../identity.slice';
 import { SocketActionTypes } from '../../socket/const/actionTypes';
@@ -17,7 +17,7 @@ export function* registerCertificateSaga(
 const currentCommunity = yield* select(communitiesSelectors.currentCommunity)
 console.log(currentCommunity.CA.rootCertString, 'rootCertString')
   if(currentCommunity.CA.rootCertString) {
-    console.log('registerOwnerCertificate')
+    console.log('registerOwnerCertificate', currentCommunity.CA.rootCertString)
     yield* apply(socket, socket.emit, [
       SocketActionTypes.REGISTER_OWNER_CERTIFICATE,
       action.payload.communityId,

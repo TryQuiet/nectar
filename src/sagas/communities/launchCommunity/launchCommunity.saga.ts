@@ -11,7 +11,7 @@ export function* launchCommunitySaga(socket,_action): Generator {
 
     const cert = identity.userCertificate
     const key = identity.userCsr.userKey
-    const ca = community.rootCa
+    const ca = community.CA.rootCertString
 
     const certs = {
 cert,
