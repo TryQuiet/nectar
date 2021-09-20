@@ -3,8 +3,8 @@ import { PayloadAction } from '@reduxjs/toolkit';
 import { fork, call, put, take, apply } from 'typed-redux-saga';
 import { eventChannel } from 'redux-saga';
 import { identityActions } from '../identity.slice';
-import {communitiesActions} from '../../communities/communities.slice'
-import {errorsActions} from '../../errors/errors.slice'
+import { communitiesActions } from '../../communities/communities.slice';
+import { errorsActions } from '../../errors/errors.slice';
 import { SocketActionTypes } from '../../socket/const/actionTypes';
 
 export function* registerCertificateSaga(
@@ -38,16 +38,24 @@ export function subscribe(socket: Socket) {
   >((emit) => {
     socket.on(
       SocketActionTypes.SEND_USER_CERTIFICATE,
-      (payload: {id: string, payload: {peers: string[], certificate: string}}) => {
-        emit(communitiesActions.storePeerList({communityId: payload.id, peerList: payload.payload.peers}))
-        emit(identityActions.storeUserCertificate({userCertificate: payload.payload.certificate, communityId: payload.id}));
-      }
-    );
-    socket.on(
-      SocketActionTypes.CERTIFICATE_REGISTRATION_ERROR,
-      (message: string) => {
-        emit(errorsActions.certificateRegistration(message));
+      (payload: {
+        id: string;
+        payload: { peers: string[]; certificate: string };
+      }) => {
+        emit(
+          communitiesActions.storePeerList({
+            communityId: payload.id,
+            peerList: payload.payload.peers,
+          })
+        );
+        emit(
+          identityActions.storeUserCertificate({
+            userCertificate: payload.payload.certificate,
+            communityId: payload.id,
+          })
+        );
       }
     );
     return () => {};
-  })};
+  });
+}
