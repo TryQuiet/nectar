@@ -13,6 +13,8 @@ export function* registerUsernameSaga(
   const peerId = identity.peerId.id
   const dmPublicKey = identity.dmKeys.publicKey
 
+  console.log('registerUsernameSaga')
+
   if (!commonName || !peerId) {
     yield* put(
       errorsActions.certificateRegistration(
@@ -26,7 +28,7 @@ export function* registerUsernameSaga(
 
   const payload = {
     zbayNickname: action.payload,
-    commonName,
+    commonName: `${commonName}.onion`,
     peerId,
     dmPublicKey,
     signAlg: config.signAlg,

@@ -26,5 +26,7 @@ export function* createUserCsrSaga(
     registrarAddress: yield* select(communitiesSelectors.registrarUrl)
   }
 
+  console.log('createUserCsrSaga')
+
   yield* put(identityActions.storeUserCsr(payload));
 }
