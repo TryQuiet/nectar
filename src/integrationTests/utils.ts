@@ -41,7 +41,7 @@ export const prepareStore = (rootSaga) => {
     [storeKeys.Errors]: errors.reducer,
     [storeKeys.Messages]: errors.reducer,
     [storeKeys.PublicChannels]: publicChannels.reducer,
-    'test': testReducer
+    'Test': testReducer
   }
   const combinedReducers = combineReducers(reducers)
   const sagaMiddleware = createSagaMiddleware()
@@ -53,7 +53,7 @@ export const prepareStore = (rootSaga) => {
   return { store, runSagas: () => sagaMiddleware.run(rootSaga) }
 }
 
-const connectToDataport = (url, name): Socket => {
+const connectToDataport = (url: string, name: string): Socket => {
   const socket = io(url)
   socket.on('connect', async () => {
     console.log(`websocket connection is ready for ${name}`)
@@ -70,7 +70,7 @@ export const createApp = async (name: string, handleTestActions) => {
   const server1 = new waggle.DataServer(dataServerPort1)
   await server1.listen()
 
-  const  { store, runSagas } = prepareStore(root)
+  const { store, runSagas } = prepareStore(root)
 
   const [proxyPort] = await fp(1234)
   const [controlPort] = await fp(5555)
@@ -79,8 +79,7 @@ export const createApp = async (name: string, handleTestActions) => {
     agentPort: proxyPort,
     options: {
       env: {
-        appDataPath: path.join(createTmpDir(`nectarIntegrationTest${name}`).name, '.nectar'),
-        
+        appDataPath: path.join(createTmpDir(`nectarIntegrationTest${name}`).name, '.nectar')
       },
       torControlPort: controlPort,
       useLocalTorFiles: true
