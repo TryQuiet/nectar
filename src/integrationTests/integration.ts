@@ -1,6 +1,6 @@
 import { createAction } from "@reduxjs/toolkit"
 import assert from 'assert'
-import { select, put, all, take, takeEvery } from "typed-redux-saga"
+import { select, put, all, take, takeEvery, call } from "typed-redux-saga"
 import { identity } from "../index"
 import { communitiesSelectors } from "../sagas/communities/communities.selectors"
 import { communitiesActions } from "../sagas/communities/communities.slice"
@@ -18,7 +18,19 @@ export function* handleTestActions(): Generator {
       createAction('userJoiningCommunity'),
       joinCommunityTestSaga,
     ),
+    // takeEvery(
+    //   createAction('assert'),
+    //   assertResultSaga
+    // )
   ]);
+}
+
+function* assertResultSaga(payload: {fn: (...args: any[]) => any, args: any[]}): Generator {
+  try {
+    payload.fn(...payload.args)
+  } catch (e) {
+    console.log('ERRROR', e)
+  }
 }
 
 function* createCommunityTestSaga(payload): Generator {
@@ -27,47 +39,23 @@ function* createCommunityTestSaga(payload): Generator {
   
   yield* put(communitiesActions.createNewCommunity(communityName))
   yield* take(communitiesActions.responseCreateCommunity)
+
+  // yield* put({type: 'assert', payload: {fn: assert.equal, args: ['hop', 'padu']}})
+  // yield* call(assert.equal, 'apud', 'hop')
+  
+  yield* put(identityActions.registerUsername(userName))
+  yield* take(identityActions.storeUserCertificate)
+  yield* take(communitiesActions.community)
+  yield* take(communitiesActions.responseRegistrar)
   const currentCommunity = yield* select(communitiesSelectors.currentCommunity)
-  // console.log(currentCommunity, '---------', currentCommunity.name)
   assert.equal(currentCommunity.name, communityName)
   assert(currentCommunity.onionAddress)
   assert(currentCommunity.port)
   assert(currentCommunity.privateKey)
-  yield* put(identityActions.registerUsername(userName))
-  yield* take(identityActions.storeUserCertificate)
-  // TODO: how to check for registration (and other) errors?
-  // const certificateRegistrationError = yield* select(errorsSelectors.certificateRegistration)
-  // console.log(certificateRegistrationError)
-  // assert.equal(certificateRegistrationError, undefined, `Registration failed: ${certificateRegistrationError}`)
-  // check if we have cert and cert ca
+  assert(currentCommunity.rootCa)
+  // TODO: check for errors (there should not be any)
   const createdIdentity = yield* select(identitySelectors.currentIdentity)
-  console.log(`User ${userName} identity:`, createdIdentity)
-  assert.equal(createdIdentity.id, currentCommunity.id)
-  assert.notEqual(createdIdentity.peerId, undefined)
-  assert.notEqual(createdIdentity.userCertificate, undefined)
-  assert.notEqual(createdIdentity.hiddenService, undefined)
-  yield* put(createAction('setDone')()) // TODO: use this method to check if part of test is ready
-  // TODO: check if identity contains zbaynickname
-}
-
-function* joinCommunityTestSaga(payload): Generator {
-  const { registrarAddress, userName, ownerPeerId } = payload.payload
-  yield* put(communitiesActions.joinCommunity(registrarAddress))
-  yield* take(communitiesActions.responseCreateCommunity)
-  const currentCommunity = yield* select(communitiesSelectors.currentCommunity)
-  yield* put(identity.actions.registerUsername(userName))
-  const responseCreatedUserCert = yield* take(identityActions.storeUserCertificate)
-  const peerList = yield* take(communitiesActions.storePeerList)
-  console.log(peerList, '<<<<<<<<<<<<<<')
-  const createdIdentity = yield* select(identitySelectors.currentIdentity)
-  // TODO: check storePeerList instead
-  
-  // assert.notEqual(bootstrapPeers, undefined)
-  // assert.equal(peerList.length, 2)
-  // assertListElementMatches(bootstrapPeers, new RegExp(ownerPeerId))
-  // assertListElementMatches(bootstrapPeers, new RegExp(createdIdentity.peerId.id))
-  console.log(`User ${userName} identity:`, createdIdentity)
-  // TODO: assert contains nickname
+  assert.equal(createdIdentity.zbayNickname, userName)
   assert.equal(createdIdentity.id, currentCommunity.id)
   assert.notEqual(createdIdentity.peerId, undefined)
   assert.notEqual(createdIdentity.userCertificate, undefined)
@@ -75,14 +63,26 @@ function* joinCommunityTestSaga(payload): Generator {
   yield* put(createAction('setDone')())
 }
 
-const isOwnerAppReady = (ownerAppState): boolean => {
-  // TODO: can I use selectors outside sagas and react components?
-  const communitiesState = ownerAppState.Communities
-  const identityState = ownerAppState.Identity
-  const useridentity = identityState.entities[identityState.ids[0]]
-  const communities = communitiesState.communities
-  const mainCommunityId = communitiesState.currentCommunity
-  return mainCommunityId && communities.entities[mainCommunityId].onionAddress && useridentity && useridentity.userCertificate
+function* joinCommunityTestSaga(payload): Generator {
+  const { registrarAddress, userName, ownerPeerId, ownerRootCA } = payload.payload
+  yield* put(communitiesActions.joinCommunity(registrarAddress))
+  yield* take(communitiesActions.responseCreateCommunity)
+  yield* put(identity.actions.registerUsername(userName))
+  yield* take(identityActions.storeUserCertificate)
+  yield* take(communitiesActions.community)
+  const currentCommunity = yield* select(communitiesSelectors.currentCommunity)
+  const createdIdentity = yield* select(identitySelectors.currentIdentity)
+  assert.equal(currentCommunity.rootCa, ownerRootCA, "User joining community should have the same rootCA as the owner")
+  assert.notEqual(currentCommunity.peerList, undefined, "User joining community should have a list of peers to connect to")
+  assert.equal(currentCommunity.peerList.length, 2)
+  assertListElementMatches(currentCommunity.peerList, new RegExp(ownerPeerId))
+  assertListElementMatches(currentCommunity.peerList, new RegExp(createdIdentity.peerId.id))
+  assert.equal(createdIdentity.zbayNickname, userName)
+  assert.equal(createdIdentity.id, currentCommunity.id)
+  assert.notEqual(createdIdentity.peerId, undefined)
+  assert.notEqual(createdIdentity.userCertificate, undefined)
+  assert.notEqual(createdIdentity.hiddenService, undefined)
+  yield* put(createAction('setDone')())
 }
 
 const main = async () => {
@@ -95,7 +95,6 @@ const main = async () => {
   const unsubscribe = store1.subscribe(async () => {
     
     const ownerStoreState = store1.getState()
-    console.log('STATE:', ownerStoreState)
     // User joins community and registers as soon as the owner finishes registering
     if (store1.getState().Test.done) {
       unsubscribe()
@@ -107,7 +106,8 @@ const main = async () => {
         payload: { 
           userName: 'User', 
           registrarAddress, communityId: community.id, 
-          ownerPeerId: ownerIdentityState.entities[ownerIdentityState.ids[0]].peerId.id 
+          ownerPeerId: ownerIdentityState.entities[ownerIdentityState.ids[0]].peerId.id,
+          ownerRootCA: community.rootCa
         }
       })
     }
