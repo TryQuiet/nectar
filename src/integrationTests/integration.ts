@@ -1,4 +1,4 @@
-import { createAction } from "@reduxjs/toolkit"
+import { createAction, Store } from "@reduxjs/toolkit"
 import assert from 'assert'
 import { select, put, all, take, takeEvery, call } from "typed-redux-saga"
 import { identity } from "../index"
@@ -6,43 +6,13 @@ import { communitiesSelectors } from "../sagas/communities/communities.selectors
 import { communitiesActions } from "../sagas/communities/communities.slice"
 import { identitySelectors } from "../sagas/identity/identity.selectors"
 import { identityActions } from "../sagas/identity/identity.slice"
-import { assertListElementMatches, createApp } from "./utils"
-
-export function* handleTestActions(): Generator {
-  yield all([
-    takeEvery(
-      createAction('userCreatingCommunity'),
-      createCommunityTestSaga,
-    ),
-    takeEvery(
-      createAction('userJoiningCommunity'),
-      joinCommunityTestSaga,
-    ),
-    // takeEvery(
-    //   createAction('assert'),
-    //   assertResultSaga
-    // )
-  ]);
-}
-
-function* assertResultSaga(payload: {fn: (...args: any[]) => any, args: any[]}): Generator {
-  try {
-    payload.fn(...payload.args)
-  } catch (e) {
-    console.log('ERRROR', e)
-  }
-}
+import { assertListElementMatches, createApp, integrationTest, watchResults } from "./utils"
 
 function* createCommunityTestSaga(payload): Generator {
-  const userName = payload.payload.userName
+  const userName = payload.userName
   const communityName = 'CommunityName'
-  
   yield* put(communitiesActions.createNewCommunity(communityName))
   yield* take(communitiesActions.responseCreateCommunity)
-
-  // yield* put({type: 'assert', payload: {fn: assert.equal, args: ['hop', 'padu']}})
-  // yield* call(assert.equal, 'apud', 'hop')
-  
   yield* put(identityActions.registerUsername(userName))
   yield* take(identityActions.storeUserCertificate)
   yield* take(communitiesActions.community)
@@ -60,11 +30,11 @@ function* createCommunityTestSaga(payload): Generator {
   assert.notEqual(createdIdentity.peerId, undefined)
   assert.notEqual(createdIdentity.userCertificate, undefined)
   assert.notEqual(createdIdentity.hiddenService, undefined)
-  yield* put(createAction('setDone')())
+  yield* put(createAction('testDone')())
 }
 
 function* joinCommunityTestSaga(payload): Generator {
-  const { registrarAddress, userName, ownerPeerId, ownerRootCA } = payload.payload
+  const { registrarAddress, userName, ownerPeerId, ownerRootCA } = payload
   yield* put(communitiesActions.joinCommunity(registrarAddress))
   yield* take(communitiesActions.responseCreateCommunity)
   yield* put(identity.actions.registerUsername(userName))
@@ -74,7 +44,7 @@ function* joinCommunityTestSaga(payload): Generator {
   const createdIdentity = yield* select(identitySelectors.currentIdentity)
   assert.equal(currentCommunity.rootCa, ownerRootCA, "User joining community should have the same rootCA as the owner")
   assert.notEqual(currentCommunity.peerList, undefined, "User joining community should have a list of peers to connect to")
-  assert.equal(currentCommunity.peerList.length, 2)
+  assert.equal(currentCommunity.peerList.length, 2, "User joining community should receive a full list of peers to connect to")
   assertListElementMatches(currentCommunity.peerList, new RegExp(ownerPeerId))
   assertListElementMatches(currentCommunity.peerList, new RegExp(createdIdentity.peerId.id))
   assert.equal(createdIdentity.zbayNickname, userName)
@@ -82,49 +52,58 @@ function* joinCommunityTestSaga(payload): Generator {
   assert.notEqual(createdIdentity.peerId, undefined)
   assert.notEqual(createdIdentity.userCertificate, undefined)
   assert.notEqual(createdIdentity.hiddenService, undefined)
-  yield* put(createAction('setDone')())
+  yield* put(createAction('testDone')())
 }
 
-const main = async () => {
-  const store1 = await createApp('First', handleTestActions)
-  const store2 = await createApp('Second', handleTestActions)
+const testUsersCreateAndJoinCommunitySuccessfully = async () => {
+  const app1 = await createApp()
+  const app2 = await createApp()
+  watchResults([app1.store, app2.store], app2.store, 'Users create and join community successfully')
 
   // Owner creates community and registers
-  store1.dispatch({ type: 'userCreatingCommunity', payload: { userName: 'Owner' } })
+  app1.runSaga(integrationTest, createCommunityTestSaga, { userName: 'Owner' })
 
-  const unsubscribe = store1.subscribe(async () => {
-    
-    const ownerStoreState = store1.getState()
+  const unsubscribe = app1.store.subscribe(async () => {
     // User joins community and registers as soon as the owner finishes registering
-    if (store1.getState().Test.done) {
+    if (app1.store.getState().Test.done) {
       unsubscribe()
+      const ownerStoreState = app1.store.getState()
       const community = ownerStoreState.Communities.communities.entities[ownerStoreState.Communities.currentCommunity]
       const registrarAddress = `http://${community.onionAddress}.onion:${community.port}`
-      const ownerIdentityState = store1.getState().Identity
-      store2.dispatch({ 
-        type: 'userJoiningCommunity', 
-        payload: { 
-          userName: 'User', 
-          registrarAddress, communityId: community.id, 
-          ownerPeerId: ownerIdentityState.entities[ownerIdentityState.ids[0]].peerId.id,
-          ownerRootCA: community.rootCa
-        }
+      const ownerIdentityState = app1.store.getState().Identity
+      app2.runSaga(integrationTest, joinCommunityTestSaga, {
+        userName: 'User', 
+        registrarAddress, communityId: community.id, 
+        ownerPeerId: ownerIdentityState.entities[ownerIdentityState.ids[0]].peerId.id,
+        ownerRootCA: community.rootCa
       })
     }
   })
-
-  store2.subscribe(() => {
-    if (store2.getState().Test.done) {
-      console.log('Test passed')
-      process.exit(0)
-    }
-  })
 }
 
-main().then(() => {}, (e) => {
-  console.log('Test failed: ', e)
-  process.exit(1)
-}).catch(e => {
-  console.error('Test failed:', e)
-  process.exit(1)
-})
+function* tryToJoinOfflineRegistrarTestSaga(payload): Generator {
+  yield* put(communitiesActions.joinCommunity(`http://offlineRegistrarAddress.onion:4040`))
+  yield* take(communitiesActions.responseCreateCommunity)
+  yield* put(identity.actions.registerUsername('IamTheUser'))
+  // TODO: check errors
+  yield* put(createAction('setDone')())
+}
+
+const testUserTriesToJoinOfflineCommunity = async () => {
+  const app = await createApp()
+  watchResults([app.store], app.store, 'User receives error when tries to connect to offline registrar')
+  app.runSaga(integrationTest, tryToJoinOfflineRegistrarTestSaga)
+}
+
+export const testCases = [
+  testUsersCreateAndJoinCommunitySuccessfully,
+  // testUserTriesToJoinOfflineCommunity // TODO
+]
+
+const run = async () => {
+  for (const testCase of testCases) {
+    await testCase()
+  }
+}
+
+run().catch((e) => {console.log('Error occurred while running integration tests', e)})

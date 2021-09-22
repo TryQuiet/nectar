@@ -28,4 +28,4 @@ jobs:
       - name: install typescript
         run: npm install --global typescript
       - name: Run tests
-        run: DEBUG='waggle*' ts-node src/tests/integration.ts
+        run: DEBUG='waggle*' ts-node src/integrationTests/integration.ts
