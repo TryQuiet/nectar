@@ -17,6 +17,7 @@ function* createCommunityTestSaga(payload): Generator {
   yield* take(identityActions.storeUserCertificate)
   yield* take(communitiesActions.community)
   yield* take(communitiesActions.responseRegistrar)
+  yield* take(identityActions.savedOwnerCertificate)
   const currentCommunity = yield* select(communitiesSelectors.currentCommunity)
   assert.equal(currentCommunity.name, communityName)
   assert(currentCommunity.onionAddress)
