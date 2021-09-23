@@ -11,12 +11,12 @@ export function* launchCommunitySaga(socket,_action): Generator {
 
     const cert = identity.userCertificate
     const key = identity.userCsr.userKey
-    const ca = community.CA.rootCertString
+    const ca = community.rootCa
 
     const certs = {
 cert,
 key,
 ca
     }
-    yield* apply(socket, socket.emit, [SocketActionTypes.LAUNCH_COMMUNITY, identity.id, identity.peerId, identity.hiddenService,[], certs])
+    yield* apply(socket, socket.emit, [SocketActionTypes.LAUNCH_COMMUNITY, identity.id, identity.peerId, identity.hiddenService,community.peerList, certs])
 }
