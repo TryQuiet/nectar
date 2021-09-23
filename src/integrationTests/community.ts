@@ -6,7 +6,7 @@ import { communitiesSelectors } from "../sagas/communities/communities.selectors
 import { communitiesActions } from "../sagas/communities/communities.slice"
 import { identitySelectors } from "../sagas/identity/identity.selectors"
 import { identityActions } from "../sagas/identity/identity.slice"
-import { assertListElementMatches, createApp, integrationTest, watchResults } from "./utils"
+import { assertListElementMatches, assertNotEmpty, createApp, integrationTest, watchResults } from "./utils"
 
 function* createCommunityTestSaga(payload): Generator {
   const userName = payload.userName
@@ -28,9 +28,9 @@ function* createCommunityTestSaga(payload): Generator {
   const createdIdentity = yield* select(identitySelectors.currentIdentity)
   assert.equal(createdIdentity.zbayNickname, userName)
   assert.equal(createdIdentity.id, currentCommunity.id)
-  assert.notEqual(createdIdentity.peerId, undefined)
-  assert.notEqual(createdIdentity.userCertificate, undefined)
-  assert.notEqual(createdIdentity.hiddenService, undefined)
+  assertNotEmpty(createdIdentity.peerId, 'Identity.peerId')
+  assertNotEmpty(createdIdentity.userCertificate, 'Identity.userCertificate')
+  assertNotEmpty(createdIdentity.hiddenService, 'Identity.hiddenService')
   yield* put(createAction('testDone')())
 }
 
@@ -50,9 +50,9 @@ function* joinCommunityTestSaga(payload): Generator {
   assertListElementMatches(currentCommunity.peerList, new RegExp(createdIdentity.peerId.id))
   assert.equal(createdIdentity.zbayNickname, userName)
   assert.equal(createdIdentity.id, currentCommunity.id)
-  assert.notEqual(createdIdentity.peerId, undefined)
-  assert.notEqual(createdIdentity.userCertificate, undefined)
-  assert.notEqual(createdIdentity.hiddenService, undefined)
+  assertNotEmpty(createdIdentity.peerId, 'Identity.peerId')
+  assertNotEmpty(createdIdentity.userCertificate, 'Identity.userCertificate')
+  assertNotEmpty(createdIdentity.hiddenService, 'Identity.hiddenService')
   yield* put(createAction('testDone')())
 }
 

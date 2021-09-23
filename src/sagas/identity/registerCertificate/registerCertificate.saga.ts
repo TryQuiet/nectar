@@ -14,7 +14,7 @@ export function* registerCertificateSaga(
 const currentCommunity = yield* select(communitiesSelectors.currentCommunity)
 
   if(currentCommunity.CA.rootCertString) {
-    console.log('registerOwnerCertificate', currentCommunity.CA.rootCertString)
+    // console.log('registerOwnerCertificate', currentCommunity.CA.rootCertString)
     yield* apply(socket, socket.emit, [
       SocketActionTypes.REGISTER_OWNER_CERTIFICATE,
       action.payload.communityId,
@@ -25,7 +25,7 @@ const currentCommunity = yield* select(communitiesSelectors.currentCommunity)
      }
     ])
   } else {
-    console.log('registerUserCertificate')
+    // console.log('registerUserCertificate')
     yield* apply(socket, socket.emit, [
       SocketActionTypes.REGISTER_USER_CERTIFICATE,
       action.payload.registrarAddress,

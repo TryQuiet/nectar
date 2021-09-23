@@ -156,3 +156,13 @@ export const assertListElementMatches = (actual: any[], match: RegExp) => {
     throw new assert.AssertionError({message: `No element in the ${actual} matches ${match}`})
   }
 }
+
+export const assertNotEmpty = (value: any, valueName: string) => {
+  if (
+    (value === null || value === undefined || value === '') || 
+    (Array.isArray(value) && value.length === 0) || 
+    (Object.keys(value).length === 0)
+    ) {
+      throw new assert.AssertionError({message: `${valueName} is empty but shouldn't be`})
+  }
+}
