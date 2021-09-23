@@ -4,15 +4,17 @@ import { combineReducers } from '@reduxjs/toolkit';
 import { StoreKeys } from '../../store.keys';
 import { SocketActionTypes } from '../../socket/const/actionTypes';
 import { communitiesReducer, CommunitiesState, Community } from '../../communities/communities.slice';
+import {identityAdapter} from '../identity.adapter'
 import {
   identityActions,
-  UserCsr,
+    identityReducer,
+  UserCsr,Identity
 } from '../identity.slice';
-import { registerCertificateSaga } from './registerCertificate.saga';
+import { saveOwnerCertToDbSaga } from './saveOwnerCertToDb.saga';
 
-describe('registerCertificateSaga', () => {
+describe('saveOwnerCertificateToDb', () => {
   
-  test('register owner certificate', async () => {
+  test('save owner certificate to database', async () => {
     const community = new Community({name: 'communityName', id: 'id', CA: { rootCertString: 'certString', rootKeyString: 'keyString' }, registrarUrl:''})
     const socket = { emit: jest.fn(), on: jest.fn() } as unknown as Socket;
     const userCsr = {
@@ -20,14 +22,13 @@ describe('registerCertificateSaga', () => {
       userKey: 'userKey',
       pkcs10: jest.fn(),
     };
+    const identity = new Identity({id: 'id', hiddenService: {onionAddress: 'onionAddress', privateKey: 'privateKey'}, dmKeys: {publicKey: 'publicKey', privateKey: 'privateKey'}, peerId: {id: 'peerId', pubKey: 'pubKey', privKey: 'privKey'}})
     const communityId = 'id'
-    const registrarAddress = 'http://wzispgrbrrkt3bari4kljpqz2j6ozzu3vlsoi2wqupgu7ewi4ncibrid.onion:7789'
     await expectSaga(
-      registerCertificateSaga,
+      saveOwnerCertToDbSaga,
       socket,
-      identityActions.storeUserCsr(<{userCsr: UserCsr, communityId: 'string',registrarAddress: string}>(<unknown>{ registrarAddress, userCsr, communityId }))
     ).withReducer(
-        combineReducers({ [StoreKeys.Communities]: communitiesReducer }),
+        combineReducers({ [StoreKeys.Communities]: communitiesReducer, [StoreKeys.Identity]: identityReducer }),
         {
           [StoreKeys.Communities]: {
             ...new CommunitiesState(),
@@ -38,13 +39,20 @@ describe('registerCertificateSaga', () => {
                 id: community
               }
             }
-            }
+            },
+            [StoreKeys.Identity]: {
+                ...identityAdapter.setAll(
+                  identityAdapter.getInitialState(),
+                  [identity]
+                )
+              }
         }
       )
       .apply(socket, socket.emit, [
-        SocketActionTypes.REGISTER_OWNER_CERTIFICATE,
+        SocketActionTypes.SAVE_OWNER_CERTIFICATE,
         communityId,
-        userCsr.userCsr,
+        identity.peerId.id,
+        identity.userCertificate,
         {
           certificate: community.CA.rootCertString,
           privKey: community.CA.rootKeyString
