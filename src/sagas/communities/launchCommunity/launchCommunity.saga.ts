@@ -18,5 +18,5 @@ cert,
 key,
 ca
     }
-    yield* apply(socket, socket.emit, [SocketActionTypes.LAUNCH_COMMUNITY, identity.id, identity.peerId, identity.hiddenService,[], certs])
+    yield* apply(socket, socket.emit, [SocketActionTypes.LAUNCH_COMMUNITY, identity.id, identity.peerId, identity.hiddenService,community.peerList, certs])
 }
