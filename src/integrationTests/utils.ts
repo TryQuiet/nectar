@@ -14,11 +14,12 @@ import { communitiesMasterSaga } from '../sagas/communities/communities.master.s
 import { identityMasterSaga } from "../sagas/identity/identity.master.saga"
 import { messagesMasterSaga } from "../sagas/messages/messages.master.saga"
 import { handleActions } from '../sagas/socket/startConnection/startConnection.saga'
-
-
+import debug from 'debug'
+const log = Object.assign(debug('tests'), {
+  error: debug('tests:err')
+})
 
 function testReducer(state = { done: false, error: null }, action) {
-  console.log('TEST REDUCER -> ', action.type)
   switch (action.type) {
     case 'testDone':
       return {done: true}
@@ -45,14 +46,14 @@ export const watchResults = (stores: Store[], finalStore: Store, testName: strin
   for (const store of stores) {
     store.subscribe(() => {
       if (store.getState().Test.error) {
-        console.log(`"${testName}" failed: `, store.getState().Test.error)
+        log.error(`"${testName}" failed: `, store.getState().Test.error)
         process.exit(1)
       }
     })
   }
   finalStore.subscribe(() => {
     if (finalStore.getState().Test.done) {
-      console.log(`"${testName}" passed`)
+      log(`"${testName}" passed`)
       // process.exit(0)
     }
   })
@@ -93,7 +94,7 @@ export const prepareStore = (rootSaga) => {
 const connectToDataport = (url: string, name: string): Socket => {
   const socket = io(url)
   socket.on('connect', async () => {
-    console.log(`websocket connection is ready for app ${name}`)
+    log(`websocket connection is ready for app ${name}`)
   })
   return socket
 }
@@ -104,7 +105,7 @@ export const createApp = async () => {
    * configure redux store
    */
   const appName = (Math.random() + 1).toString(36).substring(7)
-  console.log(`Creating test app for ${appName}`)
+  log(`Creating test app for ${appName}`)
   const [dataServerPort1] = await fp(4677)
   const server1 = new waggle.DataServer(dataServerPort1)
   await server1.listen()
@@ -152,6 +153,6 @@ export const assertListElementMatches = (actual: any[], match: RegExp) => {
     }
   }
   if (counter === actual.length) {
-    throw new assert.AssertionError({message: `No element in the list matches ${match}`})
+    throw new assert.AssertionError({message: `No element in the ${actual} matches ${match}`})
   }
 }

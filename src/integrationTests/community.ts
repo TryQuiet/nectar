@@ -1,6 +1,6 @@
-import { createAction, Store } from "@reduxjs/toolkit"
+import { createAction } from "@reduxjs/toolkit"
 import assert from 'assert'
-import { select, put, all, take, takeEvery, call } from "typed-redux-saga"
+import { put, select, take } from "typed-redux-saga"
 import { identity } from "../index"
 import { communitiesSelectors } from "../sagas/communities/communities.selectors"
 import { communitiesActions } from "../sagas/communities/communities.slice"
@@ -81,7 +81,7 @@ const testUsersCreateAndJoinCommunitySuccessfully = async () => {
   })
 }
 
-function* tryToJoinOfflineRegistrarTestSaga(payload): Generator {
+function* tryToJoinOfflineRegistrarTestSaga(): Generator {
   yield* put(communitiesActions.joinCommunity(`http://offlineRegistrarAddress.onion:4040`))
   yield* take(communitiesActions.responseCreateCommunity)
   yield* put(identity.actions.registerUsername('IamTheUser'))
@@ -95,15 +95,7 @@ const testUserTriesToJoinOfflineCommunity = async () => {
   app.runSaga(integrationTest, tryToJoinOfflineRegistrarTestSaga)
 }
 
-export const testCases = [
+export default [
   testUsersCreateAndJoinCommunitySuccessfully,
   // testUserTriesToJoinOfflineCommunity // TODO
 ]
-
-const run = async () => {
-  for (const testCase of testCases) {
-    await testCase()
-  }
-}
-
-run().catch((e) => {console.log('Error occurred while running integration tests', e)})
