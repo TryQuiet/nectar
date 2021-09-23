@@ -3,32 +3,37 @@ import { Socket } from 'socket.io-client';
 import { combineReducers } from '@reduxjs/toolkit';
 import { StoreKeys } from '../../store.keys';
 import { SocketActionTypes } from '../../socket/const/actionTypes';
-import { communitiesReducer, CommunitiesState, Community } from '../../communities/communities.slice';
-import {identityAdapter} from '../identity.adapter'
 import {
-  identityActions,
-    identityReducer,
-  UserCsr,Identity
-} from '../identity.slice';
+  communitiesReducer,
+  CommunitiesState,
+  Community,
+} from '../../communities/communities.slice';
+import { identityAdapter } from '../identity.adapter';
+import { identityReducer, Identity } from '../identity.slice';
 import { saveOwnerCertToDbSaga } from './saveOwnerCertToDb.saga';
 
 describe('saveOwnerCertificateToDb', () => {
-  
   test('save owner certificate to database', async () => {
-    const community = new Community({name: 'communityName', id: 'id', CA: { rootCertString: 'certString', rootKeyString: 'keyString' }, registrarUrl:''})
+    const community = new Community({
+      name: 'communityName',
+      id: 'id',
+      CA: { rootCertString: 'certString', rootKeyString: 'keyString' },
+      registrarUrl: '',
+    });
     const socket = { emit: jest.fn(), on: jest.fn() } as unknown as Socket;
-    const userCsr = {
-      userCsr: 'userCsr',
-      userKey: 'userKey',
-      pkcs10: jest.fn(),
-    };
-    const identity = new Identity({id: 'id', hiddenService: {onionAddress: 'onionAddress', privateKey: 'privateKey'}, dmKeys: {publicKey: 'publicKey', privateKey: 'privateKey'}, peerId: {id: 'peerId', pubKey: 'pubKey', privKey: 'privKey'}})
-    const communityId = 'id'
-    await expectSaga(
-      saveOwnerCertToDbSaga,
-      socket,
-    ).withReducer(
-        combineReducers({ [StoreKeys.Communities]: communitiesReducer, [StoreKeys.Identity]: identityReducer }),
+    const identity = new Identity({
+      id: 'id',
+      hiddenService: { onionAddress: 'onionAddress', privateKey: 'privateKey' },
+      dmKeys: { publicKey: 'publicKey', privateKey: 'privateKey' },
+      peerId: { id: 'peerId', pubKey: 'pubKey', privKey: 'privKey' },
+    });
+    const communityId = 'id';
+    await expectSaga(saveOwnerCertToDbSaga, socket)
+      .withReducer(
+        combineReducers({
+          [StoreKeys.Communities]: communitiesReducer,
+          [StoreKeys.Identity]: identityReducer,
+        }),
         {
           [StoreKeys.Communities]: {
             ...new CommunitiesState(),
@@ -36,16 +41,15 @@ describe('saveOwnerCertificateToDb', () => {
             communities: {
               ids: ['id'],
               entities: {
-                id: community
-              }
-            }
+                id: community,
+              },
             },
-            [StoreKeys.Identity]: {
-                ...identityAdapter.setAll(
-                  identityAdapter.getInitialState(),
-                  [identity]
-                )
-              }
+          },
+          [StoreKeys.Identity]: {
+            ...identityAdapter.setAll(identityAdapter.getInitialState(), [
+              identity,
+            ]),
+          },
         }
       )
       .apply(socket, socket.emit, [
@@ -55,8 +59,8 @@ describe('saveOwnerCertificateToDb', () => {
         identity.userCertificate,
         {
           certificate: community.CA.rootCertString,
-          privKey: community.CA.rootKeyString
-        }
+          privKey: community.CA.rootKeyString,
+        },
       ])
       .silentRun();
   });

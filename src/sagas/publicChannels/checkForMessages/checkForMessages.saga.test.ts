@@ -1,4 +1,3 @@
-
 import { combineReducers } from '@reduxjs/toolkit';
 import { expectSaga } from 'redux-saga-test-plan';
 import { mainChannelName } from '../../config';
@@ -35,13 +34,13 @@ describe('checkForMessagesSaga', () => {
               },
             },
           },
-        },
+        }
       )
       .put(
         publicChannelsActions.askForMessages({
           channelAddress: mainChannelName,
           ids: ['2', '3'],
-        }),
+        })
       )
       .silentRun();
   });

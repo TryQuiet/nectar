@@ -10,11 +10,15 @@ export function* identityMasterSaga(socket: Socket): Generator {
   yield all([
     takeEvery(identityActions.registerUsername.type, registerUsernameSaga),
     takeEvery(identityActions.createUserCsr.type, createUserCsrSaga),
-    takeEvery(identityActions.saveOwnerCertToDb.type, saveOwnerCertToDbSaga, socket),
+    takeEvery(
+      identityActions.saveOwnerCertToDb.type,
+      saveOwnerCertToDbSaga,
+      socket
+    ),
     takeEvery(
       identityActions.storeUserCsr.type,
       registerCertificateSaga,
       socket
-    )
+    ),
   ]);
 }

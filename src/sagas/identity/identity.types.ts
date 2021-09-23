@@ -14,20 +14,17 @@ export interface IIdentity {
   id: string;
   zbayNickname: string;
   peerId: {
-    id: string,
-    privateKey: string
-
+    id: string;
+    privateKey: string;
   };
   hiddenService: {
-    address: string,
-    privateKey: string
-
-  }
+    address: string;
+    privateKey: string;
+  };
   dmKeys: {
-    publicKey: string,
-    privateKey: string
-
-  }
+    publicKey: string;
+    privateKey: string;
+  };
   userCsr: UserCsr | null;
   userCertificate: string | null;
 }
