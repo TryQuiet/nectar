@@ -16,7 +16,7 @@
   "license": "ISC",
   "dependencies": {
     "@reduxjs/toolkit": "^1.6.1",
-    "@zbayapp/identity": "^3.3.1",
+    "@zbayapp/identity": "^3.3.2",
     "debug": "^4.3.2",
     "luxon": "^2.0.2",
     "pkijs": "^2.1.97",

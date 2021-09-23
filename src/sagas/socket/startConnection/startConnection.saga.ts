@@ -94,6 +94,7 @@ export function subscribe(socket: Socket) {
         console.log('created Registrar')
         console.log(payload)
         emit(communitiesActions.responseRegistrar(payload));
+        emit(identityActions.saveOwnerCertToDb())
       }
     );
     socket.on(
@@ -123,7 +124,7 @@ export function subscribe(socket: Socket) {
     socket.on(
       SocketActionTypes.SEND_USER_CERTIFICATE,
       (payload: {id: string, payload: {peers: string[], certificate: string, rootCa:string}}) => {
-        console.log('gor response with cert', payload.payload.certificate )
+        console.log('gor response with cert', payload.payload.rootCa )
         emit(communitiesActions.storePeerList({communityId: payload.id, peerList: payload.payload.peers}))
         emit(identityActions.storeUserCertificate({userCertificate: payload.payload.certificate, communityId: payload.id}))
         emit(communitiesActions.updateCommunity({id: payload.id, rootCa: payload.payload.rootCa }))
@@ -136,7 +137,12 @@ export function subscribe(socket: Socket) {
         emit(errorsActions.certificateRegistration(message));
       }
     );
-  
+    socket.on(
+      SocketActionTypes.SAVED_OWNER_CERTIFICATE,
+      () => {
+        emit(identityActions.savedOwnerCertificate());
+      }
+    );
     return () => {};
   });
 }

@@ -98,6 +98,10 @@ export const identitySlice = createSlice({
     },
     createUserCsr: (state, _action: PayloadAction<CreateUserCsrPayload>) =>
       state,
+    saveOwnerCertToDb: (state, _action: PayloadAction<string>) =>
+      state,
+    savedOwnerCertificate: (state, _action: PayloadAction<string>) =>
+      state,
     registerUsername: (state, _action: PayloadAction<string>) => state,
     updateUsername: (state, action: PayloadAction<UpdateUsernamePayload>) => {
       identityAdapter.updateOne(state, {

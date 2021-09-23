@@ -37,5 +37,7 @@ export enum SocketActionTypes {
   REGISTRAR = 'registrar',
   REGISTRAR_ERROR = 'registrarError',
   LAUNCH_COMMUNITY = 'launchCommunity',
-  LAUNCH_REGISTRAR  ='launchRegistrar'
+  LAUNCH_REGISTRAR  ='launchRegistrar',
+  SAVE_OWNER_CERTIFICATE = 'saveOwnerCertificate',
+  SAVED_OWNER_CERTIFICATE = 'savedOwnerCertificate',
 }
