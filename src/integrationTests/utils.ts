@@ -1,30 +1,30 @@
-import { applyMiddleware, combineReducers, createStore, Store } from "@reduxjs/toolkit"
+import { applyMiddleware, combineReducers, createAction, createStore, Store } from "@reduxjs/toolkit"
 import assert from 'assert'
+import debug from 'debug'
 import fp from 'find-free-port'
 import path from 'path'
 import createSagaMiddleware from "redux-saga"
-import { all, fork } from "redux-saga/effects"
 import thunk from 'redux-thunk'
 import { io, Socket } from 'socket.io-client'
 import tmp from 'tmp'
-import { call, put } from "typed-redux-saga"
+import { call, fork, put, select, take } from "typed-redux-saga"
 import waggle from 'waggle'
 import { communities, errors, identity, publicChannels, storeKeys, users } from "../index"
-import { communitiesMasterSaga } from '../sagas/communities/communities.master.saga'
-import { identityMasterSaga } from "../sagas/identity/identity.master.saga"
-import { messagesMasterSaga } from "../sagas/messages/messages.master.saga"
-import { handleActions } from '../sagas/socket/startConnection/startConnection.saga'
-import debug from 'debug'
-const log = Object.assign(debug('tests'), {
-  error: debug('tests:err')
+import { useIO } from '../sagas/socket/startConnection/startConnection.saga'
+const log = Object.assign(debug('nectar:tests'), {
+  error: debug('nectar:tests:err')
 })
 
-function testReducer(state = { done: false, error: null }, action) {
+function testReducer(state = { continue: false, finished: false, error: null, manager: null }, action) {
   switch (action.type) {
-    case 'testDone':
-      return {done: true}
-    case 'testFail':
-      return {error: action.payload}
+    case 'setManager':
+      return {...state, manager: action.payload}
+    case 'testContinue':
+      return {...state, continue: true}
+    case 'testFinished':
+      return {...state, finished: true}
+    case 'testFailed':
+      return {...state, error: action.payload}
     default:
       return state
   }
@@ -37,7 +37,7 @@ export function* integrationTest(saga, ...args: any[]): Generator {
   try {
     yield* call(saga, ...args)
   } catch (e) {
-    yield* put({type: 'testFail', payload: e.message})
+    yield* put({type: 'testFailed', payload: e.message})
   }
 }
 
@@ -52,7 +52,7 @@ export const watchResults = (stores: Store[], finalStore: Store, testName: strin
     })
   }
   finalStore.subscribe(() => {
-    if (finalStore.getState().Test.done) {
+    if (finalStore.getState().Test.finished) {
       log(`"${testName}" passed`)
       // process.exit(0)
     }
@@ -114,7 +114,7 @@ export const createApp = async () => {
 
   const [proxyPort] = await fp(1234)
   const [controlPort] = await fp(5555)
-  const manager1 = new waggle.ConnectionsManager({
+  const manager = new waggle.ConnectionsManager({
     agentHost: 'localhost',
     agentPort: proxyPort,
     options: {
@@ -126,18 +126,18 @@ export const createApp = async () => {
     },
     io: server1.io
   })
-  await manager1.init()
+  await manager.init()
 
   runSagas()
   
   function* root(): Generator {
-    const socket = yield* call(connectToDataport, `http://localhost:${dataServerPort1}`, appName);
-    yield all([
-      fork(handleActions, socket),
-      fork(messagesMasterSaga, socket),
-      fork(identityMasterSaga, socket),
-      fork(communitiesMasterSaga, socket)
-    ])
+    yield* put({type: 'setManager', payload: manager})
+    const socket = yield* call(connectToDataport, `http://localhost:${dataServerPort1}`, appName)
+    yield* fork(useIO, socket)
+    yield* take(createAction('testFinished'))
+    const mmm = yield* select((state) => state.Test.manager)
+    yield* call(mmm.tor.kill)
+    log('Killed tor')
   }
   
   return {store, runSaga}

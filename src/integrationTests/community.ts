@@ -31,7 +31,7 @@ function* createCommunityTestSaga(payload): Generator {
   assertNotEmpty(createdIdentity.peerId, 'Identity.peerId')
   assertNotEmpty(createdIdentity.userCertificate, 'Identity.userCertificate')
   assertNotEmpty(createdIdentity.hiddenService, 'Identity.hiddenService')
-  yield* put(createAction('testDone')())
+  yield* put(createAction('testContinue')())
 }
 
 function* joinCommunityTestSaga(payload): Generator {
@@ -53,7 +53,7 @@ function* joinCommunityTestSaga(payload): Generator {
   assertNotEmpty(createdIdentity.peerId, 'Identity.peerId')
   assertNotEmpty(createdIdentity.userCertificate, 'Identity.userCertificate')
   assertNotEmpty(createdIdentity.hiddenService, 'Identity.hiddenService')
-  yield* put(createAction('testDone')())
+  yield* put(createAction('testFinished')())
 }
 
 const testUsersCreateAndJoinCommunitySuccessfully = async () => {
@@ -66,7 +66,7 @@ const testUsersCreateAndJoinCommunitySuccessfully = async () => {
 
   const unsubscribe = app1.store.subscribe(async () => {
     // User joins community and registers as soon as the owner finishes registering
-    if (app1.store.getState().Test.done) {
+    if (app1.store.getState().Test.continue) {
       unsubscribe()
       const ownerStoreState = app1.store.getState()
       const community = ownerStoreState.Communities.communities.entities[ownerStoreState.Communities.currentCommunity]
@@ -87,7 +87,7 @@ function* tryToJoinOfflineRegistrarTestSaga(): Generator {
   yield* take(communitiesActions.responseCreateCommunity)
   yield* put(identity.actions.registerUsername('IamTheUser'))
   // TODO: check errors
-  yield* put(createAction('setDone')())
+  yield* put(createAction('testFinished')())
 }
 
 const testUserTriesToJoinOfflineCommunity = async () => {
