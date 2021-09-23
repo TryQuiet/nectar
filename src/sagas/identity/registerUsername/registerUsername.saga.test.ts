@@ -70,7 +70,7 @@ describe('registerUsernameSaga', () => {
       .put(
         identityActions.createUserCsr({
           zbayNickname: username,
-          commonName: 'onionAddress',
+          commonName: 'onionAddress.onion',
           peerId: 'peerId',
           dmPublicKey: 'publicKey',
           signAlg: config.signAlg,
