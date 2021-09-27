@@ -119,10 +119,9 @@ export const createApp = async () => {
     agentPort: proxyPort,
     options: {
       env: {
-        appDataPath: path.join(createTmpDir(`nectarIntegrationTest${appName}`).name, '.nectar')
+        appDataPath: createPath(createTmpDir(`nectarIntegrationTest-${appName}`).name)
       },
-      torControlPort: controlPort,
-      useLocalTorFiles: true
+      torControlPort: controlPort
     },
     io: server1.io
   })
