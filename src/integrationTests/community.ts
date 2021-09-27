@@ -70,11 +70,12 @@ const testUsersCreateAndJoinCommunitySuccessfully = async () => {
       unsubscribe()
       const ownerStoreState = app1.store.getState()
       const community = ownerStoreState.Communities.communities.entities[ownerStoreState.Communities.currentCommunity]
-      const registrarAddress = `http://${community.onionAddress}.onion:${community.port}`
+      const registrarAddress = `http://${community.onionAddress}:${community.port}`
       const ownerIdentityState = app1.store.getState().Identity
       app2.runSaga(integrationTest, joinCommunityTestSaga, {
         userName: 'User', 
-        registrarAddress, communityId: community.id, 
+        registrarAddress, 
+        communityId: community.id, 
         ownerPeerId: ownerIdentityState.entities[ownerIdentityState.ids[0]].peerId.id,
         ownerRootCA: community.rootCa
       })
