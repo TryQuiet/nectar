@@ -1,18 +1,18 @@
 import { Socket } from 'socket.io-client';
-import { all, call, put, delay, take, fork, takeEvery } from 'typed-redux-saga';
+import { all, call, put, take, fork } from 'typed-redux-saga';
 import { eventChannel } from 'redux-saga';
 import { SocketActionTypes } from '../const/actionTypes';
 import log from '../../../utils/logger'
 
 // import { nativeServicesActions } from '../../nativeServices/nativeServices.slice';
-import {
-  AskForMessagesResponse,
-  ChannelMessagesIdsResponse,
-  GetPublicChannelsResponse,
-  publicChannelsActions,
-} from '../../publicChannels/publicChannels.slice';
+// import {
+//   AskForMessagesResponse,
+//   ChannelMessagesIdsResponse,
+//   GetPublicChannelsResponse,
+//   publicChannelsActions,
+// } from '../../publicChannels/publicChannels.slice';
 import { publicChannelsMasterSaga } from '../../publicChannels/publicChannels.master.saga';
-import {errorsActions} from '../../errors/errors.slice'
+import { errorsActions } from '../../errors/errors.slice';
 import { identityActions } from '../../identity/identity.slice';
 import { identityMasterSaga } from '../../identity/identity.master.saga';
 import { messagesMasterSaga } from '../../messages/messages.master.saga';
@@ -20,9 +20,13 @@ import {
   SendCertificatesResponse,
   usersActions,
 } from '../../users/users.slice';
-import { IMessage } from '../../publicChannels/publicChannels.types';
+// import { IMessage } from '../../publicChannels/publicChannels.types';
 import { communitiesMasterSaga } from '../../communities/communities.master.saga';
-import {communitiesActions, ResponseCreateCommunityPayload, ResponseRegistrarPayload} from '../../communities/communities.slice'
+import {
+  communitiesActions,
+  ResponseCreateCommunityPayload,
+  ResponseRegistrarPayload,
+} from '../../communities/communities.slice';
 
 export function* useIO(socket: Socket): Generator {
   yield all([
@@ -30,7 +34,7 @@ export function* useIO(socket: Socket): Generator {
     fork(publicChannelsMasterSaga, socket),
     fork(messagesMasterSaga, socket),
     fork(identityMasterSaga, socket),
-    fork(communitiesMasterSaga, socket)
+    fork(communitiesMasterSaga, socket),
   ]);
 }
 
@@ -93,44 +97,56 @@ export function subscribe(socket: Socket) {
     socket.on(
       SocketActionTypes.REGISTRAR,
       (payload: ResponseRegistrarPayload) => {
-        log('created Registrar')
-        log(payload)
+        console.log('created Registrar');
+        console.log(payload);
         emit(communitiesActions.responseRegistrar(payload));
-        emit(identityActions.saveOwnerCertToDb())
+        emit(identityActions.saveOwnerCertToDb());
       }
     );
-    socket.on(
-      SocketActionTypes.NETWORK,
-      (payload: any) => {
-        log('created NETWORK')
-        log(payload)
-        emit(communitiesActions.responseCreateCommunity(payload));
-      }
-    );
-    socket.on(
-      SocketActionTypes.COMMUNITY,
-      (payload: any) => {
-        log('COMMUNITY')
-        log(payload)
-        emit(communitiesActions.community());
-      }
-    );
+    socket.on(SocketActionTypes.NETWORK, (payload: any) => {
+      log('created NETWORK');
+      log(payload);
+      emit(communitiesActions.responseCreateCommunity(payload));
+    });
+    socket.on(SocketActionTypes.COMMUNITY, (payload: any) => {
+      log('COMMUNITY');
+      log(payload);
+      emit(communitiesActions.community());
+    });
     socket.on(
       SocketActionTypes.REGISTRAR_ERROR,
-      (payload: {id:string, network: string}) => {
-        log('createdCommunity')
-        log(payload)
+      (payload: { id: string; network: string }) => {
+        log('createdCommunity');
+        log(payload);
         // emit(communitiesActions.responseCreateCommunity(payload));
       }
     );
     socket.on(
       SocketActionTypes.SEND_USER_CERTIFICATE,
-      (payload: {id: string, payload: {peers: string[], certificate: string, rootCa:string}}) => {
-        log('got response with cert', payload.payload.rootCa )
-        emit(communitiesActions.storePeerList({communityId: payload.id, peerList: payload.payload.peers}))
-        emit(identityActions.storeUserCertificate({userCertificate: payload.payload.certificate, communityId: payload.id}))
-        emit(communitiesActions.updateCommunity({id: payload.id, rootCa: payload.payload.rootCa }))
-        emit(communitiesActions.launchCommunity())
+      (payload: {
+        id: string;
+        payload: { peers: string[]; certificate: string; rootCa: string };
+      }) => {
+        log('got response with cert', payload.payload.rootCa);
+        emit(
+          communitiesActions.storePeerList({
+            communityId: payload.id,
+            peerList: payload.payload.peers,
+          })
+        );
+        emit(
+          identityActions.storeUserCertificate({
+            userCertificate: payload.payload.certificate,
+            communityId: payload.id,
+          })
+        );
+        emit(
+          communitiesActions.updateCommunity({
+            id: payload.id,
+            rootCa: payload.payload.rootCa,
+          })
+        );
+        emit(communitiesActions.launchCommunity());
       }
     );
     socket.on(
@@ -139,12 +155,9 @@ export function subscribe(socket: Socket) {
         emit(errorsActions.certificateRegistration(message));
       }
     );
-    socket.on(
-      SocketActionTypes.SAVED_OWNER_CERTIFICATE,
-      () => {
-        emit(identityActions.savedOwnerCertificate());
-      }
-    );
+    socket.on(SocketActionTypes.SAVED_OWNER_CERTIFICATE, () => {
+      emit(identityActions.savedOwnerCertificate());
+    });
     return () => {};
   });
 }

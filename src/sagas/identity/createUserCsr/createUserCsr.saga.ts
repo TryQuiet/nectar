@@ -12,21 +12,21 @@ export function* createUserCsrSaga(
   let csr: UserCsr;
 
   try {
-    csr = yield* call(createUserCsr, action.payload)
+    csr = yield* call(createUserCsr, action.payload);
   } catch (e) {
     console.error(e);
     return;
   }
 
-  const currentCommunity = yield* select(communitiesSelectors.currentCommunity)
-  
+  const currentCommunity = yield* select(communitiesSelectors.currentCommunity);
+
   const payload = {
     communityId: currentCommunity.id,
     userCsr: csr,
     registrarAddress: yield* select(communitiesSelectors.registrarUrl)
-  }
+  };
 
-  console.log('createUserCsrSaga')
+  console.log('createUserCsrSaga');
 
   yield* put(identityActions.storeUserCsr(payload));
 }

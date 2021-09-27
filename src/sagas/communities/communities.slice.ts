@@ -3,10 +3,11 @@ import { StoreKeys } from '../store.keys';
 import { communitiesAdapter } from './communities.adapter';
 import { createRootCA } from '@zbayapp/identity';
 import { AsyncReturnType } from '../../utils/types/AsyncReturnType.interface';
-import {Identity} from '../identity/identity.slice'
+import { Identity } from '../identity/identity.slice';
 
 export class CommunitiesState {
   public currentCommunity: string = '';
+
   public communities: EntityState<Community> =
     communitiesAdapter.getInitialState();
 }
@@ -24,19 +25,27 @@ export class Community {
       this.registrarUrl = registrarUrl;
     }
   }
+
   public name: string = '';
+
   peerList: string[] = [];
+
   id: string = '';
-  rootCa:string=  '';
+
+  rootCa: string = '';
+
   CA: null | {
     rootCertString: string;
     rootKeyString: string;
   } = null;
+
   public registrar: {
     privateKey: string;
     address: string;
   };
+
   privateKey: string = '';
+
   onionAddress: string = '';
   registrarUrl: string = ''
   port: number
@@ -51,7 +60,7 @@ export interface AddNewCommunityPayload {
 
 export interface ResponseRegistrarPayload {
   id: string;
-  payload: Partial<Community>
+  payload: Partial<Community>;
 }
 
 export interface StorePeerListPayload {
@@ -60,8 +69,8 @@ export interface StorePeerListPayload {
 }
 
 export interface ResponseCreateCommunityPayload {
-id: string,
-payload: Partial<Identity>
+  id: string;
+  payload: Partial<Identity>;
 }
 
 export const communitiesSlice = createSlice({
@@ -89,8 +98,14 @@ export const communitiesSlice = createSlice({
     community: (state, _action: PayloadAction<string>) => state,
     createNetwork: (state, _action: PayloadAction<string>) => state,
     createNewCommunity: (state, _action: PayloadAction<string>) => state,
-    responseCreateCommunity: (state, _action: PayloadAction<ResponseCreateCommunityPayload>) => state,
-    responseRegistrar: (state, action: PayloadAction<ResponseRegistrarPayload>) => {
+    responseCreateCommunity: (
+      state,
+      _action: PayloadAction<ResponseCreateCommunityPayload>
+    ) => state,
+    responseRegistrar: (
+      state,
+      action: PayloadAction<ResponseRegistrarPayload>
+    ) => {
       communitiesAdapter.updateOne(state.communities, {
         id: action.payload.id,
         changes: {
