@@ -13,6 +13,7 @@ import { usersSelectors } from './sagas/users/users.selectors';
 import {
   identityReducer,
   identityActions,
+  Identity,
 } from './sagas/identity/identity.slice';
 import { identitySelectors } from './sagas/identity/identity.selectors';
 
@@ -46,6 +47,7 @@ export const identity = {
   reducer: identityReducer,
   actions: identityActions,
   selectors: identitySelectors,
+  Identity: Identity,
 };
 
 export const messages = {

@@ -15,7 +15,7 @@ import { communitiesAdapter } from '../communities.adapter';
 import { Identity, identityReducer } from '../../identity/identity.slice';
 
 describe('launchRegistrar', () => {
-  test('launch registrar if owner', async () => {
+  test('launch registrar if user is community owner', async () => {
     const socket = { emit: jest.fn(), on: jest.fn() } as unknown as Socket;
     const launchRegistrarPayload = {
       id: 'id',
@@ -71,9 +71,9 @@ describe('launchRegistrar', () => {
         launchRegistrarPayload.CA.rootKeyString,
         launchRegistrarPayload.privateKey,
       ])
-      .silentRun();
+      .run();
   });
-  test('do not launch registrar if not owner', async () => {
+  test('do not attempt to launch registrar if user is not community owner', async () => {
     const socket = { emit: jest.fn(), on: jest.fn() } as unknown as Socket;
     const community = new Community({
       name: '',
@@ -87,7 +87,13 @@ describe('launchRegistrar', () => {
       dmKeys: { publicKey: 'publicKey', privateKey: 'privateKey' },
       peerId: { id: 'peerId', pubKey: 'pubKey', privKey: 'privKey' },
     });
-
+    const launchRegistrarPayload = {
+      id: 'id',
+      peerId: { id: 'peerId', pubKey: 'pubKey', privKey: 'privKey' },
+      hiddenService: { onionAddress: 'onionAddress', privateKey: 'privateKey' },
+      CA: { rootCertString: 'certString', rootKeyString: 'keyString' },
+      privateKey: '',
+    };
     await expectSaga(
       launchRegistrarSaga,
       socket,
@@ -114,6 +120,14 @@ describe('launchRegistrar', () => {
           },
         }
       )
-      .silentRun();
+      .not.apply(socket, socket.emit, [
+        SocketActionTypes.LAUNCH_REGISTRAR,
+        launchRegistrarPayload.id,
+        launchRegistrarPayload.peerId.id,
+        launchRegistrarPayload.CA.rootCertString,
+        launchRegistrarPayload.CA.rootKeyString,
+        launchRegistrarPayload.privateKey,
+      ])
+      .run();
   });
 });

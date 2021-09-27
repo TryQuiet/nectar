@@ -12,7 +12,7 @@ import { identityActions, UserCsr } from '../identity.slice';
 import { registerCertificateSaga } from './registerCertificate.saga';
 
 describe('registerCertificateSaga', () => {
-  test('request certificate registration when owner', async () => {
+  test('request certificate registration when user is community owner', async () => {
     const community = new Community({
       name: 'communityName',
       id: 'id',
@@ -59,9 +59,15 @@ describe('registerCertificateSaga', () => {
           privKey: community.CA.rootKeyString,
         },
       ])
-      .silentRun();
+      .not.apply(socket, socket.emit, [
+        SocketActionTypes.REGISTER_USER_CERTIFICATE,
+        registrarAddress,
+        userCsr.userCsr,
+        communityId,
+      ])
+      .run();
   });
-  test('request certificate registration when user', async () => {
+  test('request certificate registration when user is not community owner', async () => {
     const community = new Community({
       name: 'communityName',
       id: 'id',
@@ -105,6 +111,15 @@ describe('registerCertificateSaga', () => {
         userCsr.userCsr,
         communityId,
       ])
-      .silentRun();
+      .not.apply(socket, socket.emit, [
+        SocketActionTypes.REGISTER_OWNER_CERTIFICATE,
+        communityId,
+        userCsr.userCsr,
+        {
+          certificate: community.CA.rootCertString,
+          privKey: community.CA.rootKeyString,
+        },
+      ])
+      .run();
   });
 });

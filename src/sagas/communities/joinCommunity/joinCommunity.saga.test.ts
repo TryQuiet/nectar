@@ -50,6 +50,6 @@ describe('joinCommunity', () => {
           ),
         },
       })
-      .silentRun();
+      .run();
   });
 });

@@ -84,6 +84,6 @@ describe('launchCommunity', () => {
         launchCommunityPayload.peerList,
         launchCommunityPayload.certs,
       ])
-      .silentRun();
+      .run();
   });
 });

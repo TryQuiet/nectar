@@ -57,6 +57,6 @@ describe('createCommunitySaga', () => {
           },
         },
       })
-      .silentRun();
+      .run();
   });
 });

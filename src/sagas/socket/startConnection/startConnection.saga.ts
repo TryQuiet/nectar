@@ -1,14 +1,14 @@
 import { Socket } from 'socket.io-client';
-import { all, call, put, delay, take, fork, takeEvery } from 'typed-redux-saga';
+import { all, call, put, take, fork } from 'typed-redux-saga';
 import { eventChannel } from 'redux-saga';
 import { SocketActionTypes } from '../const/actionTypes';
 // import { nativeServicesActions } from '../../nativeServices/nativeServices.slice';
-import {
-  AskForMessagesResponse,
-  ChannelMessagesIdsResponse,
-  GetPublicChannelsResponse,
-  publicChannelsActions,
-} from '../../publicChannels/publicChannels.slice';
+// import {
+//   AskForMessagesResponse,
+//   ChannelMessagesIdsResponse,
+//   GetPublicChannelsResponse,
+//   publicChannelsActions,
+// } from '../../publicChannels/publicChannels.slice';
 import { publicChannelsMasterSaga } from '../../publicChannels/publicChannels.master.saga';
 import { errorsActions } from '../../errors/errors.slice';
 import { identityActions } from '../../identity/identity.slice';
@@ -18,7 +18,7 @@ import {
   SendCertificatesResponse,
   usersActions,
 } from '../../users/users.slice';
-import { IMessage } from '../../publicChannels/publicChannels.types';
+// import { IMessage } from '../../publicChannels/publicChannels.types';
 import { communitiesMasterSaga } from '../../communities/communities.master.saga';
 import {
   communitiesActions,

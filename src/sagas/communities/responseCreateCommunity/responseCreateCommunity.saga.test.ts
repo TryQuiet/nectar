@@ -48,6 +48,6 @@ describe('responseCreateCommunity', () => {
           },
         },
       })
-      .silentRun();
+      .run();
   });
 });

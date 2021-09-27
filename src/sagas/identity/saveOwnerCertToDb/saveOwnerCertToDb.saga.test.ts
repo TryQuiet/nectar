@@ -62,6 +62,6 @@ describe('saveOwnerCertificateToDb', () => {
           privKey: community.CA.rootKeyString,
         },
       ])
-      .silentRun();
+      .run();
   });
 });
