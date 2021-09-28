@@ -5,14 +5,18 @@ import { identityActions, identityReducer, Identity } from '../identity.slice';
 import { identityAdapter } from '../identity.adapter';
 import { registerUsernameSaga } from './registerUsername.saga';
 import { config } from '../../users/const/certFieldTypes';
-import { errorsReducer, ErrorsState } from '../../errors/errors.slice';
+import {
+  errorsActions,
+  errorsReducer,
+  ErrorsState,
+} from '../../errors/errors.slice';
 import {
   communitiesReducer,
   CommunitiesState,
   Community,
 } from '../../communities/communities.slice';
 import { communitiesAdapter } from '../../communities/communities.adapter';
-import { errorsAdapter } from '../../errors/errors.adapter';
+import { errorAdapter, errorsAdapter } from '../../errors/errors.adapter';
 
 describe('registerUsernameSaga', () => {
   const identity = new Identity({
@@ -33,12 +37,14 @@ describe('registerUsernameSaga', () => {
     registrarUrl: 'registrarUrl',
     CA: {},
   });
+
   const connectionError = new ErrorsState({
     communityId: 'id',
     type: 'registrar',
     code: 403,
     message: "You're not connected with other peers.",
   });
+
   const username = 'username';
 
   test('create user csr', () => {
@@ -73,7 +79,7 @@ describe('registerUsernameSaga', () => {
       .put(
         identityActions.createUserCsr({
           zbayNickname: username,
-          commonName: 'onionAddress',
+          commonName: 'onionAddress.onion',
           peerId: 'peerId',
           dmPublicKey: 'publicKey',
           signAlg: config.signAlg,
@@ -110,6 +116,9 @@ describe('registerUsernameSaga', () => {
           [StoreKeys.Errors]: errorsAdapter.getInitialState(),
         }
       )
+      // .put(
+      //   errorsActions.addError(connectionError)
+      // )
       .hasFinalState({
         [StoreKeys.Identity]: {
           ...identityAdapter.setAll(identityAdapter.getInitialState(), [
@@ -128,6 +137,7 @@ describe('registerUsernameSaga', () => {
           ...errorsAdapter.setAll(errorsAdapter.getInitialState(), [
             connectionError,
           ]),
+
         },
       })
       .run();

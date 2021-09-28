@@ -5,8 +5,6 @@ import { selectReducer } from '../store.utils';
 import { errorAdapter, errorsAdapter } from './errors.adapter';
 import { GENERAL_ERRORS } from './errors.slice';
 
-const selectSelf = (state) => state;
-
 export const currentCommunityErrors = createSelector(
   currentCommunityId, 
   selectReducer(StoreKeys.Errors), 

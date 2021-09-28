@@ -12,6 +12,7 @@ export function* registerUsernameSaga(
   const commonName = identity.hiddenService.onionAddress;
   const peerId = identity.peerId.id;
   const dmPublicKey = identity.dmKeys.publicKey;
+
   if (!commonName || !peerId) {
     yield* put(
       errorsActions.addError({
@@ -33,7 +34,7 @@ export function* registerUsernameSaga(
 
   const payload = {
     zbayNickname: action.payload,
-    commonName,
+    commonName: `${commonName}.onion`,
     peerId,
     dmPublicKey,
     signAlg: config.signAlg,
