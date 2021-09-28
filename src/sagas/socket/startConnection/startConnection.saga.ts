@@ -27,6 +27,7 @@ import {
   ResponseCreateCommunityPayload,
   ResponseRegistrarPayload,
 } from '../../communities/communities.slice';
+import { appMasterSaga } from '../../app/app.master.saga'
 
 export function* useIO(socket: Socket): Generator {
   yield all([
@@ -35,6 +36,7 @@ export function* useIO(socket: Socket): Generator {
     fork(messagesMasterSaga, socket),
     fork(identityMasterSaga, socket),
     fork(communitiesMasterSaga, socket),
+    fork(appMasterSaga, socket),
   ]);
 }
 

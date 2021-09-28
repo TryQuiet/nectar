@@ -6,8 +6,9 @@ import path from 'path'
 import createSagaMiddleware from "redux-saga"
 import thunk from 'redux-thunk'
 import { io, Socket } from 'socket.io-client'
+import { appActions } from "../sagas/app/app.slice"
 import tmp from 'tmp'
-import { call, fork, put, select, take } from "typed-redux-saga"
+import { call, fork, put, select, take, cancel, takeLatest } from "typed-redux-saga"
 import waggle from 'waggle'
 import { communities, errors, identity, publicChannels, storeKeys, users } from "../index"
 import { useIO } from '../sagas/socket/startConnection/startConnection.saga'
@@ -51,10 +52,13 @@ export const watchResults = (stores: Store[], finalStore: Store, testName: strin
       }
     })
   }
-  finalStore.subscribe(() => {
+  const finalStoreUnsubscribe = finalStore.subscribe(() => {
     if (finalStore.getState().Test.finished) {
+      finalStoreUnsubscribe()
       log(`"${testName}" passed`)
-      // process.exit(0)
+      for (const store of stores.filter((s) => s !== finalStore)) {
+        store.dispatch(createAction('testFinished'))
+      }
     }
   })
 }
@@ -130,13 +134,17 @@ export const createApp = async () => {
   runSagas()
   
   function* root(): Generator {
-    yield* put({type: 'setManager', payload: manager})
+    // yield* put({type: 'setManager', payload: manager})
     const socket = yield* call(connectToDataport, `http://localhost:${dataServerPort1}`, appName)
-    yield* fork(useIO, socket)
+    const task = yield* fork(useIO, socket)
     yield* take(createAction('testFinished'))
-    const mmm = yield* select((state) => state.Test.manager)
-    yield* call(mmm.tor.kill)
-    log('Killed tor')
+    yield* cancel(task)
+    // console.log('CANCELLED TASK', task)
+
+    // yield* put(appActions.closeServices())
+    // const mmm = yield* select((state) => state.Test.manager)
+    // yield* call(mmm.tor.kill)
+    // log('Killed tor')
   }
   
   return {store, runSaga}
