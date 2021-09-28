@@ -4,6 +4,8 @@ import { identitySelectors } from '../identity.selectors';
 import { identityActions } from '../identity.slice';
 import { errorsActions } from '../../errors/errors.slice';
 import { config } from '../../users/const/certFieldTypes';
+import logger from '../../../utils/logger'
+const log = logger('identity')
 
 export function* registerUsernameSaga(
   action: PayloadAction<string>
@@ -13,7 +15,7 @@ export function* registerUsernameSaga(
   const peerId = identity.peerId.id;
   const dmPublicKey = identity.dmKeys.publicKey;
 
-  console.log('registerUsernameSaga');
+  log('registerUsernameSaga');
 
   if (!commonName || !peerId) {
     yield* put(

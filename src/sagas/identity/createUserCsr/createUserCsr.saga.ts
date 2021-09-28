@@ -3,6 +3,8 @@ import { createUserCsr } from '@zbayapp/identity';
 import { PayloadAction } from '@reduxjs/toolkit';
 import { identityActions, UserCsr } from '../identity.slice';
 import { communitiesSelectors } from '../../communities/communities.selectors';
+import logger from '../../../utils/logger'
+const log = logger('identity')
 
 export function* createUserCsrSaga(
   action: PayloadAction<
@@ -26,7 +28,7 @@ export function* createUserCsrSaga(
     registrarAddress: yield* select(communitiesSelectors.registrarUrl)
   };
 
-  console.log('createUserCsrSaga');
+  log('createUserCsrSaga');
 
   yield* put(identityActions.storeUserCsr(payload));
 }

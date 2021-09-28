@@ -11,10 +11,8 @@ import { call, fork, put, take } from "typed-redux-saga"
 import waggle from 'waggle'
 import { communities, errors, identity, publicChannels, storeKeys, users } from "../index"
 import { useIO } from '../sagas/socket/startConnection/startConnection.saga'
-
-const log = Object.assign(debug('nectar:tests'), {
-  error: debug('nectar:tests:err')
-})
+import logger from '../utils/logger'
+const log = logger('tests')
 
 function testReducer(state = { continue: false, finished: false, error: null, manager: null, rootTask: null }, action) {
   switch (action.type) {
@@ -45,6 +43,7 @@ export function* integrationTest(saga, ...args: any[]): Generator {
 }
 
 export const watchResults = (apps: any[], finalApp: any, testName: string) => {
+  log(`Running "${testName}"`)
   for (const app of apps) {
     app.store.dispatch({type: 'setRootTask', payload: app.rootTask})
     const storeUnsub = app.store.subscribe(() => {
@@ -58,7 +57,7 @@ export const watchResults = (apps: any[], finalApp: any, testName: string) => {
   const finalStoreUnsubscribe = finalApp.store.subscribe(() => {
     if (finalApp.store.getState().Test.finished) {
       finalStoreUnsubscribe()
-      log(`"${testName}" passed`)
+      log.success(`"${testName}" passed`)
       process.exit(0) // TODO: handle running multiple tests and make them not hang after passing
       // for (const app of apps.filter((a) => a !== finalApp)) {
       //   app.store.dispatch(createAction('testFinished'))

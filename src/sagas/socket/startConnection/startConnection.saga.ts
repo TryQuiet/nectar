@@ -2,7 +2,8 @@ import { Socket } from 'socket.io-client';
 import { all, call, put, take, fork } from 'typed-redux-saga';
 import { eventChannel } from 'redux-saga';
 import { SocketActionTypes } from '../const/actionTypes';
-import log from '../../../utils/logger'
+import logger from '../../../utils/logger'
+const log = logger('socket')
 
 // import { nativeServicesActions } from '../../nativeServices/nativeServices.slice';
 // import {
@@ -99,8 +100,8 @@ export function subscribe(socket: Socket) {
     socket.on(
       SocketActionTypes.REGISTRAR,
       (payload: ResponseRegistrarPayload) => {
-        console.log('created Registrar');
-        console.log(payload);
+        log('created Registrar');
+        log(payload);
         emit(communitiesActions.responseRegistrar(payload));
         emit(identityActions.saveOwnerCertToDb());
       }

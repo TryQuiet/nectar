@@ -1,4 +1,10 @@
 import debug from 'debug'
-export default Object.assign(debug('nectar'), {
-  error: debug('nectar:err')
-})
+
+const logger = (module: string) => {
+  return Object.assign(debug(`nectar:${module}`), {
+    error: debug(`nectar:${module}:err`),
+    success: debug(`nectar:${module}:success`)
+  })
+}
+
+export default logger
