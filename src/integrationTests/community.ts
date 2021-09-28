@@ -4,8 +4,11 @@ import { put, select, take } from "typed-redux-saga"
 import { identity } from "../index"
 import { communitiesSelectors } from "../sagas/communities/communities.selectors"
 import { communitiesActions } from "../sagas/communities/communities.slice"
+import { errorsSelectors } from "../sagas/errors/errors.selectors"
+import { errorsActions } from "../sagas/errors/errors.slice"
 import { identitySelectors } from "../sagas/identity/identity.selectors"
 import { identityActions } from "../sagas/identity/identity.slice"
+import { SocketActionTypes } from "../sagas/socket/const/actionTypes"
 import { assertListElementMatches, assertNotEmpty, createApp, integrationTest, watchResults } from "./utils"
 
 function* createCommunityTestSaga(payload): Generator {
@@ -86,8 +89,14 @@ const testUsersCreateAndJoinCommunitySuccessfully = async () => {
 function* tryToJoinOfflineRegistrarTestSaga(): Generator {
   yield* put(communitiesActions.joinCommunity(`http://offlineRegistrarAddress.onion:4040`))
   yield* take(communitiesActions.responseCreateCommunity)
+  const currentCommunityId = yield* select(communitiesSelectors.currentCommunityId)
   yield* put(identity.actions.registerUsername('IamTheUser'))
-  // TODO: check errors
+  yield* take(errorsActions.addError)
+  const registrarError = yield* select(errorsSelectors.currentCommunityErrorByType(SocketActionTypes.REGISTRAR))
+  assertNotEmpty(registrarError, 'Registrar error')
+  assert.equal(registrarError.communityId, currentCommunityId)
+  assert.equal(registrarError.code, 500)
+  assert.equal(registrarError.message, 'Connecting to registrar failed')
   yield* put(createAction('testFinished')())
 }
 
@@ -99,5 +108,5 @@ const testUserTriesToJoinOfflineCommunity = async () => {
 
 export default [
   testUsersCreateAndJoinCommunitySuccessfully,
-  // testUserTriesToJoinOfflineCommunity // TODO
+  // testUserTriesToJoinOfflineCommunity
 ]
