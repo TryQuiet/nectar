@@ -28,4 +28,5 @@ jobs:
       - name: install typescript
         run: npm install --global typescript
       - name: Run tests
+        timeout-minutes: 5
         run: DEBUG_COLORS=yes DEBUG='waggle*,nectar:tests*' ts-node src/integrationTests/run.ts
