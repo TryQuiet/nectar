@@ -11,7 +11,9 @@ import { assertListElementMatches, assertNotEmpty, createApp, integrationTest, w
 function* createCommunityTestSaga(payload): Generator {
   const userName = payload.userName
   const communityName = 'CommunityName'
+  console.log('DUPA')
   yield* put(communitiesActions.createNewCommunity(communityName))
+  console.log('DUPA')
   yield* take(communitiesActions.responseCreateCommunity)
   yield* put(identityActions.registerUsername(userName))
   yield* take(identityActions.storeUserCertificate)

@@ -92,6 +92,7 @@ export const prepareStore = (rootSaga) => {
     store, 
     runSagas: () => sagaMiddleware.run(rootSaga),
     runSaga: sagaMiddleware.run
+    
   }
 }
 
@@ -114,7 +115,7 @@ export const createApp = async () => {
   const server1 = new waggle.DataServer(dataServerPort1)
   await server1.listen()
 
-  const { store, runSagas, runSaga } = prepareStore(root)
+  let { store, runSagas, runSaga } = prepareStore(root)
 
   const [proxyPort] = await fp(1234)
   const [controlPort] = await fp(5555)
@@ -132,18 +133,30 @@ export const createApp = async () => {
   await manager.init()
 
   runSagas()
+
+  let c = 0
+
+  const killShit = () => {
+    c++
+    if (c===1){
+      console.log('killShit')
+      process.exit()
+    }
+  }
   
   function* root(): Generator {
     // yield* put({type: 'setManager', payload: manager})
     const socket = yield* call(connectToDataport, `http://localhost:${dataServerPort1}`, appName)
     const task = yield* fork(useIO, socket)
-    yield* take(createAction('testFinished'))
-    yield* cancel(task)
     // console.log('CANCELLED TASK', task)
+    yield* take(createAction('testFinished'))
+    console.log('TESTFINISGED')
+    // yield* cancel(task)
 
-    // yield* put(appActions.closeServices())
+    yield* put(appActions.closeServices())
     // const mmm = yield* select((state) => state.Test.manager)
     // yield* call(mmm.tor.kill)
+    killShit()
     // log('Killed tor')
   }
   

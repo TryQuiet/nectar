@@ -10,6 +10,7 @@ const testCases = [
 
 const run = async () => {
   for (const testCase of testCases) {
+    console.log('RUNNING TEST ONE')
     await testCase()
   }
 }

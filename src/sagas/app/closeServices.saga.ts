@@ -10,6 +10,7 @@ export function* closeServicesSaga(
       ReturnType<typeof appActions.closeServices>['payload']
     >
   ): Generator {
+    console.log('closing services')
     yield* apply(socket, socket.emit, [SocketActionTypes.CLOSE]);
     console.log('DUPS')
   }
