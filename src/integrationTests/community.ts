@@ -59,7 +59,7 @@ function* joinCommunityTestSaga(payload): Generator {
 const testUsersCreateAndJoinCommunitySuccessfully = async () => {
   const app1 = await createApp()
   const app2 = await createApp()
-  watchResults([app1.store, app2.store], app2.store, 'Users create and join community successfully')
+  watchResults([app1, app2], app2, 'Users create and join community successfully')
 
   // Owner creates community and registers
   app1.runSaga(integrationTest, createCommunityTestSaga, { userName: 'Owner' })
@@ -93,7 +93,7 @@ function* tryToJoinOfflineRegistrarTestSaga(): Generator {
 
 const testUserTriesToJoinOfflineCommunity = async () => {
   const app = await createApp()
-  watchResults([app.store], app.store, 'User receives error when tries to connect to offline registrar')
+  watchResults([app], app, 'User receives error when tries to connect to offline registrar')
   app.runSaga(integrationTest, tryToJoinOfflineRegistrarTestSaga)
 }
 

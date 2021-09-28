@@ -1,4 +1,4 @@
-import { applyMiddleware, combineReducers, createAction, createStore, Store } from "@reduxjs/toolkit"
+import { applyMiddleware, combineReducers, createAction, createStore } from "@reduxjs/toolkit"
 import assert from 'assert'
 import debug from 'debug'
 import fp from 'find-free-port'
@@ -6,20 +6,22 @@ import path from 'path'
 import createSagaMiddleware from "redux-saga"
 import thunk from 'redux-thunk'
 import { io, Socket } from 'socket.io-client'
-import { appActions } from "../sagas/app/app.slice"
 import tmp from 'tmp'
-import { call, fork, put, select, take, cancel, takeLatest } from "typed-redux-saga"
+import { call, fork, put, take } from "typed-redux-saga"
 import waggle from 'waggle'
 import { communities, errors, identity, publicChannels, storeKeys, users } from "../index"
 import { useIO } from '../sagas/socket/startConnection/startConnection.saga'
+
 const log = Object.assign(debug('nectar:tests'), {
   error: debug('nectar:tests:err')
 })
 
-function testReducer(state = { continue: false, finished: false, error: null, manager: null }, action) {
+function testReducer(state = { continue: false, finished: false, error: null, manager: null, rootTask: null }, action) {
   switch (action.type) {
     case 'setManager':
       return {...state, manager: action.payload}
+    case 'setRootTask':
+      return {...state, rootTask: action.payload}
     case 'testContinue':
       return {...state, continue: true}
     case 'testFinished':
@@ -42,23 +44,25 @@ export function* integrationTest(saga, ...args: any[]): Generator {
   }
 }
 
-
-export const watchResults = (stores: Store[], finalStore: Store, testName: string) => {
-  for (const store of stores) {
-    store.subscribe(() => {
-      if (store.getState().Test.error) {
-        log.error(`"${testName}" failed: `, store.getState().Test.error)
+export const watchResults = (apps: any[], finalApp: any, testName: string) => {
+  for (const app of apps) {
+    app.store.dispatch({type: 'setRootTask', payload: app.rootTask})
+    const storeUnsub = app.store.subscribe(() => {
+      if (app.store.getState().Test.error) {
+        storeUnsub()
+        log.error(`"${testName}" failed: `, app.store.getState().Test.error)
         process.exit(1)
       }
     })
   }
-  const finalStoreUnsubscribe = finalStore.subscribe(() => {
-    if (finalStore.getState().Test.finished) {
+  const finalStoreUnsubscribe = finalApp.store.subscribe(() => {
+    if (finalApp.store.getState().Test.finished) {
       finalStoreUnsubscribe()
       log(`"${testName}" passed`)
-      for (const store of stores.filter((s) => s !== finalStore)) {
-        store.dispatch(createAction('testFinished'))
-      }
+      process.exit(0) // TODO: handle running multiple tests and make them not hang after passing
+      // for (const app of apps.filter((a) => a !== finalApp)) {
+      //   app.store.dispatch(createAction('testFinished'))
+      // }
     }
   })
 }
@@ -71,7 +75,7 @@ export const createPath = (dirName: string) => {
   return path.join(dirName, '.nectar')
 }
 
-export const prepareStore = (rootSaga) => {
+export const prepareStore = () => {
   const reducers = {
     [storeKeys.Communities]: communities.reducer,
     [storeKeys.Identity]: identity.reducer,
@@ -89,8 +93,7 @@ export const prepareStore = (rootSaga) => {
   )
 
   return {
-    store, 
-    runSagas: () => sagaMiddleware.run(rootSaga),
+    store,
     runSaga: sagaMiddleware.run
   }
 }
@@ -114,7 +117,7 @@ export const createApp = async () => {
   const server1 = new waggle.DataServer(dataServerPort1)
   await server1.listen()
 
-  const { store, runSagas, runSaga } = prepareStore(root)
+  const { store, runSaga } = prepareStore()
 
   const [proxyPort] = await fp(1234)
   const [controlPort] = await fp(5555)
@@ -131,23 +134,20 @@ export const createApp = async () => {
   })
   await manager.init()
 
-  runSagas()
+  const rootTask = runSaga(root)
   
   function* root(): Generator {
-    // yield* put({type: 'setManager', payload: manager})
     const socket = yield* call(connectToDataport, `http://localhost:${dataServerPort1}`, appName)
     const task = yield* fork(useIO, socket)
     yield* take(createAction('testFinished'))
-    yield* cancel(task)
+    // const root = yield* select((state) => {return state.Test.rootTask})
+    // yield* cancel(root)
+    // yield* cancel(task)
     // console.log('CANCELLED TASK', task)
-
     // yield* put(appActions.closeServices())
-    // const mmm = yield* select((state) => state.Test.manager)
-    // yield* call(mmm.tor.kill)
-    // log('Killed tor')
   }
   
-  return {store, runSaga}
+  return {store, runSaga, rootTask}
 }
 
 export const assertListElementMatches = (actual: any[], match: RegExp) => {
