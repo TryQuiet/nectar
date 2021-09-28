@@ -13,7 +13,7 @@ const log = logger('socket')
 //   publicChannelsActions,
 // } from '../../publicChannels/publicChannels.slice';
 import { publicChannelsMasterSaga } from '../../publicChannels/publicChannels.master.saga';
-import { errorsActions } from '../../errors/errors.slice';
+import { ErrorPayload, errorsActions } from '../../errors/errors.slice';
 import { identityActions } from '../../identity/identity.slice';
 import { identityMasterSaga } from '../../identity/identity.master.saga';
 import { messagesMasterSaga } from '../../messages/messages.master.saga';
@@ -23,12 +23,14 @@ import {
 } from '../../users/users.slice';
 // import { IMessage } from '../../publicChannels/publicChannels.types';
 import { communitiesMasterSaga } from '../../communities/communities.master.saga';
+import { errorsMasterSaga } from '../../errors/errors.master.saga';
 import {
   communitiesActions,
   ResponseCreateCommunityPayload,
   ResponseRegistrarPayload,
 } from '../../communities/communities.slice';
 import { appMasterSaga } from '../../app/app.master.saga'
+
 
 export function* useIO(socket: Socket): Generator {
   yield all([
@@ -38,6 +40,7 @@ export function* useIO(socket: Socket): Generator {
     fork(identityMasterSaga, socket),
     fork(communitiesMasterSaga, socket),
     fork(appMasterSaga, socket),
+    fork(errorsMasterSaga, socket)
   ]);
 }
 
@@ -57,6 +60,7 @@ export function subscribe(socket: Socket) {
     // | ReturnType<typeof publicChannelsActions.onMessagePosted>
     | ReturnType<typeof usersActions.responseSendCertificates>
     | ReturnType<typeof communitiesActions.responseCreateCommunity>
+    | ReturnType<typeof errorsActions.addError>
     | ReturnType<typeof identityActions.storeUserCertificate>
     | ReturnType<typeof identityActions.throwIdentityError>
     | ReturnType<typeof communitiesActions.storePeerList>
@@ -117,11 +121,11 @@ export function subscribe(socket: Socket) {
       emit(communitiesActions.community());
     });
     socket.on(
-      SocketActionTypes.REGISTRAR_ERROR,
-      (payload: { id: string; network: string }) => {
-        log('createdCommunity');
-        log(payload);
-        // emit(communitiesActions.responseCreateCommunity(payload));
+      SocketActionTypes.ERROR,
+      (payload: ErrorPayload) => {
+        log('Got Error')
+        log(payload)
+        emit(errorsActions.addError(payload))
       }
     );
     socket.on(
@@ -150,12 +154,6 @@ export function subscribe(socket: Socket) {
           })
         );
         emit(communitiesActions.launchCommunity());
-      }
-    );
-    socket.on(
-      SocketActionTypes.CERTIFICATE_REGISTRATION_ERROR,
-      (message: string) => {
-        emit(errorsActions.certificateRegistration(message));
       }
     );
     socket.on(SocketActionTypes.SAVED_OWNER_CERTIFICATE, () => {
