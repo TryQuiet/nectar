@@ -38,7 +38,7 @@ export function* registerUsernameSaga(
 
   const payload = {
     zbayNickname: action.payload,
-    commonName: `${commonName}.onion`,
+    commonName: commonName,
     peerId,
     dmPublicKey,
     signAlg: config.signAlg,

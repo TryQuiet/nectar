@@ -1,19 +1,19 @@
 import { applyMiddleware, combineReducers, createAction, createStore } from "@reduxjs/toolkit"
 import assert from 'assert'
-import debug from 'debug'
 import getPort from "get-port"
 import path from 'path'
 import createSagaMiddleware from "redux-saga"
 import thunk from 'redux-thunk'
 import { io, Socket } from 'socket.io-client'
 import tmp from 'tmp'
-import { call, fork, put, take, cancel } from "typed-redux-saga"
+import { all, call, fork, put, take, takeEvery } from "typed-redux-saga"
 import waggle from 'waggle'
 import { communities, errors, identity, publicChannels, storeKeys, users } from "../index"
+import { appActions } from '../sagas/app/app.slice'
+import { errorsActions } from "../sagas/errors/errors.slice"
 import { useIO } from '../sagas/socket/startConnection/startConnection.saga'
 import logger from '../utils/logger'
 import resultLogger from './logger'
-import {appActions} from '../sagas/app/app.slice'
 const log = logger('tests')
 const logResult = resultLogger()
 
@@ -173,4 +173,15 @@ export const assertNotEmpty = (value: any, valueName: string) => {
     ) {
       throw new assert.AssertionError({message: `${valueName} is empty but shouldn't be`})
   }
+}
+
+const throwAssertionError = (payload) => {
+  throw new assert.AssertionError({message: `Nectar received error: ${JSON.stringify(payload.payload)}`})
+}
+
+export function* assertNoErrors(): Generator {
+  // Use at the beginning of test saga
+  yield* all([
+    takeEvery(errorsActions.addError, throwAssertionError)
+  ]);
 }

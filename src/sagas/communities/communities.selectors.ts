@@ -27,7 +27,7 @@ export const currentCommunityId = createSelector(
 export const registrarUrl = createSelector(currentCommunity, (community) => {
     let registrarAddress: string = ''
     if (community.onionAddress && community.port) {
-      registrarAddress = `http://${community.onionAddress}.onion:${community.port}`
+      registrarAddress = `http://${community.onionAddress}:${community.port}`
     } else if (community.registrarUrl) {
       registrarAddress = community.registrarUrl
     }
