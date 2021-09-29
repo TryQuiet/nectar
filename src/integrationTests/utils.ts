@@ -1,17 +1,18 @@
 import { applyMiddleware, combineReducers, createAction, createStore } from "@reduxjs/toolkit"
 import assert from 'assert'
 import debug from 'debug'
-import fp from 'find-free-port'
+import getPort from "get-port"
 import path from 'path'
 import createSagaMiddleware from "redux-saga"
 import thunk from 'redux-thunk'
 import { io, Socket } from 'socket.io-client'
 import tmp from 'tmp'
-import { call, fork, put, take } from "typed-redux-saga"
+import { call, fork, put, take, cancel } from "typed-redux-saga"
 import waggle from 'waggle'
 import { communities, errors, identity, publicChannels, storeKeys, users } from "../index"
 import { useIO } from '../sagas/socket/startConnection/startConnection.saga'
 import logger from '../utils/logger'
+import {appActions} from '../sagas/app/app.slice'
 const log = logger('tests')
 
 function testReducer(state = { continue: false, finished: false, error: null, manager: null, rootTask: null }, action) {
@@ -112,14 +113,14 @@ export const createApp = async () => {
    */
   const appName = (Math.random() + 1).toString(36).substring(7)
   log(`Creating test app for ${appName}`)
-  const [dataServerPort1] = await fp(4677)
+  const dataServerPort1 = await getPort({port: 4677})
   const server1 = new waggle.DataServer(dataServerPort1)
   await server1.listen()
 
   const { store, runSaga } = prepareStore()
 
-  const [proxyPort] = await fp(1234)
-  const [controlPort] = await fp(5555)
+  const proxyPort = await getPort({port:1234})
+  const controlPort = await getPort({port: 5555})
   const manager = new waggle.ConnectionsManager({
     agentHost: 'localhost',
     agentPort: proxyPort,
@@ -139,11 +140,10 @@ export const createApp = async () => {
     const socket = yield* call(connectToDataport, `http://localhost:${dataServerPort1}`, appName)
     const task = yield* fork(useIO, socket)
     yield* take(createAction('testFinished'))
-    // const root = yield* select((state) => {return state.Test.rootTask})
-    // yield* cancel(root)
-    // yield* cancel(task)
-    // console.log('CANCELLED TASK', task)
-    // yield* put(appActions.closeServices())
+    yield* put(appActions.closeServices())
+    yield* cancel(task)
+    yield* call(socket.close)
+    console.log('Closing test')
   }
   
   return {store, runSaga, rootTask}
