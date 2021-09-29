@@ -108,5 +108,5 @@ const testUserTriesToJoinOfflineCommunity = async () => {
 
 export default [
   testUsersCreateAndJoinCommunitySuccessfully,
-  // testUserTriesToJoinOfflineCommunity
+  testUserTriesToJoinOfflineCommunity
 ]

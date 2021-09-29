@@ -12,8 +12,10 @@ import waggle from 'waggle'
 import { communities, errors, identity, publicChannels, storeKeys, users } from "../index"
 import { useIO } from '../sagas/socket/startConnection/startConnection.saga'
 import logger from '../utils/logger'
+import resultLogger from './logger'
 import {appActions} from '../sagas/app/app.slice'
 const log = logger('tests')
+const logResult = resultLogger()
 
 function testReducer(state = { continue: false, finished: false, error: null, manager: null, rootTask: null }, action) {
   switch (action.type) {
@@ -50,7 +52,7 @@ export const watchResults = (apps: any[], finalApp: any, testName: string) => {
     const storeUnsub = app.store.subscribe(() => {
       if (app.store.getState().Test.error) {
         storeUnsub()
-        log.error(`"${testName}" failed: `, app.store.getState().Test.error)
+        logResult.failed(`"${testName}": `, app.store.getState().Test.error)
         process.exit(1)
       }
     })
@@ -58,11 +60,10 @@ export const watchResults = (apps: any[], finalApp: any, testName: string) => {
   const finalStoreUnsubscribe = finalApp.store.subscribe(() => {
     if (finalApp.store.getState().Test.finished) {
       finalStoreUnsubscribe()
-      log.success(`"${testName}" passed`)
-      process.exit(0) // TODO: handle running multiple tests and make them not hang after passing
-      // for (const app of apps.filter((a) => a !== finalApp)) {
-      //   app.store.dispatch(createAction('testFinished'))
-      // }
+      logResult.passed(testName)
+      for (const app of apps.filter((a) => a !== finalApp)) {
+        app.store.dispatch(createAction('testFinished'))
+      }
     }
   })
 }
@@ -103,6 +104,10 @@ const connectToDataport = (url: string, name: string): Socket => {
   socket.on('connect', async () => {
     log(`websocket connection is ready for app ${name}`)
   })
+  socket.on('disconnect', () => {
+    log(`socket disconnected is for app ${name}`)
+    socket.close()
+  })
   return socket
 }
 
@@ -141,9 +146,6 @@ export const createApp = async () => {
     const task = yield* fork(useIO, socket)
     yield* take(createAction('testFinished'))
     yield* put(appActions.closeServices())
-    yield* cancel(task)
-    yield* call(socket.close)
-    console.log('Closing test')
   }
   
   return {store, runSaga, rootTask}
