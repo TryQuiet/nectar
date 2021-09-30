@@ -1,6 +1,7 @@
 import { createAction } from "@reduxjs/toolkit"
 import assert from 'assert'
-import { fork, put, select, take } from "typed-redux-saga"
+import { usersSelectors } from "../sagas/users/users.selectors"
+import { fork, put, select, take, delay, call } from "typed-redux-saga"
 import { identity } from "../index"
 import { communitiesSelectors } from "../sagas/communities/communities.selectors"
 import { communitiesActions } from "../sagas/communities/communities.slice"
@@ -11,8 +12,16 @@ import { identityActions } from "../sagas/identity/identity.slice"
 import { SocketActionTypes } from "../sagas/socket/const/actionTypes"
 import { assertListElementMatches, assertNoErrors, assertNotEmpty, createApp, integrationTest, watchResults } from "./utils"
 
+function* assertReceivedCertificates(userName: string, expectedCount: number, maxTime: number = 20000) {
+  yield delay(maxTime)
+  const certificates = yield* select(usersSelectors.certificates)
+  const certificatesCount = Object.keys(certificates).length
+  assert.equal(certificatesCount, expectedCount, `User ${userName} received ${certificatesCount} certificates after ${maxTime}ms, expected ${expectedCount}`)
+  yield* put(createAction('replicatedCertificates'))
+}
+
 function* createCommunityTestSaga(payload): Generator {
-  const userName = payload.userName
+  const {userName} = payload
   const communityName = 'CommunityName'
   yield* fork(assertNoErrors)
   yield* put(communitiesActions.createNewCommunity(communityName))
@@ -39,7 +48,6 @@ function* createCommunityTestSaga(payload): Generator {
 
 function* joinCommunityTestSaga(payload): Generator {
   const { registrarAddress, userName, ownerPeerId, ownerRootCA, expectedPeersCount } = payload
-  console.log('USER::::', userName)
   yield* fork(assertNoErrors)
   yield* put(communitiesActions.joinCommunity(registrarAddress))
   yield* take(communitiesActions.responseCreateCommunity)
@@ -89,6 +97,9 @@ const testUsersCreateAndJoinCommunitySuccessfully = async () => {
         ownerRootCA: community.rootCa,
         expectedPeersCount: 3
       })
+      app3.runSaga(integrationTest, assertReceivedCertificates, 'User2', 3)
+      app2.runSaga(integrationTest, assertReceivedCertificates, 'User1', 3)
+      app1.runSaga(integrationTest, assertReceivedCertificates, 'Owner', 3)
     }
   })
 
@@ -112,7 +123,9 @@ const testUsersCreateAndJoinCommunitySuccessfully = async () => {
   })
 
   const unsubscribeApp3 = app3.store.subscribe(() => {
-    if (app3.store.getState().Test.continue) {
+    const apps = [app1, app2, app3]
+    const appsReady = apps.filter((app) => {app.store.getState().Test.replicatedCertificates})
+    if (app3.store.getState().Test.continue && (appsReady.length === apps.length)) {
       unsubscribeApp3()
       app3.runSaga(finishTestSaga)
     }

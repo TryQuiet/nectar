@@ -5,8 +5,9 @@ import path from 'path'
 import createSagaMiddleware from "redux-saga"
 import thunk from 'redux-thunk'
 import { io, Socket } from 'socket.io-client'
+import { usersActions } from "../sagas/users/users.slice"
 import tmp from 'tmp'
-import { all, call, fork, put, take, takeEvery } from "typed-redux-saga"
+import { all, call, fork, put, take, takeEvery, select } from "typed-redux-saga"
 import waggle from 'waggle'
 import { communities, errors, identity, publicChannels, storeKeys, users } from "../index"
 import { appActions } from '../sagas/app/app.slice'
@@ -17,7 +18,15 @@ import resultLogger from './logger'
 const log = logger('tests')
 const logResult = resultLogger()
 
-function testReducer(state = { continue: false, finished: false, error: null, manager: null, rootTask: null }, action) {
+function testReducer(
+  state = {
+    continue: false,
+    finished: false,
+    error: null,
+    manager: null,
+    rootTask: null,
+    replicatedCertificates: false
+  }, action) {
   switch (action.type) {
     case 'setManager':
       return {...state, manager: action.payload}
@@ -29,6 +38,8 @@ function testReducer(state = { continue: false, finished: false, error: null, ma
       return {...state, finished: true}
     case 'testFailed':
       return {...state, error: action.payload}
+    case 'replicatedCertificates':
+      return {...state, replicatedCertificates: true}
     default:
       return state
   }
