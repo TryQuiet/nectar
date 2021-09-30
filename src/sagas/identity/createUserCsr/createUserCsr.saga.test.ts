@@ -39,13 +39,13 @@ describe('createUserCsrSaga', () => {
     });
     const identity = new Identity({
       id: 'id',
-      hiddenService: { onionAddress: 'onionAddress', privateKey: 'privateKey' },
+      hiddenService: { onionAddress: 'onionAddress.onion', privateKey: 'privateKey' },
       dmKeys: { publicKey: 'publicKey', privateKey: 'privateKey' },
       peerId: { id: 'peerId', pubKey: 'pubKey', privKey: 'privKey' },
     });
     const identityWithCsr: Identity = {
       id: 'id',
-      hiddenService: { onionAddress: 'onionAddress', privateKey: 'privateKey' },
+      hiddenService: { onionAddress: 'onionAddress.onion', privateKey: 'privateKey' },
       peerId: { id: 'peerId', pubKey: 'pubKey', privKey: 'privKey' },
       zbayNickname: '',
       userCsr: userCsr,
