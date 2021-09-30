@@ -11,13 +11,17 @@ import { identitySelectors } from "../sagas/identity/identity.selectors"
 import { identityActions } from "../sagas/identity/identity.slice"
 import { SocketActionTypes } from "../sagas/socket/const/actionTypes"
 import { assertListElementMatches, assertNoErrors, assertNotEmpty, createApp, integrationTest, watchResults } from "./utils"
+import logger from '../utils/logger'
+const log = logger('tests')
 
-function* assertReceivedCertificates(userName: string, expectedCount: number, maxTime: number = 20000) {
+function* assertReceivedCertificates(userName: string, expectedCount: number, maxTime: number = 30000) {
+  log(`User ${userName} starts waiting ${maxTime}ms for certificates`)
   yield delay(maxTime)
   const certificates = yield* select(usersSelectors.certificates)
   const certificatesCount = Object.keys(certificates).length
   assert.equal(certificatesCount, expectedCount, `User ${userName} received ${certificatesCount} certificates after ${maxTime}ms, expected ${expectedCount}`)
-  yield* put(createAction('replicatedCertificates'))
+  log(`User ${userName} received all certificates`)
+  yield* put(createAction('replicatedCertificates')())
 }
 
 function* createCommunityTestSaga(payload): Generator {
@@ -87,7 +91,7 @@ const testUsersCreateAndJoinCommunitySuccessfully = async () => {
       unsubscribeApp2()
       const ownerStoreState = app1.store.getState()
       const community = ownerStoreState.Communities.communities.entities[ownerStoreState.Communities.currentCommunity]
-      const registrarAddress = `http://${community.onionAddress}:${community.port}`
+      const registrarAddress = `http://${community.onionAddress}`
       const ownerIdentityState = app1.store.getState().Identity
       app3.runSaga(integrationTest, joinCommunityTestSaga, {
         userName: 'User2', 
@@ -97,6 +101,7 @@ const testUsersCreateAndJoinCommunitySuccessfully = async () => {
         ownerRootCA: community.rootCa,
         expectedPeersCount: 3
       })
+      // Watch all apps for received certificates:
       app3.runSaga(integrationTest, assertReceivedCertificates, 'User2', 3)
       app2.runSaga(integrationTest, assertReceivedCertificates, 'User1', 3)
       app1.runSaga(integrationTest, assertReceivedCertificates, 'Owner', 3)
@@ -109,7 +114,7 @@ const testUsersCreateAndJoinCommunitySuccessfully = async () => {
       unsubscribeApp1()
       const ownerStoreState = app1.store.getState()
       const community = ownerStoreState.Communities.communities.entities[ownerStoreState.Communities.currentCommunity]
-      const registrarAddress = `http://${community.onionAddress}:${community.port}`
+      const registrarAddress = `http://${community.onionAddress}`
       const ownerIdentityState = app1.store.getState().Identity
       app2.runSaga(integrationTest, joinCommunityTestSaga, {
         userName: 'User1', 
@@ -124,7 +129,7 @@ const testUsersCreateAndJoinCommunitySuccessfully = async () => {
 
   const unsubscribeApp3 = app3.store.subscribe(() => {
     const apps = [app1, app2, app3]
-    const appsReady = apps.filter((app) => {app.store.getState().Test.replicatedCertificates})
+    const appsReady = apps.filter((app) => {return app.store.getState().Test.replicatedCertificates}) // TODO: fix
     if (app3.store.getState().Test.continue && (appsReady.length === apps.length)) {
       unsubscribeApp3()
       app3.runSaga(finishTestSaga)
