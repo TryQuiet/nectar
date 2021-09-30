@@ -137,9 +137,11 @@ export const createApp = async () => {
 
   const proxyPort = await getPort({port:1234})
   const controlPort = await getPort({port: 5555})
+  const httpTunnelPort = await getPort({port: 9000})
   const manager = new waggle.ConnectionsManager({
     agentHost: 'localhost',
     agentPort: proxyPort,
+    httpTunnelPort,
     options: {
       env: {
         appDataPath: createPath(createTmpDir(`nectarIntegrationTest-${appName}`).name)
