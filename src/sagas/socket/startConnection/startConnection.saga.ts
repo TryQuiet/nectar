@@ -2,8 +2,8 @@ import { Socket } from 'socket.io-client';
 import { all, call, put, take, fork } from 'typed-redux-saga';
 import { eventChannel } from 'redux-saga';
 import { SocketActionTypes } from '../const/actionTypes';
-import logger from '../../../utils/logger'
-const log = logger('socket')
+import logger from '../../../utils/logger';
+const log = logger('socket');
 
 // import { nativeServicesActions } from '../../nativeServices/nativeServices.slice';
 // import {
@@ -29,8 +29,7 @@ import {
   ResponseCreateCommunityPayload,
   ResponseRegistrarPayload,
 } from '../../communities/communities.slice';
-import { appMasterSaga } from '../../app/app.master.saga'
-
+import { appMasterSaga } from '../../app/app.master.saga';
 
 export function* useIO(socket: Socket): Generator {
   yield all([
@@ -40,7 +39,7 @@ export function* useIO(socket: Socket): Generator {
     fork(identityMasterSaga, socket),
     fork(communitiesMasterSaga, socket),
     fork(appMasterSaga, socket),
-    fork(errorsMasterSaga, socket)
+    fork(errorsMasterSaga, socket),
   ]);
 }
 
@@ -96,8 +95,8 @@ export function subscribe(socket: Socket) {
     socket.on(
       SocketActionTypes.NEW_COMMUNITY,
       (payload: ResponseCreateCommunityPayload) => {
-        log('createdCommunity')
-        log(payload)
+        log('createdCommunity');
+        log(payload);
         emit(communitiesActions.responseCreateCommunity(payload));
       }
     );
@@ -120,14 +119,11 @@ export function subscribe(socket: Socket) {
       log(payload);
       emit(communitiesActions.community());
     });
-    socket.on(
-      SocketActionTypes.ERROR,
-      (payload: ErrorPayload) => {
-        log('Got Error')
-        log(payload)
-        emit(errorsActions.addError(payload))
-      }
-    );
+    socket.on(SocketActionTypes.ERROR, (payload: ErrorPayload) => {
+      log('Got Error');
+      log(payload);
+      emit(errorsActions.addError(payload));
+    });
     socket.on(
       SocketActionTypes.SEND_USER_CERTIFICATE,
       (payload: {

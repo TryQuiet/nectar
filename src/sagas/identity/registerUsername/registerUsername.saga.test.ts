@@ -137,7 +137,6 @@ describe('registerUsernameSaga', () => {
           ...errorsAdapter.setAll(errorsAdapter.getInitialState(), [
             connectionError,
           ]),
-
         },
       })
       .run();

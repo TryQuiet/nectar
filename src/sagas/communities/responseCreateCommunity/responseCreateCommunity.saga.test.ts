@@ -15,7 +15,7 @@ describe('responseCreateCommunity', () => {
       id: 'id',
       payload: {
         hiddenService: {
-          onionAddress: 'onionAddress',
+          onionAddress: 'onionAddress.onion',
           privateKey: 'privateKey',
         },
         peerId: { id: 'id', pubKey: 'pubKey', privKey: 'privKey' },
@@ -39,7 +39,7 @@ describe('responseCreateCommunity', () => {
             id: new Identity({
               id: 'id',
               hiddenService: {
-                onionAddress: 'onionAddress',
+                onionAddress: 'onionAddress.onion',
                 privateKey: 'privateKey',
               },
               peerId: { id: 'id', pubKey: 'pubKey', privKey: 'privKey' },

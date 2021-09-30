@@ -23,7 +23,10 @@ describe('saveOwnerCertificateToDb', () => {
     const socket = { emit: jest.fn(), on: jest.fn() } as unknown as Socket;
     const identity = new Identity({
       id: 'id',
-      hiddenService: { onionAddress: 'onionAddress', privateKey: 'privateKey' },
+      hiddenService: {
+        onionAddress: 'onionAddress.onion',
+        privateKey: 'privateKey',
+      },
       dmKeys: { publicKey: 'publicKey', privateKey: 'privateKey' },
       peerId: { id: 'peerId', pubKey: 'pubKey', privKey: 'privKey' },
     });
