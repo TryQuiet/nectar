@@ -89,4 +89,5 @@ export default {
   identity,
   messages,
   communities,
+  reducers
 };
