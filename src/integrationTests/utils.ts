@@ -5,9 +5,8 @@ import path from 'path'
 import createSagaMiddleware from "redux-saga"
 import thunk from 'redux-thunk'
 import { io, Socket } from 'socket.io-client'
-import { usersActions } from "../sagas/users/users.slice"
 import tmp from 'tmp'
-import { all, call, fork, put, take, takeEvery, select } from "typed-redux-saga"
+import { all, call, fork, put, take, takeEvery } from "typed-redux-saga"
 import waggle from 'waggle'
 import { communities, errors, identity, publicChannels, storeKeys, users } from "../index"
 import { appActions } from '../sagas/app/app.slice'
@@ -79,6 +78,14 @@ export const watchResults = (apps: any[], finalApp: any, testName: string) => {
   })
 }
 
+export function* finishTestSaga () {
+  yield* put(createAction('testFinished')())
+}
+
+export const userIsReady = (userStore: any): boolean => {
+  return userStore.getState().Test.continue
+}
+
 export const createTmpDir = (prefix: string) => {
   return tmp.dirSync({ mode: 0o750, prefix, unsafeCleanup: true })
 }
@@ -87,16 +94,17 @@ export const createPath = (dirName: string) => {
   return path.join(dirName, '.nectar')
 }
 
-export const prepareStore = () => {
-  const reducers = {
-    [storeKeys.Communities]: communities.reducer,
-    [storeKeys.Identity]: identity.reducer,
-    [storeKeys.Users]: users.reducer,
-    [storeKeys.Errors]: errors.reducer,
-    [storeKeys.Messages]: errors.reducer,
-    [storeKeys.PublicChannels]: publicChannels.reducer,
-    'Test': testReducer
-  }
+const reducers = {
+  [storeKeys.Communities]: communities.reducer,
+  [storeKeys.Identity]: identity.reducer,
+  [storeKeys.Users]: users.reducer,
+  [storeKeys.Errors]: errors.reducer,
+  [storeKeys.Messages]: errors.reducer,
+  [storeKeys.PublicChannels]: publicChannels.reducer,
+  'Test': testReducer
+}
+
+export const prepareStore = (reducers) => {
   const combinedReducers = combineReducers(reducers)
   const sagaMiddleware = createSagaMiddleware()
   const store = createStore(
@@ -133,7 +141,7 @@ export const createApp = async () => {
   const server1 = new waggle.DataServer(dataServerPort1)
   await server1.listen()
 
-  const { store, runSaga } = prepareStore()
+  const { store, runSaga } = prepareStore(reducers)
 
   const proxyPort = await getPort({port:1234})
   const controlPort = await getPort({port: 5555})
