@@ -18,7 +18,7 @@ function* putAction(actionName: string) {
   yield* put(createAction(actionName)())
 }
 
-function* assertReceivedCertificates(runTestCaseSaga, userName: string, expectedCount: number, maxTime: number = 30000) {
+function* assertReceivedCertificates(runTestCaseSaga, userName: string, expectedCount: number, maxTime: number = 60000) {
   log(`User ${userName} starts waiting ${maxTime}ms for certificates`)
   yield delay(maxTime)
   const certificates = yield* select(usersSelectors.certificates)
