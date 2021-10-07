@@ -130,22 +130,31 @@ const connectToDataport = (url: string, name: string): Socket => {
   return socket
 }
 
+function getRandomInt(min=null, max=null) {
+  const ports = [1000, 65536]
+  min = Math.ceil(ports[0]);
+  max = Math.floor(ports[1]);
+  return Math.floor(Math.random() * (max - min)) + min;
+}
+
 export const createApp = async () => {
   /**
    * Configure and initialize ConnectionsManager from waggle,
    * configure redux store
    */
+  
   const appName = (Math.random() + 1).toString(36).substring(7)
   log(`Creating test app for ${appName}`)
-  const dataServerPort1 = await getPort({port: 4677})
+  const dataServerPort1 = await getPort({port: getRandomInt()})
+  log('Got port , ', dataServerPort1)
   const server1 = new waggle.DataServer(dataServerPort1)
   await server1.listen()
 
   const { store, runSaga } = prepareStore(reducers)
 
-  const proxyPort = await getPort({port:1234})
-  const controlPort = await getPort({port: 5555})
-  const httpTunnelPort = await getPort({port: 9000})
+  const proxyPort = await getPort({port:getRandomInt()})
+  const controlPort = await getPort({port: getRandomInt()})
+  const httpTunnelPort = await getPort({port: getRandomInt()})
   const manager = new waggle.ConnectionsManager({
     agentHost: 'localhost',
     agentPort: proxyPort,
@@ -166,7 +175,11 @@ export const createApp = async () => {
     const socket = yield* call(connectToDataport, `http://localhost:${dataServerPort1}`, appName)
     const task = yield* fork(useIO, socket)
     yield* take(createAction('testFinished'))
+    console.log('FINISHED????')
+    process.exit(0)
     yield* put(appActions.closeServices())
+    
+    console.log('CLOSED????')
   }
   
   return {store, runSaga, rootTask}
