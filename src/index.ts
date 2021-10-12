@@ -34,7 +34,7 @@ import { reducers } from './sagas/reducers'
 
 import { SocketActionTypes } from './sagas/socket/const/actionTypes'
 
-import { DisplayableMessage } from './sagas/publicChannels/publicChannels.types'
+export { DisplayableMessage } from './sagas/publicChannels/publicChannels.types'
 
 export const publicChannels = {
   reducer: publicChannelsReducer,
@@ -81,8 +81,6 @@ export const socket = {
 export const storeKeys = StoreKeys;
 
 export const socketActionTypes = SocketActionTypes;
-
-export type DisplayableMessageType = DisplayableMessage;
 
 export default {
   publicChannels,
