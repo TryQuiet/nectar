@@ -3,12 +3,19 @@ import { createSelector } from 'reselect';
 import { communitiesAdapter } from './communities.adapter';
 import { CreatedSelectors, StoreState } from '../store.types';
 
-const communitiesSlice: CreatedSelectors[StoreKeys.Communities] = (state: StoreState) => state[StoreKeys.Communities]
+const communitiesSlice: CreatedSelectors[StoreKeys.Communities] = (
+  state: StoreState
+) => state[StoreKeys.Communities];
 
 export const selectById = (id: string) =>
   createSelector(communitiesSlice, (reducerState) =>
     communitiesAdapter.getSelectors().selectById(reducerState.communities, id)
   );
+
+export const currentPort = createSelector(
+  communitiesSlice,
+  (reducerState) => reducerState.communities
+);
 
 export const currentCommunity = createSelector(
   communitiesSlice,
@@ -27,19 +34,19 @@ export const currentCommunityId = createSelector(
 );
 
 export const registrarUrl = createSelector(currentCommunity, (community) => {
-    let registrarAddress: string = ''
-    if (community.onionAddress && community.port) {
-      registrarAddress = `http://${community.onionAddress}:${community.port}`
-    } else if (community.registrarUrl) {
-      registrarAddress = community.registrarUrl
-    }
-    return registrarAddress
+  let registrarAddress: string = '';
+  if (community.onionAddress && community.port) {
+    registrarAddress = `http://${community.onionAddress}:${community.port}`;
+  } else if (community.registrarUrl) {
+    registrarAddress = community.registrarUrl;
   }
-);
+  return registrarAddress;
+});
 
 export const communitiesSelectors = {
   selectById,
   currentCommunityId,
   currentCommunity,
-  registrarUrl
+  registrarUrl,
+  currentPort,
 };
