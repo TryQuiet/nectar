@@ -1,10 +1,10 @@
-import { communitiesReducer } from './communities/communities.slice';
-import { errorsReducer } from './errors/errors.slice';
-import { identityReducer } from './identity/identity.slice';
-import { messagesReducer } from './messages/messages.slice';
-import { publicChannelsReducer } from './publicChannels/publicChannels.slice';
-import { StoreKeys } from './store.keys';
-import { usersReducer } from './users/users.slice';
+import { communitiesReducer } from './communities/communities.slice'
+import { errorsReducer } from './errors/errors.slice'
+import { identityReducer } from './identity/identity.slice'
+import { messagesReducer } from './messages/messages.slice'
+import { publicChannelsReducer } from './publicChannels/publicChannels.slice'
+import { StoreKeys } from './store.keys'
+import { usersReducer } from './users/users.slice'
 
 export const reducers = {
   [StoreKeys.PublicChannels]: publicChannelsReducer,
@@ -12,5 +12,5 @@ export const reducers = {
   [StoreKeys.Communities]: communitiesReducer,
   [StoreKeys.Identity]: identityReducer,
   [StoreKeys.Errors]: errorsReducer,
-  [StoreKeys.Messages]: messagesReducer,
-};
+  [StoreKeys.Messages]: messagesReducer
+}

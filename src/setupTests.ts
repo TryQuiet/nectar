@@ -1,11 +1,11 @@
 jest.mock('pkijs/src/CryptoEngine', () => ({
-  CryptoEngine: jest.fn(),
-}));
+  CryptoEngine: jest.fn()
+}))
 
 jest.mock('pkijs/src/common', () => ({
-  setEngine: jest.fn(),
-}));
+  setEngine: jest.fn()
+}))
 
 jest.mock('@zbayapp/identity/lib/generateRootCA', () => ({
-  createRootCA: jest.fn(),
-}));
+  createRootCA: jest.fn()
+}))

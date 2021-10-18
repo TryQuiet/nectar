@@ -1,70 +1,70 @@
-import { combineReducers } from '@reduxjs/toolkit';
-import { expectSaga } from 'redux-saga-test-plan';
-import { StoreKeys } from '../../store.keys';
-import { identityActions, identityReducer, Identity } from '../identity.slice';
-import { identityAdapter } from '../identity.adapter';
-import { registerUsernameSaga } from './registerUsername.saga';
-import { config } from '../../users/const/certFieldTypes';
+import { combineReducers } from '@reduxjs/toolkit'
+import { expectSaga } from 'redux-saga-test-plan'
+import { StoreKeys } from '../../store.keys'
+import { identityActions, identityReducer, Identity } from '../identity.slice'
+import { identityAdapter } from '../identity.adapter'
+import { registerUsernameSaga } from './registerUsername.saga'
+import { config } from '../../users/const/certFieldTypes'
 import {
   errorsActions,
   errorsReducer,
-  ErrorsState,
-} from '../../errors/errors.slice';
+  ErrorsState
+} from '../../errors/errors.slice'
 import {
   communitiesReducer,
   CommunitiesState,
-  Community,
-} from '../../communities/communities.slice';
-import { communitiesAdapter } from '../../communities/communities.adapter';
-import { errorAdapter, errorsAdapter } from '../../errors/errors.adapter';
+  Community
+} from '../../communities/communities.slice'
+import { communitiesAdapter } from '../../communities/communities.adapter'
+import { errorAdapter, errorsAdapter } from '../../errors/errors.adapter'
 
 describe('registerUsernameSaga', () => {
   const identity = new Identity({
     id: 'id',
     hiddenService: {
       onionAddress: 'onionAddress.onion',
-      privateKey: 'privateKey',
+      privateKey: 'privateKey'
     },
     dmKeys: { publicKey: 'publicKey', privateKey: 'privateKey' },
-    peerId: { id: 'peerId', pubKey: 'pubKey', privKey: 'privKey' },
-  });
+    peerId: { id: 'peerId', pubKey: 'pubKey', privKey: 'privKey' }
+  })
   const identityWithoutPeerId = new Identity({
     id: 'id',
     hiddenService: {
       onionAddress: 'onionAddress.onion',
-      privateKey: 'privateKey',
+      privateKey: 'privateKey'
     },
     dmKeys: { publicKey: 'publicKey', privateKey: 'privateKey' },
-    peerId: { id: '', pubKey: 'pubKey', privKey: 'privKey' },
-  });
+    peerId: { id: '', pubKey: 'pubKey', privKey: 'privKey' }
+  })
   const community = new Community({
     name: '',
     id: 'id',
     registrarUrl: 'registrarUrl',
-    CA: {},
-  });
+    CA: {}
+  })
 
   const connectionError = new ErrorsState({
     communityId: 'id',
     type: 'registrar',
     code: 403,
-    message: "You're not connected with other peers.",
-  });
+    message: "You're not connected with other peers."
+  })
 
-  const username = 'username';
+  const username = 'username'
 
   test('create user csr', () => {
     expectSaga(registerUsernameSaga, identityActions.registerUsername(username))
       .withReducer(
         combineReducers({
           [StoreKeys.Identity]: identityReducer,
-          [StoreKeys.Communities]: communitiesReducer,
+          [StoreKeys.Communities]: communitiesReducer
         }),
         {
           [StoreKeys.Identity]: {
             ...identityAdapter.setAll(identityAdapter.getInitialState(), [
-              identity,
-            ]),
+              identity
+            ])
           },
           [StoreKeys.Communities]: {
             ...new CommunitiesState(),
@@ -72,14 +72,14 @@ describe('registerUsernameSaga', () => {
             communities: communitiesAdapter.setAll(
               communitiesAdapter.getInitialState(),
               [community]
-            ),
-          },
+            )
+          }
         }
       )
       .put(
         identityActions.updateUsername({
           communityId: identity.id,
-          nickname: username,
+          nickname: username
         })
       )
       .put(
@@ -89,11 +89,11 @@ describe('registerUsernameSaga', () => {
           peerId: 'peerId',
           dmPublicKey: 'publicKey',
           signAlg: config.signAlg,
-          hashAlg: config.hashAlg,
+          hashAlg: config.hashAlg
         })
       )
-      .run();
-  });
+      .run()
+  })
   test('throw error if missing data', () => {
     expectSaga(
       registerUsernameSaga,
@@ -103,13 +103,13 @@ describe('registerUsernameSaga', () => {
         combineReducers({
           [StoreKeys.Identity]: identityReducer,
           [StoreKeys.Communities]: communitiesReducer,
-          [StoreKeys.Errors]: errorsReducer,
+          [StoreKeys.Errors]: errorsReducer
         }),
         {
           [StoreKeys.Identity]: {
             ...identityAdapter.setAll(identityAdapter.getInitialState(), [
-              identityWithoutPeerId,
-            ]),
+              identityWithoutPeerId
+            ])
           },
           [StoreKeys.Communities]: {
             ...new CommunitiesState(),
@@ -117,9 +117,9 @@ describe('registerUsernameSaga', () => {
             communities: communitiesAdapter.setAll(
               communitiesAdapter.getInitialState(),
               [community]
-            ),
+            )
           },
-          [StoreKeys.Errors]: errorsAdapter.getInitialState(),
+          [StoreKeys.Errors]: errorsAdapter.getInitialState()
         }
       )
       // .put(
@@ -128,8 +128,8 @@ describe('registerUsernameSaga', () => {
       .hasFinalState({
         [StoreKeys.Identity]: {
           ...identityAdapter.setAll(identityAdapter.getInitialState(), [
-            identityWithoutPeerId,
-          ]),
+            identityWithoutPeerId
+          ])
         },
         [StoreKeys.Communities]: {
           ...new CommunitiesState(),
@@ -137,14 +137,14 @@ describe('registerUsernameSaga', () => {
           communities: communitiesAdapter.setAll(
             communitiesAdapter.getInitialState(),
             [community]
-          ),
+          )
         },
         [StoreKeys.Errors]: {
           ...errorsAdapter.setAll(errorsAdapter.getInitialState(), [
-            connectionError,
-          ]),
-        },
+            connectionError
+          ])
+        }
       })
-      .run();
-  });
-});
+      .run()
+  })
+})

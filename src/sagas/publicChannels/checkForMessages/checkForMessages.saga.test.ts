@@ -1,13 +1,13 @@
-import { combineReducers } from '@reduxjs/toolkit';
-import { expectSaga } from 'redux-saga-test-plan';
-import { mainChannelName } from '../../config';
-import { StoreKeys } from '../../store.keys';
+import { combineReducers } from '@reduxjs/toolkit'
+import { expectSaga } from 'redux-saga-test-plan'
+import { mainChannelName } from '../../config'
+import { StoreKeys } from '../../store.keys'
 import {
   publicChannelsActions,
   publicChannelsReducer,
-  PublicChannelsState,
-} from '../publicChannels.slice';
-import { checkForMessagesSaga } from './checkForMessages.saga';
+  PublicChannelsState
+} from '../publicChannels.slice'
+import { checkForMessagesSaga } from './checkForMessages.saga'
 
 describe('checkForMessagesSaga', () => {
   test.skip('ask for missing messages', () => {
@@ -28,20 +28,20 @@ describe('checkForMessagesSaga', () => {
                     message: 'message',
                     createdAt: 0,
                     channelId: '',
-                    signature: '',
-                  },
-                },
-              },
-            },
-          },
+                    signature: ''
+                  }
+                }
+              }
+            }
+          }
         }
       )
       .put(
         publicChannelsActions.askForMessages({
           channelAddress: mainChannelName,
-          ids: ['2', '3'],
+          ids: ['2', '3']
         })
       )
-      .run();
-  });
-});
+      .run()
+  })
+})

@@ -1,10 +1,10 @@
-import { combineReducers, createStore, Store } from 'redux';
-import { StoreKeys } from '../store.keys';
-import { publicChannelsSelectors } from './publicChannels.selectors';
+import { combineReducers, createStore, Store } from 'redux'
+import { StoreKeys } from '../store.keys'
+import { publicChannelsSelectors } from './publicChannels.selectors'
 import {
   publicChannelsActions,
-  publicChannelsReducer,
-} from './publicChannels.slice';
+  publicChannelsReducer
+} from './publicChannels.slice'
 
 const mockGetPublicChannels = {
   public: {
@@ -13,7 +13,7 @@ const mockGetPublicChannels = {
     description: 'public chat',
     name: 'public',
     owner: '030fdc016427a6e41ca8dccaf0c09cfbf002e5916a13ee16f5fe7240d0dfe50ede',
-    timestamp: 1587010998,
+    timestamp: 1587010998
   },
   zbay: {
     address:
@@ -21,25 +21,25 @@ const mockGetPublicChannels = {
     description: 'zbay marketplace channel',
     name: 'zbay',
     owner: '030fdc016427a6e41ca8dccaf0c09cfbf002e5916a13ee16f5fe7240d0dfe50ede',
-    timestamp: 1587009699,
-  },
-};
+    timestamp: 1587009699
+  }
+}
 
 describe('publicChannelsReducer', () => {
-  let store: Store;
+  let store: Store
   beforeEach(() => {
     store = createStore(
       combineReducers({
-        [StoreKeys.PublicChannels]: publicChannelsReducer,
+        [StoreKeys.PublicChannels]: publicChannelsReducer
       })
-    );
-  });
+    )
+  })
 
   it('responseGetPublicChannels should set channels info', () => {
     store.dispatch(
       publicChannelsActions.responseGetPublicChannels(mockGetPublicChannels)
-    );
-    const channels = publicChannelsSelectors.publicChannels(store.getState());
+    )
+    const channels = publicChannelsSelectors.publicChannels(store.getState())
     expect(channels).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -57,6 +57,6 @@ describe('publicChannelsReducer', () => {
           "timestamp": 1587009699,
         },
       ]
-    `);
-  });
-});
+    `)
+  })
+})

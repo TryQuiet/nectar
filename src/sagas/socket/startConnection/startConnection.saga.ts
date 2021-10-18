@@ -1,9 +1,8 @@
-import { Socket } from 'socket.io-client';
-import { all, call, put, take, fork } from 'typed-redux-saga';
-import { eventChannel } from 'redux-saga';
-import { SocketActionTypes } from '../const/actionTypes';
-import logger from '../../../utils/logger';
-const log = logger('socket');
+import { Socket } from 'socket.io-client'
+import { all, call, put, take, fork } from 'typed-redux-saga'
+import { eventChannel } from 'redux-saga'
+import { SocketActionTypes } from '../const/actionTypes'
+import logger from '../../../utils/logger'
 
 // import { nativeServicesActions } from '../../nativeServices/nativeServices.slice';
 // import {
@@ -12,24 +11,25 @@ const log = logger('socket');
 //   GetPublicChannelsResponse,
 //   publicChannelsActions,
 // } from '../../publicChannels/publicChannels.slice';
-import { publicChannelsMasterSaga } from '../../publicChannels/publicChannels.master.saga';
-import { ErrorPayload, errorsActions } from '../../errors/errors.slice';
-import { identityActions } from '../../identity/identity.slice';
-import { identityMasterSaga } from '../../identity/identity.master.saga';
-import { messagesMasterSaga } from '../../messages/messages.master.saga';
+import { publicChannelsMasterSaga } from '../../publicChannels/publicChannels.master.saga'
+import { ErrorPayload, errorsActions } from '../../errors/errors.slice'
+import { identityActions } from '../../identity/identity.slice'
+import { identityMasterSaga } from '../../identity/identity.master.saga'
+import { messagesMasterSaga } from '../../messages/messages.master.saga'
 import {
   SendCertificatesResponse,
-  usersActions,
-} from '../../users/users.slice';
+  usersActions
+} from '../../users/users.slice'
 // import { IMessage } from '../../publicChannels/publicChannels.types';
-import { communitiesMasterSaga } from '../../communities/communities.master.saga';
-import { errorsMasterSaga } from '../../errors/errors.master.saga';
+import { communitiesMasterSaga } from '../../communities/communities.master.saga'
+import { errorsMasterSaga } from '../../errors/errors.master.saga'
 import {
   communitiesActions,
   ResponseCreateCommunityPayload,
-  ResponseRegistrarPayload,
-} from '../../communities/communities.slice';
-import { appMasterSaga } from '../../app/app.master.saga';
+  ResponseRegistrarPayload
+} from '../../communities/communities.slice'
+import { appMasterSaga } from '../../app/app.master.saga'
+const log = logger('socket')
 
 export function* useIO(socket: Socket): Generator {
   yield all([
@@ -39,31 +39,31 @@ export function* useIO(socket: Socket): Generator {
     fork(identityMasterSaga, socket),
     fork(communitiesMasterSaga, socket),
     fork(appMasterSaga, socket),
-    fork(errorsMasterSaga, socket),
-  ]);
+    fork(errorsMasterSaga, socket)
+  ])
 }
 
 export function* handleActions(socket: Socket): Generator {
-  const socketChannel = yield* call(subscribe, socket);
+  const socketChannel = yield* call(subscribe, socket)
   while (true) {
-    const action = yield* take(socketChannel);
-    yield put(action);
+    const action = yield* take(socketChannel)
+    yield put(action)
   }
 }
 
 export function subscribe(socket: Socket) {
   return eventChannel<
-    // | ReturnType<typeof publicChannelsActions.responseGetPublicChannels>
-    // | ReturnType<typeof publicChannelsActions.responseSendMessagesIds>
-    // | ReturnType<typeof publicChannelsActions.responseAskForMessages>
-    // | ReturnType<typeof publicChannelsActions.onMessagePosted>
-    | ReturnType<typeof usersActions.responseSendCertificates>
-    | ReturnType<typeof communitiesActions.responseCreateCommunity>
-    | ReturnType<typeof errorsActions.addError>
-    | ReturnType<typeof identityActions.storeUserCertificate>
-    | ReturnType<typeof identityActions.throwIdentityError>
-    | ReturnType<typeof communitiesActions.storePeerList>
-    | ReturnType<typeof communitiesActions.updateCommunity>
+  // | ReturnType<typeof publicChannelsActions.responseGetPublicChannels>
+  // | ReturnType<typeof publicChannelsActions.responseSendMessagesIds>
+  // | ReturnType<typeof publicChannelsActions.responseAskForMessages>
+  // | ReturnType<typeof publicChannelsActions.onMessagePosted>
+  | ReturnType<typeof usersActions.responseSendCertificates>
+  | ReturnType<typeof communitiesActions.responseCreateCommunity>
+  | ReturnType<typeof errorsActions.addError>
+  | ReturnType<typeof identityActions.storeUserCertificate>
+  | ReturnType<typeof identityActions.throwIdentityError>
+  | ReturnType<typeof communitiesActions.storePeerList>
+  | ReturnType<typeof communitiesActions.updateCommunity>
   >((emit) => {
     // socket.on(
     //   SocketActionTypes.RESPONSE_GET_PUBLIC_CHANNELS,
@@ -89,72 +89,72 @@ export function subscribe(socket: Socket) {
     socket.on(
       SocketActionTypes.RESPONSE_GET_CERTIFICATES,
       (payload: SendCertificatesResponse) => {
-        emit(usersActions.responseSendCertificates(payload));
+        emit(usersActions.responseSendCertificates(payload))
       }
-    );
+    )
     socket.on(
       SocketActionTypes.NEW_COMMUNITY,
       (payload: ResponseCreateCommunityPayload) => {
-        log('createdCommunity');
-        log(payload);
-        emit(communitiesActions.responseCreateCommunity(payload));
+        log('createdCommunity')
+        log(payload)
+        emit(communitiesActions.responseCreateCommunity(payload))
       }
-    );
+    )
     socket.on(
       SocketActionTypes.REGISTRAR,
       (payload: ResponseRegistrarPayload) => {
-        log('created Registrar');
-        log(payload);
-        emit(communitiesActions.responseRegistrar(payload));
-        emit(identityActions.saveOwnerCertToDb());
+        log('created Registrar')
+        log(payload)
+        emit(communitiesActions.responseRegistrar(payload))
+        emit(identityActions.saveOwnerCertToDb())
       }
-    );
+    )
     socket.on(SocketActionTypes.NETWORK, (payload: any) => {
-      log('created NETWORK');
-      log(payload);
-      emit(communitiesActions.responseCreateCommunity(payload));
-    });
+      log('created NETWORK')
+      log(payload)
+      emit(communitiesActions.responseCreateCommunity(payload))
+    })
     socket.on(SocketActionTypes.COMMUNITY, (payload: any) => {
-      log('COMMUNITY');
-      log(payload);
-      emit(communitiesActions.community());
-    });
+      log('COMMUNITY')
+      log(payload)
+      emit(communitiesActions.community())
+    })
     socket.on(SocketActionTypes.ERROR, (payload: ErrorPayload) => {
-      log('Got Error');
-      log(payload);
-      emit(errorsActions.addError(payload));
-    });
+      log('Got Error')
+      log(payload)
+      emit(errorsActions.addError(payload))
+    })
     socket.on(
       SocketActionTypes.SEND_USER_CERTIFICATE,
       (payload: {
-        id: string;
-        payload: { peers: string[]; certificate: string; rootCa: string };
+        id: string
+        payload: { peers: string[], certificate: string, rootCa: string }
       }) => {
-        log('got response with cert', payload.payload.rootCa);
+        log('got response with cert', payload.payload.rootCa)
         emit(
           communitiesActions.storePeerList({
             communityId: payload.id,
-            peerList: payload.payload.peers,
+            peerList: payload.payload.peers
           })
-        );
+        )
         emit(
           identityActions.storeUserCertificate({
             userCertificate: payload.payload.certificate,
-            communityId: payload.id,
+            communityId: payload.id
           })
-        );
+        )
         emit(
           communitiesActions.updateCommunity({
             id: payload.id,
-            rootCa: payload.payload.rootCa,
+            rootCa: payload.payload.rootCa
           })
-        );
-        emit(communitiesActions.launchCommunity());
+        )
+        emit(communitiesActions.launchCommunity())
       }
-    );
+    )
     socket.on(SocketActionTypes.SAVED_OWNER_CERTIFICATE, () => {
-      emit(identityActions.savedOwnerCertificate());
-    });
-    return () => {};
-  });
+      emit(identityActions.savedOwnerCertificate())
+    })
+    return () => {}
+  })
 }
