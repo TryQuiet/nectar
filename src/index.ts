@@ -34,7 +34,7 @@ import { reducers } from './sagas/reducers'
 
 import { SocketActionTypes } from './sagas/socket/const/actionTypes'
 
-export { DisplayableMessage } from './sagas/publicChannels/publicChannels.types'
+export { DisplayableMessage, IChannelInfo, IMessage } from './sagas/publicChannels/publicChannels.types'
 
 export const publicChannels = {
   reducer: publicChannelsReducer,
