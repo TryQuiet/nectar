@@ -1,13 +1,13 @@
-import { Socket } from 'socket.io-client'
-import { all, fork, takeEvery } from 'typed-redux-saga'
-import { askForMessagesSaga } from './askForMessages/askForMessages.saga'
-import { checkForMessagesSaga } from './checkForMessages/checkForMessages.saga'
+import { Socket } from 'socket.io-client';
+import { all, fork, takeEvery } from 'typed-redux-saga';
+import { askForMessagesSaga } from './askForMessages/askForMessages.saga';
+import { checkForMessagesSaga } from './checkForMessages/checkForMessages.saga';
 import {
   getPublicChannelsSaga,
-  loadPublicChannelsSaga
-} from './getPublicChannels/getPublicChannels.saga'
-import { publicChannelsActions } from './publicChannels.slice'
-import { subscribeForTopicSaga } from './subscribeForTopic/subscribeForTopic.saga'
+  loadPublicChannelsSaga,
+} from './getPublicChannels/getPublicChannels.saga';
+import { publicChannelsActions } from './publicChannels.slice';
+import { subscribeForTopicSaga } from './subscribeForTopic/subscribeForTopic.saga';
 
 export function* publicChannelsMasterSaga(socket: Socket): Generator {
   yield all([
@@ -30,6 +30,6 @@ export function* publicChannelsMasterSaga(socket: Socket): Generator {
       publicChannelsActions.askForMessages.type,
       askForMessagesSaga,
       socket
-    )
-  ])
+    ),
+  ]);
 }

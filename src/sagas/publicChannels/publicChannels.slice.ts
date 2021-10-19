@@ -1,46 +1,46 @@
-import { createSlice, EntityState, PayloadAction } from '@reduxjs/toolkit'
-import { mainChannelName } from '../config'
+import { createSlice, EntityState, PayloadAction } from '@reduxjs/toolkit';
+import { mainChannelName } from '../config';
 
-import { StoreKeys } from '../store.keys'
+import { StoreKeys } from '../store.keys';
 
-import { publicChannelsAdapter } from './publicChannels.adapter'
-import { IChannelInfo, IMessage } from './publicChannels.types'
+import { publicChannelsAdapter } from './publicChannels.adapter';
+import { IChannelInfo, IMessage } from './publicChannels.types';
 
 export class PublicChannelsState {
   public channels: EntityState<IChannelInfo> =
-  publicChannelsAdapter.getInitialState()
+    publicChannelsAdapter.getInitialState();
 
-  public currentChannel: string = mainChannelName
+  public currentChannel: string = mainChannelName;
 
-  public channelMessages: ChannelMessages = {}
+  public channelMessages: ChannelMessages = {};
 }
 
 export interface ChannelMessages {
   [channelAddres: string]: {
-    ids: string[]
+    ids: string[];
     messages: {
-      [id: string]: IMessage
-    }
-  }
+      [id: string]: IMessage;
+    };
+  };
 }
 
 export interface GetPublicChannelsResponse {
-  [name: string]: IChannelInfo
+  [name: string]: IChannelInfo;
 }
 
 export interface ChannelMessagesIdsResponse {
-  channelAddress: string
-  ids: string[]
+  channelAddress: string;
+  ids: string[];
 }
 
 export interface AskForMessagesPayload {
-  channelAddress: string
-  ids: string[]
+  channelAddress: string;
+  ids: string[];
 }
 
 export interface AskForMessagesResponse {
-  channelAddress: string
-  messages: IMessage[]
+  channelAddress: string;
+  messages: IMessage[];
 }
 
 export const publicChannelsSlice = createSlice({
@@ -55,24 +55,24 @@ export const publicChannelsSlice = createSlice({
       publicChannelsAdapter.setAll(
         state.channels,
         Object.values(action.payload)
-      )
+      );
     },
     setCurrentChannel: (state, action: PayloadAction<string>) => {
-      state.currentChannel = action.payload
+      state.currentChannel = action.payload;
     },
     subscribeForTopic: (state, _action: PayloadAction<IChannelInfo>) => state,
     responseSendMessagesIds: (
       state,
       action: PayloadAction<ChannelMessagesIdsResponse>
     ) => {
-      const channelAddress = action.payload.channelAddress
+      const channelAddress = action.payload.channelAddress;
       if (channelAddress in state.channelMessages) {
-        state.channelMessages[channelAddress].ids = action.payload.ids
+        state.channelMessages[channelAddress].ids = action.payload.ids;
       } else {
         state.channelMessages[channelAddress] = {
           ids: action.payload.ids,
-          messages: {}
-        }
+          messages: {},
+        };
       }
     },
     askForMessages: (state, _action: PayloadAction<AskForMessagesPayload>) =>
@@ -81,19 +81,19 @@ export const publicChannelsSlice = createSlice({
       state,
       action: PayloadAction<AskForMessagesResponse>
     ) => {
-      const channelAddress = action.payload.channelAddress
+      const channelAddress = action.payload.channelAddress;
       action.payload.messages.forEach((message) => {
-        state.channelMessages[channelAddress].messages[message.id] = message
-      })
+        state.channelMessages[channelAddress].messages[message.id] = message;
+      });
     },
     onMessagePosted: (state, action: PayloadAction<{ message: IMessage }>) => {
-      const channelAddress = state.currentChannel
-      const message = action.payload.message
-      state.channelMessages[channelAddress].ids.push(message.id)
-      state.channelMessages[channelAddress].messages[message.id] = message
-    }
-  }
-})
+      const channelAddress = state.currentChannel;
+      const message = action.payload.message;
+      state.channelMessages[channelAddress].ids.push(message.id);
+      state.channelMessages[channelAddress].messages[message.id] = message;
+    },
+  },
+});
 
-export const publicChannelsActions = publicChannelsSlice.actions
-export const publicChannelsReducer = publicChannelsSlice.reducer
+export const publicChannelsActions = publicChannelsSlice.actions;
+export const publicChannelsReducer = publicChannelsSlice.reducer;

@@ -1,23 +1,23 @@
-import { createSlice, EntityState, PayloadAction } from '@reduxjs/toolkit'
-import { parseCertificate } from '@zbayapp/identity/lib'
-import Certificate from 'pkijs/src/Certificate'
-import { StoreKeys } from '../store.keys'
-import { certificatesAdapter } from './users.adapter'
+import { createSlice, EntityState, PayloadAction } from '@reduxjs/toolkit';
+import { parseCertificate } from '@zbayapp/identity/lib';
+import Certificate from 'pkijs/src/Certificate';
+import { StoreKeys } from '../store.keys';
+import { certificatesAdapter } from './users.adapter';
 
 export class UsersState {
   public certificates: EntityState<Certificate> =
-  certificatesAdapter.getInitialState()
+    certificatesAdapter.getInitialState();
 }
 
 export interface User {
-  username: string
-  onionAddress: string
-  peerId: string
-  dmPublicKey: string
+  username: string;
+  onionAddress: string;
+  peerId: string;
+  dmPublicKey: string;
 }
 
 export interface SendCertificatesResponse {
-  certificates: string[]
+  certificates: string[];
 }
 
 export const usersSlice = createSlice({
@@ -32,14 +32,14 @@ export const usersSlice = createSlice({
         state.certificates,
         Object.values(action.payload.certificates).map((item) => {
           if (!item) {
-            return
+            return;
           }
-          return parseCertificate(item)
+          return parseCertificate(item);
         })
-      )
-    }
-  }
-})
+      );
+    },
+  },
+});
 
-export const usersActions = usersSlice.actions
-export const usersReducer = usersSlice.reducer
+export const usersActions = usersSlice.actions;
+export const usersReducer = usersSlice.reducer;

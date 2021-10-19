@@ -1,19 +1,19 @@
-import { combineReducers, createStore, Store } from '@reduxjs/toolkit'
-import { mainChannelName } from '../config'
-import { StoreKeys } from '../store.keys'
-import { publicChannelsAdapter } from './publicChannels.adapter'
-import { publicChannelsSelectors } from './publicChannels.selectors'
+import { combineReducers, createStore, Store } from '@reduxjs/toolkit';
+import { mainChannelName } from '../config';
+import { StoreKeys } from '../store.keys';
+import { publicChannelsAdapter } from './publicChannels.adapter';
+import { publicChannelsSelectors } from './publicChannels.selectors';
 import {
   publicChannelsReducer,
-  PublicChannelsState
-} from './publicChannels.slice'
+  PublicChannelsState,
+} from './publicChannels.slice';
 
 describe('publicChannelsSelectors', () => {
-  let store: Store
+  let store: Store;
   beforeEach(() => {
     store = createStore(
       combineReducers({
-        [StoreKeys.PublicChannels]: publicChannelsReducer
+        [StoreKeys.PublicChannels]: publicChannelsReducer,
       }),
       {
         [StoreKeys.PublicChannels]: {
@@ -26,8 +26,8 @@ describe('publicChannelsSelectors', () => {
                 description: '',
                 owner: '',
                 timestamp: 123,
-                address: mainChannelName
-              }
+                address: mainChannelName,
+              },
             ]
           ),
           currentChannel: 'currentChannel',
@@ -35,27 +35,27 @@ describe('publicChannelsSelectors', () => {
             currentChannel: {
               ids: ['1', '0', '2', '4'],
               messages: {
-                0: {
+                '0': {
                   id: '0',
                   type: 1,
                   message: 'message0',
                   createdAt: 0,
                   channelId: '',
                   signature: '',
-                  pubKey: 'sdf'
-                }
-              }
-            }
-          }
-        }
+                  pubKey: 'sdf',
+                },
+              },
+            },
+          },
+        },
       }
-    )
-  })
+    );
+  });
 
   it('get messages in proper order', () => {
     const messages = publicChannelsSelectors.orderedChannelMessages(
       store.getState()
-    )
+    );
     expect(messages).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -68,11 +68,11 @@ describe('publicChannelsSelectors', () => {
           "type": 1,
         },
       ]
-    `)
-  })
+    `);
+  });
 
   it('get zbay channel', () => {
-    const ZbayChannel = publicChannelsSelectors.ZbayChannel(store.getState())
+    const ZbayChannel = publicChannelsSelectors.ZbayChannel(store.getState());
     expect(ZbayChannel).toMatchInlineSnapshot(`
       Object {
         "address": "general",
@@ -81,6 +81,6 @@ describe('publicChannelsSelectors', () => {
         "owner": "",
         "timestamp": 123,
       }
-    `)
-  })
-})
+    `);
+  });
+});

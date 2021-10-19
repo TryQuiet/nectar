@@ -1,23 +1,23 @@
-import { expectSaga } from 'redux-saga-test-plan'
-import { combineReducers } from '@reduxjs/toolkit'
-import { call } from 'redux-saga-test-plan/matchers'
-import { createUserCsr } from '@zbayapp/identity'
-import { KeyObject } from 'crypto'
-import { StoreKeys } from '../../store.keys'
-import { createUserCsrSaga } from './createUserCsr.saga'
+import { expectSaga } from 'redux-saga-test-plan';
+import { combineReducers } from '@reduxjs/toolkit';
+import { call } from 'redux-saga-test-plan/matchers';
+import { createUserCsr } from '@zbayapp/identity';
+import { KeyObject } from 'crypto';
+import { StoreKeys } from '../../store.keys';
+import { createUserCsrSaga } from './createUserCsr.saga';
 import {
   CreateUserCsrPayload,
   identityActions,
   identityReducer,
-  Identity
-} from '../identity.slice'
+  Identity,
+} from '../identity.slice';
 
-import { identityAdapter } from '../identity.adapter'
+import { identityAdapter } from '../identity.adapter';
 import {
   communitiesReducer,
   CommunitiesState,
-  Community
-} from '../../communities/communities.slice'
+  Community,
+} from '../../communities/communities.slice';
 
 describe('createUserCsrSaga', () => {
   const userCsr = {
@@ -26,23 +26,23 @@ describe('createUserCsrSaga', () => {
     pkcs10: {
       publicKey: jest.fn() as unknown as KeyObject,
       privateKey: jest.fn() as unknown as KeyObject,
-      pkcs10: 'pkcs10'
-    }
-  }
+      pkcs10: 'pkcs10',
+    },
+  };
 
   test('create csr', async () => {
     const community = new Community({
       name: '',
       id: 'id',
       registrarUrl: 'registrarUrl',
-      CA: {}
-    })
+      CA: {},
+    });
     const identity = new Identity({
       id: 'id',
       hiddenService: { onionAddress: 'onionAddress', privateKey: 'privateKey' },
       dmKeys: { publicKey: 'publicKey', privateKey: 'privateKey' },
-      peerId: { id: 'peerId', pubKey: 'pubKey', privKey: 'privKey' }
-    })
+      peerId: { id: 'peerId', pubKey: 'pubKey', privKey: 'privKey' },
+    });
     const identityWithCsr: Identity = {
       id: 'id',
       hiddenService: { onionAddress: 'onionAddress', privateKey: 'privateKey' },
@@ -50,8 +50,8 @@ describe('createUserCsrSaga', () => {
       zbayNickname: '',
       userCsr: userCsr,
       userCertificate: null,
-      dmKeys: { publicKey: 'publicKey', privateKey: 'privateKey' }
-    } as Identity
+      dmKeys: { publicKey: 'publicKey', privateKey: 'privateKey' },
+    } as Identity;
     await expectSaga(
       createUserCsrSaga,
       identityActions.createUserCsr(<CreateUserCsrPayload>{})
@@ -59,13 +59,13 @@ describe('createUserCsrSaga', () => {
       .withReducer(
         combineReducers({
           [StoreKeys.Identity]: identityReducer,
-          [StoreKeys.Communities]: communitiesReducer
+          [StoreKeys.Communities]: communitiesReducer,
         }),
         {
           [StoreKeys.Identity]: {
             ...identityAdapter.setAll(identityAdapter.getInitialState(), [
-              identity
-            ])
+              identity,
+            ]),
           },
           [StoreKeys.Communities]: {
             ...new CommunitiesState(),
@@ -73,18 +73,18 @@ describe('createUserCsrSaga', () => {
             communities: {
               ids: ['id'],
               entities: {
-                [community.id]: community
-              }
-            }
-          }
+                [community.id]: community,
+              },
+            },
+          },
         }
       )
       .provide([[call.fn(createUserCsr), userCsr]])
       .hasFinalState({
         [StoreKeys.Identity]: {
           ...identityAdapter.setAll(identityAdapter.getInitialState(), [
-            identityWithCsr
-          ])
+            identityWithCsr,
+          ]),
         },
         [StoreKeys.Communities]: {
           ...new CommunitiesState(),
@@ -92,11 +92,11 @@ describe('createUserCsrSaga', () => {
           communities: {
             ids: ['id'],
             entities: {
-              [community.id]: community
-            }
-          }
-        }
+              [community.id]: community,
+            },
+          },
+        },
       })
-      .run()
-  })
-})
+      .run();
+  });
+});
