@@ -12,11 +12,6 @@ export const selectById = (id: string) =>
     communitiesAdapter.getSelectors().selectById(reducerState.communities, id)
   );
 
-export const currentPort = createSelector(
-  communitiesSlice,
-  (reducerState) => reducerState.communities
-);
-
 export const currentCommunity = createSelector(
   communitiesSlice,
   (reducerState) => {
@@ -47,6 +42,5 @@ export const communitiesSelectors = {
   selectById,
   currentCommunityId,
   currentCommunity,
-  registrarUrl,
-  currentPort,
+  registrarUrl
 };

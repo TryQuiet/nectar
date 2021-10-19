@@ -127,7 +127,7 @@ const getCommunityOwnerData = (ownerStore: any) => {
   const ownerStoreState = ownerStore.getState();
   const community =
     ownerStoreState.Communities.communities.entities[
-      ownerStoreState.Communities.currentCommunity
+    ownerStoreState.Communities.currentCommunity
     ];
   const registrarAddress = `http://${community.onionAddress}`;
   const ownerIdentityState = ownerStore.getState().Identity;
@@ -218,7 +218,7 @@ const testUsersCreateAndJoinCommunitySuccessfullyWithoutTor = async (
   const user1 = await createAppWithoutTor();
   const user2 = await createAppWithoutTor();
   const allUsers = [owner, user1, user2];
-  watchResults(allUsers, user2, 'Users create and join community successfully');
+  watchResults(allUsers, user2, 'Users create and join community successfully without tor');
 
   // Owner creates community and registers
   owner.runSaga(integrationTest, createCommunityTestSaga, {
