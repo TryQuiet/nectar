@@ -30,12 +30,12 @@ import {
   communitiesReducer,
 } from './sagas/communities/communities.slice';
 
-import { reducers } from './sagas/reducers';
+import { reducers } from './sagas/reducers'
 
-import { SocketActionTypes } from './sagas/socket/const/actionTypes';
+import { SocketActionTypes } from './sagas/socket/const/actionTypes'
 import { communitiesSelectors } from './sagas/communities/communities.selectors';
 
-export { DisplayableMessage } from './sagas/publicChannels/publicChannels.types';
+export { DisplayableMessage } from './sagas/publicChannels/publicChannels.types'
 
 export const publicChannels = {
   reducer: publicChannelsReducer,
@@ -92,5 +92,5 @@ export default {
   communities,
   reducers,
   storeKeys,
-  socketActionTypes,
+  socketActionTypes
 };

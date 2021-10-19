@@ -23,8 +23,8 @@ import { MessageTypes } from '../const/messageTypes';
 // import { appImages } from '../../../../assets';
 // import { replaceScreen } from '../../../utils/functions/replaceScreen/replaceScreen';
 import { generateMessageId, getCurrentTime } from '../utils/message.utils';
-import logger from '../../../utils/logger';
-const log = logger('message');
+import logger from '../../../utils/logger'
+const log = logger('message')
 
 export function* sendMessageSaga(
   socket: Socket,

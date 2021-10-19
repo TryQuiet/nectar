@@ -3,7 +3,7 @@ import { createSlice, EntityState, PayloadAction } from '@reduxjs/toolkit';
 import { StoreKeys } from '../store.keys';
 import { errorAdapter, errorsAdapter } from './errors.adapter';
 
-export const GENERAL_ERRORS = 'general';
+export const GENERAL_ERRORS = 'general'
 
 export class ErrorState {
   type: string;

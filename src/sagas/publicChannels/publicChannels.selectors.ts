@@ -1,15 +1,13 @@
 import { StoreKeys } from '../store.keys';
 import { createSelector } from 'reselect';
-import { CreatedSelectors } from '../store.types';
+import { CreatedSelectors } from '../store.types'
 import { publicChannelsAdapter } from './publicChannels.adapter';
 import { formatMessageDisplayDate } from '../../utils/functions/formatMessageDisplayDate/formatMessageDisplayDate';
 import { certificatesMapping } from '../users/users.selectors';
 import { mainChannelName } from '../config';
 import { StoreState } from '../store.types';
 
-const publicChannelSlice: CreatedSelectors[StoreKeys.PublicChannels] = (
-  state: StoreState
-) => state[StoreKeys.PublicChannels];
+const publicChannelSlice: CreatedSelectors[StoreKeys.PublicChannels] = (state: StoreState) => state[StoreKeys.PublicChannels]
 
 export const publicChannels = createSelector(
   publicChannelSlice,
