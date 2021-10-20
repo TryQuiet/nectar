@@ -2,7 +2,7 @@ import { createSelector } from 'reselect';
 import { currentCommunityId } from '../communities/communities.selectors';
 import { StoreKeys } from '../store.keys';
 import { CreatedSelectors, StoreState } from '../store.types';
-import { errorAdapter, errorsAdapter } from './errors.adapter';
+import { errorsAdapter } from './errors.adapter';
 import { GENERAL_ERRORS } from './errors.slice';
 
 const errorSlice: CreatedSelectors[StoreKeys.Errors] = (state: StoreState) =>
@@ -12,24 +12,22 @@ export const currentCommunityErrors = createSelector(
   currentCommunityId,
   errorSlice,
   (communityId: string, reducerState) =>
-    errorsAdapter.getSelectors().selectById(reducerState, communityId)
+    errorsAdapter.getSelectors().selectAll(reducerState[communityId])
 );
 
 export const generalErrors = createSelector(errorSlice, (reducerState) =>
-  errorsAdapter.getSelectors().selectById(reducerState, GENERAL_ERRORS)
+  errorsAdapter.getSelectors().selectAll(reducerState[GENERAL_ERRORS])
 );
 
-export const currentCommunityErrorByType = (type: string) =>
-  createSelector(currentCommunityErrors, (reducerState) => {
-    if (reducerState) {
-      errorAdapter.getSelectors().selectById(reducerState.errors, type);
-    } else {
-      return null
-    }
-  });
+export const currentCommunityErrorsByType = createSelector(
+  currentCommunityId,
+  errorSlice,
+  (communityId: string, reducerState) =>
+    errorsAdapter.getSelectors().selectEntities(reducerState[communityId])
+);
 
 export const errorsSelectors = {
   currentCommunityErrors,
-  currentCommunityErrorByType,
+  currentCommunityErrorsByType,
   generalErrors,
 };

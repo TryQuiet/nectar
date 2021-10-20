@@ -1,69 +1,39 @@
-import { createSlice, EntityState, PayloadAction } from '@reduxjs/toolkit';
+import {
+  createSlice,
+  EntityState,
+  PayloadAction,
+  Dictionary,
+} from '@reduxjs/toolkit';
 
 import { StoreKeys } from '../store.keys';
-import { errorAdapter, errorsAdapter } from './errors.adapter';
+import { errorsAdapter } from './errors.adapter';
 
-export const GENERAL_ERRORS = 'general'
+export const GENERAL_ERRORS = 'general';
 
-export class ErrorState {
-  type: string;
-
-  code: number;
-
-  message: string;
-
-  communityId?: string;
-
-  constructor({ type, code, message, communityId }) {
-    this.type = type;
-    this.code = code;
-    this.message = message;
-    this.communityId = communityId;
-  }
+export class ErrorPayload {
+  constructor(
+    public type: string,
+    public code: number,
+    public message: string,
+    public communityId: string = GENERAL_ERRORS
+  ) { }
 }
 
-export class ErrorsState {
-  id: string = '';
-
-  errors: EntityState<ErrorPayload>;
-
-  constructor({ communityId = null, type, code, message }) {
-    this.id = communityId;
-    if (!communityId) {
-      this.id = GENERAL_ERRORS; // Error not connected with community
-    }
-    this.errors = errorAdapter.addOne(
-      errorAdapter.getInitialState(),
-      new ErrorState({ type, code, message, communityId })
-    );
-  }
-}
-
-export interface ErrorPayload {
-  communityId?: string;
-  type: string;
-  code: number;
-  message: string;
-}
+type ErrorsState = Dictionary<EntityState<ErrorPayload>>;
+const initialState: ErrorsState = {};
 
 export const errorsSlice = createSlice({
-  initialState: errorsAdapter.getInitialState(),
+  initialState,
   name: StoreKeys.Errors,
   reducers: {
     addError: (state, action: PayloadAction<ErrorPayload>) => {
-      if (state.entities[action.payload.communityId]) {
-        errorsAdapter.updateOne(state, {
-          id: action.payload.communityId,
-          changes: {
-            errors: errorAdapter.addOne(
-              state.entities[action.payload.communityId].errors,
-              action.payload
-            ),
-          },
-        });
-      } else {
-        errorsAdapter.addOne(state, new ErrorsState(action.payload));
+      if (!state[action.payload.communityId]) {
+        state[action.payload.communityId] = errorsAdapter.getInitialState();
       }
+      errorsAdapter.upsertOne(
+        state.entities[action.payload.communityId],
+        action.payload
+      );
     },
   },
 });
