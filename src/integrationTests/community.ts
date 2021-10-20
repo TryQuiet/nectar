@@ -218,7 +218,11 @@ const testUsersCreateAndJoinCommunitySuccessfullyWithoutTor = async (
   const user1 = await createAppWithoutTor();
   const user2 = await createAppWithoutTor();
   const allUsers = [owner, user1, user2];
-  watchResults(allUsers, user2, 'Users create and join community successfully without tor');
+  watchResults(
+    allUsers,
+    user2,
+    'Users create and join community successfully without tor'
+  );
 
   // Owner creates community and registers
   owner.runSaga(integrationTest, createCommunityTestSaga, {
@@ -297,8 +301,8 @@ function* tryToJoinOfflineRegistrarTestSaga(): Generator {
   yield* put(identity.actions.registerUsername('IamTheUser'));
   yield* take(errorsActions.addError);
   const registrarError = yield* select(
-    errorsSelectors.currentCommunityErrorByType(SocketActionTypes.REGISTRAR)
-  );
+    errorsSelectors.currentCommunityErrorsByType
+  )[SocketActionTypes.REGISTRAR];
   assertNotEmpty(registrarError, 'Registrar error');
   assert.equal(registrarError.communityId, currentCommunityId);
   assert.equal(registrarError.code, 500);
