@@ -10,13 +10,11 @@ import { errorsAdapter } from './errors.adapter';
 
 export const GENERAL_ERRORS = 'general';
 
-export class ErrorPayload {
-  constructor(
-    public type: string,
-    public code: number,
-    public message: string,
-    public communityId: string = GENERAL_ERRORS
-  ) { }
+export interface ErrorPayload {
+  communityId: string;
+  type: string;
+  code: number;
+  message: string;
 }
 
 type ErrorsState = Dictionary<EntityState<ErrorPayload>>;
@@ -27,11 +25,8 @@ export const errorsSlice = createSlice({
   name: StoreKeys.Errors,
   reducers: {
     addError: (state, action: PayloadAction<ErrorPayload>) => {
-      if (!state[action.payload.communityId]) {
-        state[action.payload.communityId] = errorsAdapter.getInitialState();
-      }
-      errorsAdapter.upsertOne(
-        state.entities[action.payload.communityId],
+      state[action.payload.communityId] = errorsAdapter.upsertOne(
+        state[action.payload.communityId] ?? errorsAdapter.getInitialState(),
         action.payload
       );
     },
