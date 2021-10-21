@@ -297,8 +297,8 @@ function* tryToJoinOfflineRegistrarTestSaga(): Generator {
   yield* put(identity.actions.registerUsername('IamTheUser'));
   yield* take(errorsActions.addError);
   const registrarError = yield* select(
-    errorsSelectors.currentCommunityErrorByType(SocketActionTypes.REGISTRAR)
-  );
+    errorsSelectors.currentCommunityErrorsByType
+  )[SocketActionTypes.REGISTRAR];
   assertNotEmpty(registrarError, 'Registrar error');
   assert.equal(registrarError.communityId, currentCommunityId);
   assert.equal(registrarError.code, 500);

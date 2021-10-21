@@ -8,22 +8,34 @@ import { GENERAL_ERRORS } from './errors.slice';
 const errorSlice: CreatedSelectors[StoreKeys.Errors] = (state: StoreState) =>
   state[StoreKeys.Errors];
 
+export const generalErrors = createSelector(errorSlice, (reducerState) =>
+  errorsAdapter.getSelectors().selectAll(reducerState[GENERAL_ERRORS])
+);
+
 export const currentCommunityErrors = createSelector(
   currentCommunityId,
   errorSlice,
-  (communityId: string, reducerState) =>
-    errorsAdapter.getSelectors().selectAll(reducerState[communityId])
-);
-
-export const generalErrors = createSelector(errorSlice, (reducerState) =>
-  errorsAdapter.getSelectors().selectAll(reducerState[GENERAL_ERRORS])
+  (communityId: string, reducerState) => {
+    if (communityId && reducerState[communityId]) {
+      return errorsAdapter.getSelectors().selectAll(reducerState[communityId]);
+    } else {
+      return null;
+    }
+  }
 );
 
 export const currentCommunityErrorsByType = createSelector(
   currentCommunityId,
   errorSlice,
-  (communityId: string, reducerState) =>
-    errorsAdapter.getSelectors().selectEntities(reducerState[communityId])
+  (communityId: string, reducerState) => {
+    if (communityId && reducerState[communityId]) {
+      return errorsAdapter
+        .getSelectors()
+        .selectEntities(reducerState[communityId]);
+    } else {
+      return null;
+    }
+  }
 );
 
 export const errorsSelectors = {
