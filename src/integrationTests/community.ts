@@ -32,7 +32,7 @@ function* assertReceivedCertificates(
   runTestCaseSaga,
   userName: string,
   expectedCount: number,
-  maxTime: number = 60000
+  maxTime: number = 600000
 ) {
   log(`User ${userName} starts waiting ${maxTime}ms for certificates`);
   yield delay(maxTime);
