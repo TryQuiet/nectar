@@ -72,7 +72,7 @@ describe('sendMessageSaga', () => {
           },
           [StoreKeys.PublicChannels]: {
             ...new PublicChannelsState(),
-            currentChannel: 'currentChannel',
+            // currentChannel: 'currentChannel',
           },
           [StoreKeys.Messages]: {
             ...new MessagesState(),

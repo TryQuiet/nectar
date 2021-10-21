@@ -1,31 +1,44 @@
 import { createSelector } from 'reselect';
 import { StoreKeys } from '../store.keys';
-import { publicChannelsAdapter, channelsByCommunityAdapter } from './publicChannels.adapter';
-import { CreatedSelectors } from '../store.types'
+import {
+  publicChannelsAdapter,
+  channelsByCommunityAdapter,
+} from './publicChannels.adapter';
+import { CreatedSelectors } from '../store.types';
 import { formatMessageDisplayDate } from '../../utils/functions/formatMessageDisplayDate/formatMessageDisplayDate';
 import { certificatesMapping } from '../users/users.selectors';
 import { mainChannelName } from '../config';
 import { StoreState } from '../store.types';
+import { communitiesSelectors } from '../communities/communities.selectors';
 
-
-const publicChannelSlice: CreatedSelectors[StoreKeys.PublicChannels] = (state: StoreState) => state[StoreKeys.PublicChannels]
+const publicChannelSlice: CreatedSelectors[StoreKeys.PublicChannels] = (
+  state: StoreState
+) => state[StoreKeys.PublicChannels];
+const communitiesSlice: CreatedSelectors[StoreKeys.Communities] = (
+  state: StoreState
+) => state[StoreKeys.Communities];
 
 export const currentCommunityChannels = createSelector(
-  publicChannelSlice, (reducerState) => {
-    const id = reducerState.Communities.currentCommunity
-    const selected = channelsByCommunityAdapter.getSelectors().selectById(reducerState.PublicChannels, id)
-    return selected || null
+  publicChannelSlice,
+  communitiesSlice,
+  (publicChannelsState, communitiesState) => {
+    const id = communitiesState.currentCommunity;
+    const selected = channelsByCommunityAdapter
+      .getSelectors()
+      .selectById(publicChannelsState.channels, id);
+    return selected || null;
   }
-)
+);
 
 export const publicChannels = createSelector(
   currentCommunityChannels,
-  (channels) =>{
+  (channels) => {
     if (channels) {
-      return publicChannelsAdapter.getSelectors().selectAll(channels.channels)
+      return publicChannelsAdapter.getSelectors().selectAll(channels.channels);
     }
-    return []
-)
+    return [];
+  }
+);
 
 // export const publicChannels = createSelector(
 //   publicChannelSlice,
@@ -37,7 +50,7 @@ export const publicChannels = createSelector(
 // );
 
 export const ZbayChannel = createSelector(
-  publicChannelSlice,
+  currentCommunityChannels,
   (reducerState) => {
     const publicChannelsList = publicChannelsAdapter
       .getSelectors()
@@ -50,16 +63,16 @@ export const ZbayChannel = createSelector(
 );
 
 export const currentChannel = createSelector(
-  publicChannelSlice,
+  currentCommunityChannels,
   (reducerState) => {
-    return reducerState.currentChannel;
+    return reducerState?.currentChannel || null;
   }
 );
 
 export const channelMessages = createSelector(
-  publicChannelSlice,
+  currentCommunityChannels,
   (reducerState) => {
-    return reducerState.channelMessages;
+    return reducerState?.channelMessages || null;
   }
 );
 
@@ -123,8 +136,7 @@ export const currentChannelDisplayableMessages = createSelector(
         nickname: user.username,
       };
     })
-)
-
+);
 
 export const publicChannelsSelectors = {
   publicChannels,

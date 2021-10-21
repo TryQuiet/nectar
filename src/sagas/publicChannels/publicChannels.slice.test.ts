@@ -37,7 +37,7 @@ describe('publicChannelsReducer', () => {
 
   it('responseGetPublicChannels should set channels info', () => {
     store.dispatch(
-      publicChannelsActions.responseGetPublicChannels(mockGetPublicChannels)
+      publicChannelsActions.responseGetPublicChannels({communityId: 'asdf', channels: mockGetPublicChannels})
     );
     const channels = publicChannelsSelectors.publicChannels(store.getState());
     expect(channels).toMatchInlineSnapshot(`

@@ -11,7 +11,7 @@ import { subscribeForTopicSaga } from './subscribeForTopic/subscribeForTopic.sag
 
 export function* publicChannelsMasterSaga(socket: Socket): Generator {
   yield all([
-    fork(loadPublicChannelsSaga),
+    // fork(loadPublicChannelsSaga),
     takeEvery(
       publicChannelsActions.getPublicChannels.type,
       getPublicChannelsSaga,
@@ -21,10 +21,6 @@ export function* publicChannelsMasterSaga(socket: Socket): Generator {
       publicChannelsActions.subscribeForTopic.type,
       subscribeForTopicSaga,
       socket
-    ),
-    takeEvery(
-      publicChannelsActions.responseSendMessagesIds.type,
-      checkForMessagesSaga
     ),
     // takeEvery(
     //   publicChannelsActions.responseSendMessagesIds.type,

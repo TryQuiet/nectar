@@ -18,23 +18,23 @@ describe('checkForMessagesSaga', () => {
         {
           [StoreKeys.PublicChannels]: {
             ...new PublicChannelsState(),
-            channelMessages: {
-              zs10zkaj29rcev9qd5xeuzck4ly5q64kzf6m6h9nfajwcvm8m2vnjmvtqgr0mzfjywswwkwke68t00:
-                {
-                  ids: ['1', '2', '3'],
-                  messages: {
-                    id: {
-                      id: '1',
-                      type: 0,
-                      message: 'message',
-                      createdAt: 0,
-                      channelId: '',
-                      signature: '',
-                      pubKey: '',
-                    },
-                  },
-                },
-            },
+            // channelMessages: {
+            //   zs10zkaj29rcev9qd5xeuzck4ly5q64kzf6m6h9nfajwcvm8m2vnjmvtqgr0mzfjywswwkwke68t00:
+            //     {
+            //       ids: ['1', '2', '3'],
+            //       messages: {
+            //         id: {
+            //           id: '1',
+            //           type: 0,
+            //           message: 'message',
+            //           createdAt: 0,
+            //           channelId: '',
+            //           signature: '',
+            //           pubKey: '',
+            //         },
+            //       },
+            //     },
+            // },
           },
         }
       )

@@ -16,46 +16,49 @@ describe('publicChannelsSelectors', () => {
       {
         [StoreKeys.PublicChannels]: {
           ...new PublicChannelsState(),
-          currentChannel: 'currentChannel',
-          channelMessages: {
-            currentChannel: {
-              ids: ['1', '0', '2', '4'],
-              messages: {
-                '0': {
-                  id: '0',
-                  message: 'message0',
-                  createdAt: 0,
-                  r: 0,
-                  channelId: '',
-                  signature: '',
-                },
-                '2': {
-                  id: '2',
-                  message: 'message2',
-                  createdAt: 0,
-                  r: 0,
-                  channelId: '',
-                  signature: '',
-                },
-                '4': {
-                  id: '4',
-                  message: 'message4',
-                  createdAt: 0,
-                  r: 0,
-                  channelId: '',
-                  signature: '',
-                },
-                '1': {
-                  id: '1',
-                  message: 'message1',
-                  createdAt: 0,
-                  r: 0,
-                  channelId: '',
-                  signature: '',
-                },
-              },
-            },
-          },
+          // channels: {
+          //   General: {}
+          // }}
+          // currentChannel: 'currentChannel',
+          // channelMessages: {
+          //   currentChannel: {
+          //     ids: ['1', '0', '2', '4'],
+          //     messages: {
+          //       '0': {
+          //         id: '0',
+          //         message: 'message0',
+          //         createdAt: 0,
+          //         r: 0,
+          //         channelId: '',
+          //         signature: '',
+          //       },
+          //       '2': {
+          //         id: '2',
+          //         message: 'message2',
+          //         createdAt: 0,
+          //         r: 0,
+          //         channelId: '',
+          //         signature: '',
+          //       },
+          //       '4': {
+          //         id: '4',
+          //         message: 'message4',
+          //         createdAt: 0,
+          //         r: 0,
+          //         channelId: '',
+          //         signature: '',
+          //       },
+          //       '1': {
+          //         id: '1',
+          //         message: 'message1',
+          //         createdAt: 0,
+          //         r: 0,
+          //         channelId: '',
+          //         signature: '',
+          //       },
+          //     },
+          //   },
+          // },
         },
       }
     );

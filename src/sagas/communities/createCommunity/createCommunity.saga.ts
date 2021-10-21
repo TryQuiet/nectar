@@ -7,6 +7,7 @@ import { SocketActionTypes } from '../../socket/const/actionTypes';
 import { generateId } from '../../../utils/cryptography/cryptography';
 // import { publicChannelsActions } from '../../publicChannels/publicChannels.slice';
 import { PayloadAction } from '@reduxjs/toolkit';
+import { publicChannelsActions } from '../../publicChannels/publicChannels.slice';
 
 export function* createCommunitySaga(
   socket,
@@ -27,6 +28,8 @@ export function* createCommunitySaga(
     registrarUrl: '',
   };
   yield* put(communitiesActions.addNewCommunity(payload));
+  yield* put(publicChannelsActions.addPublicChannelsList(id))
+  yield* put(publicChannelsActions.createChannel({communityId:id}))
   yield* put(communitiesActions.setCurrentCommunity(id));
   // yield* put(publicChannelsActions.addPublicChannelsList({id}))
 
