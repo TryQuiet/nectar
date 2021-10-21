@@ -9,7 +9,7 @@ import {
   communitiesActions,
   communitiesReducer,
   Community,
-  CommunitiesState
+  CommunitiesState,
 } from '../communities.slice';
 import { createCommunitySaga } from './createCommunity.saga';
 import { createRootCA } from '@zbayapp/identity/lib';
@@ -17,15 +17,24 @@ import { createRootCA } from '@zbayapp/identity/lib';
 describe('createCommunitySaga', () => {
   test('create new community', async () => {
     const socket = { emit: jest.fn(), on: jest.fn() } as unknown as Socket;
-    const community = new Community({name: 'communityName', id: 'id', CA: { rootCertString: 'certString', rootKeyString: 'keyString' }, registrarUrl:''})
+    const community = new Community({
+      name: 'communityName',
+      id: 'id',
+      CA: { rootCertString: 'certString', rootKeyString: 'keyString' },
+      registrarUrl: '',
+    });
 
-    const id = 'id'
+    const id = 'id';
 
-    await expectSaga(createCommunitySaga, socket, communitiesActions.createNewCommunity('communityName'))
+    await expectSaga(
+      createCommunitySaga,
+      socket,
+      communitiesActions.createNewCommunity('communityName')
+    )
       .withReducer(
         combineReducers({ [StoreKeys.Communities]: communitiesReducer }),
         {
-          [StoreKeys.Communities]: {...new CommunitiesState()}
+          [StoreKeys.Communities]: { ...new CommunitiesState() },
         }
       )
       .provide([
@@ -35,23 +44,19 @@ describe('createCommunitySaga', () => {
           { rootCertString: 'certString', rootKeyString: 'keyString' },
         ],
       ])
-      .apply(socket, socket.emit, [
-        SocketActionTypes.CREATE_NETWORK,
-        id,
-      ])
-      .hasFinalState(
-        {
-          [StoreKeys.Communities]: {
-        ...new CommunitiesState(),
-        currentCommunity: 'id',
-        communities: {
-          ids: ['id'],
-          entities: {
-            id: community
-          }
-        }
-        }}
-      )
-      .silentRun();
+      .apply(socket, socket.emit, [SocketActionTypes.CREATE_NETWORK, id])
+      .hasFinalState({
+        [StoreKeys.Communities]: {
+          ...new CommunitiesState(),
+          currentCommunity: 'id',
+          communities: {
+            ids: ['id'],
+            entities: {
+              id: community,
+            },
+          },
+        },
+      })
+      .run();
   });
 });

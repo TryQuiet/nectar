@@ -11,22 +11,18 @@ export function* registerCertificateSaga(
     ReturnType<typeof identityActions.storeUserCsr>['payload']
   >
 ): Generator {
+  const currentCommunity = yield* select(communitiesSelectors.currentCommunity);
 
-  console.log('registerCertificateSaga')
-
-const currentCommunity = yield* select(communitiesSelectors.currentCommunity)
-console.log(currentCommunity.CA.rootCertString, 'rootCertString')
-  if(currentCommunity.CA.rootCertString) {
-    console.log('registerOwnerCertificate', currentCommunity.CA.rootCertString)
+  if (currentCommunity.CA.rootCertString) {
     yield* apply(socket, socket.emit, [
       SocketActionTypes.REGISTER_OWNER_CERTIFICATE,
       action.payload.communityId,
       action.payload.userCsr.userCsr,
-     {
-       certificate: currentCommunity.CA.rootCertString,
-       privKey: currentCommunity.CA.rootKeyString
-     }
-    ])
+      {
+        certificate: currentCommunity.CA.rootCertString,
+        privKey: currentCommunity.CA.rootKeyString,
+      },
+    ]);
   } else {
     yield* apply(socket, socket.emit, [
       SocketActionTypes.REGISTER_USER_CERTIFICATE,

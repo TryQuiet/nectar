@@ -55,19 +55,21 @@ describe('communitiesSelectors', () => {
         "onionAddress": "",
         "peerList": Array [],
         "privateKey": "",
+        "registrarUrl": "",
+        "rootCa": "",
       }
-      `);
+    `);
   });
 
-    it('select current commnity id', () => {
-      const communityId = communitiesSelectors.currentCommunityId(store.getState());
-      expect(communityId).toMatchInlineSnapshot(
-      `"communityAlpha"`
-      );
-    });
-    it('select current community', () => {
-      const community = communitiesSelectors.currentCommunity(store.getState());
-      expect(community).toMatchInlineSnapshot(`
+  it('select current commnity id', () => {
+    const communityId = communitiesSelectors.currentCommunityId(
+      store.getState()
+    );
+    expect(communityId).toMatchInlineSnapshot(`"communityAlpha"`);
+  });
+  it('select current community', () => {
+    const community = communitiesSelectors.currentCommunity(store.getState());
+    expect(community).toMatchInlineSnapshot(`
       Community {
         "CA": Object {
           "rootCertString": "certString",
@@ -78,7 +80,9 @@ describe('communitiesSelectors', () => {
         "onionAddress": "",
         "peerList": Array [],
         "privateKey": "",
+        "registrarUrl": "",
+        "rootCa": "",
       }
-      `);
-    });
+    `);
+  });
 });

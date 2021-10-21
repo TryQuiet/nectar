@@ -8,5 +8,6 @@ export enum StoreKeys {
   Messages = 'Messages',
   Users = 'Users',
   Errors = 'Errors',
-  Communities = 'Communities'
+  Communities = 'Communities',
+  App = 'App'
 }
