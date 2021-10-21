@@ -291,7 +291,7 @@ const testUsersCreateAndJoinCommunitySuccessfullyWithoutTor = async (
 function* tryToJoinOfflineRegistrarTestSaga(): Generator {
   yield* put(
     communitiesActions.joinCommunity(
-      `http://offlineRegistrarAddress.onion:4040`
+      `http://yjnblkcrvqexxmntrs7hscywgebrizvz2jx4g4m5wq4x7uzi5syv5cid.onion`
     )
   );
   yield* take(communitiesActions.responseCreateCommunity);
@@ -300,13 +300,13 @@ function* tryToJoinOfflineRegistrarTestSaga(): Generator {
   );
   yield* put(identity.actions.registerUsername('IamTheUser'));
   yield* take(errorsActions.addError);
-  const registrarError = yield* select(
+  const registrarError = (yield* select(
     errorsSelectors.currentCommunityErrorsByType
-  )[SocketActionTypes.REGISTRAR];
+  ))[SocketActionTypes.REGISTRAR]
   assertNotEmpty(registrarError, 'Registrar error');
   assert.equal(registrarError.communityId, currentCommunityId);
   assert.equal(registrarError.code, 500);
-  assert.equal(registrarError.message, 'Connecting to registrar failed');
+  assert.equal(registrarError.message, 'Registering username failed.');
   yield* put(createAction('testFinished')());
 }
 
@@ -321,6 +321,7 @@ const testUserTriesToJoinOfflineCommunity = async (testCase) => {
 };
 
 export default {
+  communityTestOfflineRegistrar: testUserTriesToJoinOfflineCommunity,
   communityTestWithTor: testUsersCreateAndJoinCommunitySuccessfully,
   communityTestWithoutTor:
     testUsersCreateAndJoinCommunitySuccessfullyWithoutTor,
