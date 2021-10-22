@@ -53,6 +53,11 @@ export interface AskForMessagesPayload {
   ids: string[];
 }
 
+export interface SetCurrentChannelPayload {
+  communityId: string
+channel: string
+}
+
 export interface CreateChannelPayload { channel: IChannelInfo; communityId: string }
 
 
@@ -74,7 +79,7 @@ export const publicChannelsSlice = createSlice({
   reducers: {
     createChannel: (
       state,
-      action: PayloadAction<{ channel: IChannelInfo; communityId: string }>
+      action: PayloadAction<CreateChannelPayload>
     ) => {
 
       const {channel, communityId} = action.payload
@@ -94,7 +99,7 @@ export const publicChannelsSlice = createSlice({
         },
       });
     },
-    addPublicChannelsList: (state, action) => {
+    addPublicChannelsList: (state, action: PayloadAction<string>) => {
       channelsByCommunityAdapter.addOne(
         state,
         new CommunityChannels(action.payload)
@@ -105,13 +110,6 @@ export const publicChannelsSlice = createSlice({
       state,
       action: PayloadAction<GetPublicChannelsResponse>
     ) => {
-      const channel: IChannelInfo = {
-        name: 'namghfhfghe',
-        description: 'asdffghfghdsf',
-        owner: 'asfghfghdf',
-        timestamp: 12333333,
-        address: 'asdf',
-      };
       channelsByCommunityAdapter.updateOne(state, {
         id: action.payload.communityId,
         changes: {
@@ -125,7 +123,7 @@ export const publicChannelsSlice = createSlice({
     },
     setCurrentChannel: (
       state,
-      action: PayloadAction<{ communityId: string; channel: string }>
+      action: PayloadAction<SetCurrentChannelPayload>
     ) => {
       channelsByCommunityAdapter.updateOne(state, {
         id: action.payload.communityId,

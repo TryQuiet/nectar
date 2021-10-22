@@ -30,10 +30,10 @@ export function* createCommunitySaga(
   yield* put(publicChannelsActions.addPublicChannelsList(id))
   const channel = {
     name: 'general',
-    description: 'asdffghfghdsf',
-    owner: 'asfghfghdf',
-    timestamp: 12333333,
-    address: 'asdf',
+    description: 'general',
+    owner: 'general',
+    timestamp: Date.now(),
+    address: 'general',
   };
   yield* put(publicChannelsActions.createChannel({communityId:id, channel}))
   yield* put(communitiesActions.setCurrentCommunity(id));
