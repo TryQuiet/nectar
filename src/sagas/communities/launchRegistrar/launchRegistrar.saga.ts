@@ -9,11 +9,9 @@ import { communitiesActions } from '../communities.slice';
 
 export function* initRegistrars(): Generator {
   const ownCommunities = yield* select(communitiesSelectors.ownCommunities);
-  yield* all(
-    ownCommunities.map((community) => {
-      put(communitiesActions.launchRegistrar(community.id));
-    })
-  );
+  for (const community of ownCommunities) {
+    yield* put(communitiesActions.launchRegistrar(community.id));
+  }
 }
 
 export function* launchRegistrarSaga(

@@ -9,11 +9,9 @@ import { communitiesActions } from '../communities.slice';
 
 export function* initCommunities(): Generator {
   const communities = yield* select(communitiesSelectors.allCommunities);
-  yield* all(
-    communities.map(community => {
-      put(communitiesActions.launchCommunity(community.id));
-    })
-  );
+  for (const community of communities) {
+    yield* put(communitiesActions.launchCommunity(community.id));
+  }
 }
 
 export function* launchCommunitySaga(
