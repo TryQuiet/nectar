@@ -12,6 +12,11 @@ export const selectById = (id: string) =>
     communitiesAdapter.getSelectors().selectById(reducerState.communities, id)
   );
 
+export const allCommunities = createSelector(
+  communitiesSlice,
+  (reducerState) => reducerState.communities
+);
+
 export const currentCommunity = createSelector(
   communitiesSlice,
   (reducerState) => {
@@ -39,13 +44,14 @@ export const registrarUrl = createSelector(currentCommunity, (community) => {
 });
 
 export const isOwner = createSelector(currentCommunity, (community) => {
-  return community && community.CA !== null
-})
+  return community && community.CA !== null;
+});
 
 export const communitiesSelectors = {
   selectById,
+  allCommunities,
   currentCommunityId,
   currentCommunity,
   registrarUrl,
-  isOwner
+  isOwner,
 };

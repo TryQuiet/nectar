@@ -1,9 +1,9 @@
 import { Socket } from 'socket.io-client';
-import { all, takeEvery } from 'typed-redux-saga';
+import { all, fork, takeEvery } from 'typed-redux-saga';
 import { communitiesActions } from './communities.slice';
 import { createCommunitySaga } from './createCommunity/createCommunity.saga';
 import { joinCommunitySaga } from './joinCommunity/joinCommunity.saga';
-import { launchCommunitySaga } from './launchCommunity/launchCommunity.saga';
+import { initCommunities, launchCommunitySaga } from './launchCommunity/launchCommunity.saga';
 import { launchRegistrarSaga } from './launchRegistrar/launchRegistrar.saga';
 import { responseCreateCommunitySaga } from './responseCreateCommunity/responseCreateCommunity.saga';
 
@@ -24,6 +24,7 @@ export function* communitiesMasterSaga(socket: Socket): Generator {
       launchRegistrarSaga,
       socket
     ),
+    fork(initCommunities),
     takeEvery(
       communitiesActions.launchCommunity.type,
       launchCommunitySaga,
