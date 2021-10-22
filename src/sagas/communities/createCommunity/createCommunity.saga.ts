@@ -5,7 +5,6 @@ import { call, apply, put } from 'typed-redux-saga';
 import { communitiesActions } from '../communities.slice';
 import { SocketActionTypes } from '../../socket/const/actionTypes';
 import { generateId } from '../../../utils/cryptography/cryptography';
-// import { publicChannelsActions } from '../../publicChannels/publicChannels.slice';
 import { PayloadAction } from '@reduxjs/toolkit';
 import { publicChannelsActions } from '../../publicChannels/publicChannels.slice';
 
@@ -29,9 +28,15 @@ export function* createCommunitySaga(
   };
   yield* put(communitiesActions.addNewCommunity(payload));
   yield* put(publicChannelsActions.addPublicChannelsList(id))
-  yield* put(publicChannelsActions.createChannel({communityId:id}))
+  const channel = {
+    name: 'general',
+    description: 'asdffghfghdsf',
+    owner: 'asfghfghdf',
+    timestamp: 12333333,
+    address: 'asdf',
+  };
+  yield* put(publicChannelsActions.createChannel({communityId:id, channel}))
   yield* put(communitiesActions.setCurrentCommunity(id));
-  // yield* put(publicChannelsActions.addPublicChannelsList({id}))
 
   yield* apply(socket, socket.emit, [SocketActionTypes.CREATE_NETWORK, id]);
 }

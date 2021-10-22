@@ -25,7 +25,7 @@ export const currentCommunityChannels = createSelector(
     const id = communitiesState.currentCommunity;
     const selected = channelsByCommunityAdapter
       .getSelectors()
-      .selectById(publicChannelsState.channels, id);
+      .selectById(publicChannelsState, id);
     return selected || null;
   }
 );
@@ -40,14 +40,6 @@ export const publicChannels = createSelector(
   }
 );
 
-// export const publicChannels = createSelector(
-//   publicChannelSlice,
-//   (reducerState) => {
-//     return publicChannelsAdapter
-//       .getSelectors()
-//       .selectAll(reducerState.channels);
-//   }
-// );
 
 export const ZbayChannel = createSelector(
   currentCommunityChannels,

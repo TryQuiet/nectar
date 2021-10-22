@@ -14,7 +14,7 @@ export function* joinCommunitySaga(
   const payload = { id: id, name: '', CA: {}, registrarUrl: action.payload };
   yield* put(communitiesActions.addNewCommunity(payload));
   yield* put(publicChannelsActions.addPublicChannelsList(id))
-  yield* put(publicChannelsActions.createChannel({communityId:id}))
+  // yield* put(publicChannelsActions.createChannel({communityId:id}))
   yield* put(communitiesActions.setCurrentCommunity(id));
   yield* apply(socket, socket.emit, [SocketActionTypes.CREATE_NETWORK, id]);
 }

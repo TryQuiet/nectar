@@ -2,6 +2,7 @@ import { Socket } from 'socket.io-client';
 import { all, fork, takeEvery } from 'typed-redux-saga';
 import { askForMessagesSaga } from './askForMessages/askForMessages.saga';
 import { checkForMessagesSaga } from './checkForMessages/checkForMessages.saga';
+import { createChannelSaga } from './createChannel/createChannel.saga';
 import {
   getPublicChannelsSaga,
   loadPublicChannelsSaga,
@@ -22,13 +23,18 @@ export function* publicChannelsMasterSaga(socket: Socket): Generator {
       subscribeForTopicSaga,
       socket
     ),
-    // takeEvery(
-    //   publicChannelsActions.responseSendMessagesIds.type,
-    //   checkForMessagesSaga
-    // ),
+    takeEvery(
+      publicChannelsActions.responseSendMessagesIds.type,
+      checkForMessagesSaga
+    ),
     takeEvery(
       publicChannelsActions.askForMessages.type,
       askForMessagesSaga,
+      socket
+    ),
+    takeEvery(
+      publicChannelsActions.createChannel.type,
+      createChannelSaga,
       socket
     ),
   ]);
