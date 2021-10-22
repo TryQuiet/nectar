@@ -14,8 +14,16 @@ export const selectById = (id: string) =>
 
 export const allCommunities = createSelector(
   communitiesSlice,
-  (reducerState) => reducerState.communities
+  (reducerState) => {
+    return communitiesAdapter
+      .getSelectors()
+      .selectAll(reducerState.communities);
+  }
 );
+
+export const ownCommunities = createSelector(allCommunities, (communities) => {
+  return communities.filter((community) => community.CA !== null);
+});
 
 export const currentCommunity = createSelector(
   communitiesSlice,
@@ -50,6 +58,7 @@ export const isOwner = createSelector(currentCommunity, (community) => {
 export const communitiesSelectors = {
   selectById,
   allCommunities,
+  ownCommunities,
   currentCommunityId,
   currentCommunity,
   registrarUrl,

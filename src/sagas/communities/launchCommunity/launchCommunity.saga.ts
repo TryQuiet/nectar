@@ -10,8 +10,8 @@ import { communitiesActions } from '../communities.slice';
 export function* initCommunities(): Generator {
   const communities = yield* select(communitiesSelectors.allCommunities);
   yield* all(
-    communities.ids.map((id: string) => {
-      put(communitiesActions.launchCommunity(id));
+    communities.map(community => {
+      put(communitiesActions.launchCommunity(community.id));
     })
   );
 }
@@ -22,15 +22,13 @@ export function* launchCommunitySaga(
     ReturnType<typeof communitiesActions.launchCommunity>['payload']
   >
 ): Generator {
-  let communityId: string = action.payload
+  let communityId: string = action.payload;
 
-  if(!communityId) {
-    communityId = yield* select(communitiesSelectors.currentCommunityId)
+  if (!communityId) {
+    communityId = yield* select(communitiesSelectors.currentCommunityId);
   }
 
-  const community = yield* select(
-    communitiesSelectors.selectById(communityId)
-  );
+  const community = yield* select(communitiesSelectors.selectById(communityId));
   const identity = yield* select(identitySelectors.selectById(communityId));
 
   const cert = identity.userCertificate;
