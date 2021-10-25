@@ -12,7 +12,11 @@ import {
   CommunitiesState,
 } from '../communities.slice';
 import { communitiesAdapter } from '../communities.adapter';
-import { Identity, identityReducer } from '../../identity/identity.slice';
+import {
+  Identity,
+  identityReducer,
+  IdentityState,
+} from '../../identity/identity.slice';
 
 describe('launchRegistrar', () => {
   test('launch all owned registrars', async () => {
@@ -97,9 +101,11 @@ describe('launchRegistrar', () => {
             ),
           },
           [StoreKeys.Identity]: {
-            ...identityAdapter.setAll(identityAdapter.getInitialState(), [
-              identity,
-            ]),
+            ...new IdentityState(),
+            identities: identityAdapter.setAll(
+              identityAdapter.getInitialState(),
+              [identity]
+            ),
           },
         }
       )
@@ -154,9 +160,11 @@ describe('launchRegistrar', () => {
             ),
           },
           [StoreKeys.Identity]: {
-            ...identityAdapter.setAll(identityAdapter.getInitialState(), [
-              identity,
-            ]),
+            ...new IdentityState(),
+            identities: identityAdapter.setAll(
+              identityAdapter.getInitialState(),
+              [identity]
+            ),
           },
         }
       )
@@ -211,9 +219,11 @@ describe('launchRegistrar', () => {
             ),
           },
           [StoreKeys.Identity]: {
-            ...identityAdapter.setAll(identityAdapter.getInitialState(), [
-              identity,
-            ]),
+            ...new IdentityState(),
+            identities: identityAdapter.setAll(
+              identityAdapter.getInitialState(),
+              [identity]
+            ),
           },
         }
       )
@@ -268,9 +278,11 @@ describe('launchRegistrar', () => {
             ),
           },
           [StoreKeys.Identity]: {
-            ...identityAdapter.setAll(identityAdapter.getInitialState(), [
-              identity,
-            ]),
+            ...new IdentityState(),
+            identities: identityAdapter.setAll(
+              identityAdapter.getInitialState(),
+              [identity]
+            ),
           },
         }
       )

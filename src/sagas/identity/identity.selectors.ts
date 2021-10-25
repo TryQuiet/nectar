@@ -10,7 +10,7 @@ const identitySlice: CreatedSelectors[StoreKeys.Identity] = (
 
 export const selectById = (id: string) =>
   createSelector(identitySlice, (reducerState) =>
-    identityAdapter.getSelectors().selectById(reducerState, id)
+    identityAdapter.getSelectors().selectById(reducerState.identities, id)
   );
 
 export const currentIdentity = createSelector(
@@ -19,7 +19,7 @@ export const currentIdentity = createSelector(
   (currentCommunityId, reducerState) => {
     return identityAdapter
       .getSelectors()
-      .selectById(reducerState, currentCommunityId);
+      .selectById(reducerState.identities, currentCommunityId);
   }
 );
 

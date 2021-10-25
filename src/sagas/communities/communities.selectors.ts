@@ -22,14 +22,13 @@ export const allCommunities = createSelector(
 );
 
 export const ownCommunities = createSelector(allCommunities, (communities) => {
-  return communities.filter((community) => community.CA !== null);
+  return communities?.filter((community) => community.CA !== null) || []
 });
 
 export const currentCommunity = createSelector(
   communitiesSlice,
   (reducerState) => {
     const id = reducerState.currentCommunity;
-    // console.log('communitnies', reducerState.communities);
     return communitiesAdapter
       .getSelectors()
       .selectById(reducerState.communities, id);
