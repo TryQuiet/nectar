@@ -1,4 +1,4 @@
-import { apply, select, all, put } from 'typed-redux-saga';
+import { apply, select} from 'typed-redux-saga';
 import { PayloadAction } from '@reduxjs/toolkit';
 import { Socket } from 'socket.io-client';
 import { SocketActionTypes } from '../../socket/const/actionTypes';
@@ -6,13 +6,6 @@ import { identitySelectors } from '../../identity/identity.selectors';
 
 import { communitiesSelectors } from '../communities.selectors';
 import { communitiesActions } from '../communities.slice';
-
-export function* initRegistrars(): Generator {
-  const ownCommunities = yield* select(communitiesSelectors.ownCommunities);
-  for (const community of ownCommunities) {
-    yield* put(communitiesActions.launchRegistrar(community.id));
-  }
-}
 
 export function* launchRegistrarSaga(
   socket: Socket,

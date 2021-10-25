@@ -27,6 +27,7 @@ import { errorsMasterSaga } from '../../errors/errors.master.saga';
 import {
   communitiesActions,
   ResponseCreateCommunityPayload,
+  ResponseLaunchCommunityPayload,
   ResponseRegistrarPayload,
 } from '../../communities/communities.slice';
 import { appMasterSaga } from '../../app/app.master.saga'
@@ -103,7 +104,7 @@ export function subscribe(socket: Socket) {
     socket.on(
       SocketActionTypes.REGISTRAR,
       (payload: ResponseRegistrarPayload) => {
-        log('created Registrar');
+        log('created REGISTRAR');
         log(payload);
         emit(communitiesActions.responseRegistrar(payload));
         emit(identityActions.saveOwnerCertToDb());
@@ -114,10 +115,10 @@ export function subscribe(socket: Socket) {
       log(payload);
       emit(communitiesActions.responseCreateCommunity(payload));
     });
-    socket.on(SocketActionTypes.COMMUNITY, (payload: any) => {
-      log('COMMUNITY');
+    socket.on(SocketActionTypes.COMMUNITY, (payload: ResponseLaunchCommunityPayload) => {
+      log('launched COMMUNITY');
       log(payload);
-      emit(communitiesActions.community());
+      emit(communitiesActions.launchRegistrar(payload.id));
     });
     socket.on(
       SocketActionTypes.ERROR,

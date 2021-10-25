@@ -75,6 +75,10 @@ export interface ResponseCreateCommunityPayload {
   payload: Partial<Identity>;
 }
 
+export interface ResponseLaunchCommunityPayload {
+  id: string;
+}
+
 export const communitiesSlice = createSlice({
   initialState: { ...new CommunitiesState() },
   name: StoreKeys.Communities,

@@ -4,7 +4,7 @@ import { communitiesActions } from './communities.slice';
 import { createCommunitySaga } from './createCommunity/createCommunity.saga';
 import { joinCommunitySaga } from './joinCommunity/joinCommunity.saga';
 import { initCommunities, launchCommunitySaga } from './launchCommunity/launchCommunity.saga';
-import { initRegistrars, launchRegistrarSaga } from './launchRegistrar/launchRegistrar.saga';
+import { launchRegistrarSaga } from './launchRegistrar/launchRegistrar.saga';
 import { responseCreateCommunitySaga } from './responseCreateCommunity/responseCreateCommunity.saga';
 
 export function* communitiesMasterSaga(socket: Socket): Generator {
@@ -19,16 +19,15 @@ export function* communitiesMasterSaga(socket: Socket): Generator {
       socket
     ),
     takeEvery(communitiesActions.joinCommunity.type, joinCommunitySaga, socket),
-    fork(initRegistrars),
-    takeEvery(
-      communitiesActions.launchRegistrar.type,
-      launchRegistrarSaga,
-      socket
-    ),
     fork(initCommunities),
     takeEvery(
       communitiesActions.launchCommunity.type,
       launchCommunitySaga,
+      socket
+    ),
+    takeEvery(
+      communitiesActions.launchRegistrar.type,
+      launchRegistrarSaga,
       socket
     ),
     takeEvery(communitiesActions.community.type, launchRegistrarSaga, socket),

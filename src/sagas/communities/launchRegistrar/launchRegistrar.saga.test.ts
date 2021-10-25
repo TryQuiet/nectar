@@ -2,7 +2,7 @@ import { expectSaga } from 'redux-saga-test-plan';
 import { Socket } from 'socket.io-client';
 import { SocketActionTypes } from '../../socket/const/actionTypes';
 import { identityAdapter } from '../../identity/identity.adapter';
-import { initRegistrars, launchRegistrarSaga } from './launchRegistrar.saga';
+import { launchRegistrarSaga } from './launchRegistrar.saga';
 import { combineReducers } from '@reduxjs/toolkit';
 import { StoreKeys } from '../../store.keys';
 import {
@@ -19,48 +19,7 @@ import {
 } from '../../identity/identity.slice';
 
 describe('launchRegistrar', () => {
-  test('launch all owned registrars', async () => {
-    const community1 = new Community({
-      name: '',
-      id: 'id-1',
-      registrarUrl: 'registrarUrl',
-      CA: { rootCertString: 'certString', rootKeyString: 'keyString' },
-    });
-
-    const community2 = new Community({
-      name: '',
-      id: 'id-2',
-      registrarUrl: 'registrarUrl',
-      CA: { rootCertString: 'certString', rootKeyString: 'keyString' },
-    });
-
-    const community3 = new Community({
-      name: '',
-      id: 'id-3',
-      registrarUrl: 'registrarUrl',
-      CA: undefined,
-    });
-    await expectSaga(initRegistrars)
-      .withReducer(
-        combineReducers({
-          [StoreKeys.Communities]: communitiesReducer,
-        }),
-        {
-          [StoreKeys.Communities]: {
-            ...new CommunitiesState(),
-            communities: communitiesAdapter.setAll(
-              communitiesAdapter.getInitialState(),
-              [community1, community2, community3]
-            ),
-          },
-        }
-      )
-      .put(communitiesActions.launchRegistrar(community1.id))
-      .put(communitiesActions.launchRegistrar(community2.id))
-      .not.put(communitiesActions.launchRegistrar(community3.id))
-      .run();
-  });
-  test("launch certain registrar instead of current community's registrar", async () => {
+  test('launch certain registrar instead of current community\'s registrar', async () => {
     const socket = { emit: jest.fn(), on: jest.fn() } as unknown as Socket;
     const community = new Community({
       name: '',
@@ -178,7 +137,7 @@ describe('launchRegistrar', () => {
       ])
       .run();
   });
-  test("launch registrar if user is current community's owner", async () => {
+  test('launch registrar if user is current community\'s owner', async () => {
     const socket = { emit: jest.fn(), on: jest.fn() } as unknown as Socket;
     const community = new Community({
       name: '',
@@ -237,7 +196,7 @@ describe('launchRegistrar', () => {
       ])
       .run();
   });
-  test("do not attempt to launch registrar if user is not current community's owner", async () => {
+  test('do not attempt to launch registrar if user is not current community\'s owner', async () => {
     const socket = { emit: jest.fn(), on: jest.fn() } as unknown as Socket;
     const community = new Community({
       name: '',

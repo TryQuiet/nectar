@@ -6,8 +6,9 @@ const log = Object.assign(debug('tests'), {
 });
 
 const cases = [
-  communityTestCases.communityTestOfflineRegistrar,
-  communityTestCases.communityTestWithTor,
+  // communityTestCases.communityTestOfflineRegistrar,
+  // communityTestCases.communityTestWithTor,
+  communityTestCases.communityTestLaunch
 ]
 
 function testCaseReducer(

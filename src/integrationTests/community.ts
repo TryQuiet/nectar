@@ -1,13 +1,23 @@
 import { createAction } from '@reduxjs/toolkit';
 import assert from 'assert';
+import { StoreKeys } from '../sagas/store.keys';
 import { delay, fork, put, select, take } from 'typed-redux-saga';
 import { identity } from '../index';
+import { communitiesAdapter } from '../sagas/communities/communities.adapter';
 import { communitiesSelectors } from '../sagas/communities/communities.selectors';
-import { communitiesActions } from '../sagas/communities/communities.slice';
+import {
+  communitiesActions,
+  CommunitiesState,
+  Community,
+} from '../sagas/communities/communities.slice';
 import { errorsSelectors } from '../sagas/errors/errors.selectors';
 import { errorsActions } from '../sagas/errors/errors.slice';
 import { identitySelectors } from '../sagas/identity/identity.selectors';
-import { identityActions } from '../sagas/identity/identity.slice';
+import {
+  Identity,
+  identityActions,
+  IdentityState,
+} from '../sagas/identity/identity.slice';
 import { SocketActionTypes } from '../sagas/socket/const/actionTypes';
 import { usersSelectors } from '../sagas/users/users.selectors';
 import logger from '../utils/logger';
@@ -22,6 +32,7 @@ import {
   userIsReady,
   watchResults,
 } from './utils';
+import { identityAdapter } from '../sagas/identity/identity.adapter';
 const log = logger('tests');
 
 function* putAction(actionName: string) {
@@ -127,7 +138,7 @@ const getCommunityOwnerData = (ownerStore: any) => {
   const ownerStoreState = ownerStore.getState();
   const community =
     ownerStoreState.Communities.communities.entities[
-    ownerStoreState.Communities.currentCommunity
+      ownerStoreState.Communities.currentCommunity
     ];
   const registrarAddress = `http://${community.onionAddress}`;
   const ownerIdentityState = ownerStore.getState().Identity;
@@ -302,7 +313,7 @@ function* tryToJoinOfflineRegistrarTestSaga(): Generator {
   yield* take(errorsActions.addError);
   const registrarError = (yield* select(
     errorsSelectors.currentCommunityErrorsByType
-  ))[SocketActionTypes.REGISTRAR]
+  ))[SocketActionTypes.REGISTRAR];
   assertNotEmpty(registrarError, 'Registrar error');
   assert.equal(registrarError.communityId, currentCommunityId);
   assert.equal(registrarError.code, 500);
@@ -320,9 +331,68 @@ const testUserTriesToJoinOfflineCommunity = async (testCase) => {
   app.runSaga(integrationTest, tryToJoinOfflineRegistrarTestSaga);
 };
 
+function* launchCommunitiesOnStartupSaga(communitiesAmount: number): Generator {
+  console.log('inside test');
+  const launched = jest.spyOn(communitiesActions, 'community');
+  console.log('im a spy', launched);
+  expect(launched).toBeCalledTimes(communitiesAmount);
+  yield* put(createAction('testFinished')());
+}
+
+const testLaunchCommunitiesOnStartup = async (testCase) => {
+  const community = new Community({
+    name: 'communityName',
+    id: 'id',
+    CA: { rootCertString: 'certString', rootKeyString: 'keyString' },
+    registrarUrl: '',
+  });
+
+  const identity = new Identity({
+    id: 'id',
+    hiddenService: { onionAddress: 'onionAddress', privateKey: 'privateKey' },
+    dmKeys: { publicKey: 'publicKey', privateKey: 'privateKey' },
+    peerId: { id: 'peerId', pubKey: 'pubKey', privKey: 'privKey' },
+  });
+
+  const userCsr = {
+    userCsr: 'userCsr',
+    userKey: 'userKey',
+    pkcs10: {
+      publicKey: 'publicKey',
+      privateKey: 'privateKey',
+      pkcs10: 'pkcs10',
+    },
+  };
+
+  identity.userCsr = userCsr;
+  identity.userCertificate = 'userCert';
+
+  const app = await createApp({
+    [StoreKeys.Communities]: {
+      ...new CommunitiesState(),
+      communities: {
+        ...communitiesAdapter.setAll(communitiesAdapter.getInitialState(), [
+          community,
+        ]),
+      },
+    },
+    [StoreKeys.Identity]: {
+      ...new IdentityState(),
+      identities: {
+        ...identityAdapter.setAll(identityAdapter.getInitialState(), [
+          identity,
+        ]),
+      },
+    },
+  });
+
+  app.runSaga(integrationTest, launchCommunitiesOnStartupSaga);
+};
+
 export default {
   communityTestOfflineRegistrar: testUserTriesToJoinOfflineCommunity,
   communityTestWithTor: testUsersCreateAndJoinCommunitySuccessfully,
   communityTestWithoutTor:
     testUsersCreateAndJoinCommunitySuccessfullyWithoutTor,
+  communityTestLaunch: testLaunchCommunitiesOnStartup,
 };
