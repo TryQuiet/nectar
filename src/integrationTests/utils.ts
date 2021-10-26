@@ -151,7 +151,7 @@ const connectToDataport = (url: string, name: string): Socket => {
     log(`websocket connection is ready for app ${name}`);
   });
   socket.on('disconnect', () => {
-    log(`socket disconnected is for app ${name}`);
+    log(`socket disconnected for app ${name}`);
     socket.close();
   });
   return socket;

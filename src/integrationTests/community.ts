@@ -34,7 +34,6 @@ import {
 } from './utils';
 import { identityAdapter } from '../sagas/identity/identity.adapter';
 import { UserCsr } from '@zbayapp/identity/lib/requestCertificate';
-import { CommunityManager } from '../../../waggle/lib';
 
 const log = logger('tests');
 
@@ -335,6 +334,10 @@ const testUserTriesToJoinOfflineCommunity = async (testCase) => {
 };
 
 function* launchCommunitiesOnStartupSaga(communitiesAmount: number): Generator {
+  yield* fork(assertNoErrors);
+  yield* take(communitiesActions.launchRegistrar);
+  yield* take(communitiesActions.responseRegistrar);
+  // TODO: add assertions
   yield* put(createAction('testFinished')());
 }
 
@@ -342,7 +345,10 @@ const testLaunchCommunitiesOnStartup = async (testCase) => {
   const community = new Community({
     name: 'communityName',
     id: 'id',
-    CA: 'MIIBTTCB8wIBATAKBggqhkjOPQQDAjASMRAwDgYDVQQDEwdaYmF5IENBMB4XDTEwMTIyODEwMTAxMFoXDTMwMTIyODEwMTAxMFowEjEQMA4GA1UEAxMHWmJheSBDQTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABPX+UupXOLEZGsM+2ZSTBLnn1tYTraMW2jqz+PLd8iuxPnXlf17sYUMh+xRkwr0ZK0gFJzM0WojewpDPF4RHFLqjPzA9MA8GA1UdEwQIMAYBAf8CAQMwCwYDVR0PBAQDAgCGMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATAKBggqhkjOPQQDAgNJADBGAiEAklQrkfh6RLNj+dawO5bOU1AffnGR8liq/fSr0U5sSn0CIQCRhfZxIxM1qDveJGtY0wNCpHZEl+UnXn9U7XOsMu/wYA==',
+    CA: {
+      rootCertString: "MIIBTTCB8wIBATAKBggqhkjOPQQDAjASMRAwDgYDVQQDEwdaYmF5IENBMB4XDTEwMTIyODEwMTAxMFoXDTMwMTIyODEwMTAxMFowEjEQMA4GA1UEAxMHWmJheSBDQTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABPX+UupXOLEZGsM+2ZSTBLnn1tYTraMW2jqz+PLd8iuxPnXlf17sYUMh+xRkwr0ZK0gFJzM0WojewpDPF4RHFLqjPzA9MA8GA1UdEwQIMAYBAf8CAQMwCwYDVR0PBAQDAgCGMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATAKBggqhkjOPQQDAgNJADBGAiEAklQrkfh6RLNj+dawO5bOU1AffnGR8liq/fSr0U5sSn0CIQCRhfZxIxM1qDveJGtY0wNCpHZEl+UnXn9U7XOsMu/wYA==",
+      rootKeyString: "MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgRMHbInrFakg3vXEsHX1aKTlj+3LxXsYNYpsmHQYl8begCgYIKoZIzj0DAQehRANCAAT1/lLqVzixGRrDPtmUkwS559bWE62jFto6s/jy3fIrsT515X9e7GFDIfsUZMK9GStIBSczNFqI3sKQzxeERxS6"
+    },
     registrarUrl: '',
   });
 
@@ -375,8 +381,8 @@ const testLaunchCommunitiesOnStartup = async (testCase) => {
     userKey:
       'MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgrW84gHtf8i01krddbjAbhB3AB27xsGV+iUeNqZiKc+CgCgYIKoZIzj0DAQehRANCAAS2dbszx01KQW10y9xnwMHUOR5DfxDLekYtS5kxxUlG6W/gN+OtsGAhdhBqrQ9WwOsKgXE6J2gJFCtPUEdVGMnh',
     pkcs10: {
-      publicKey: {} as CryptoKey,
-      privateKey: {} as CryptoKey,
+      publicKey: {},
+      privateKey: {},
       pkcs10: {
         tbs: '308201640201003049314730450603550403133E7037776975617479707477346E6767716A377570337578367A796D34686A6A70756D353577656A7467796D6B326E7773706C6273687479642E6F6E696F6E3059301306072A8648CE3D020106082A8648CE3D03010703420004B675BB33C74D4A416D74CBDC67C0C1D4391E437F10CB7A462D4B9931C54946E96FE037E3ADB0602176106AAD0F56C0EB0A81713A276809142B4F50475518C9E1A081B8302E06092A864886F70D01090E3121301F301D0603551D0E04160414294EA2C23BD4E0358287F2F6E7C9A2659E343981302F06092A864886F70D01090C312204200BD934B164FDBF09A2675233BD9D5C396CE3A5944F92485C8C98B72EC3148F513016060A2B06010401838C1B02013108130677696B746F72303D06092B060102010F0301013130132E516D64693862553347507468746E76324C415A48705139796D5847386D4166396471676D55357363377066546873',
         version: 0,
@@ -455,8 +461,12 @@ const testLaunchCommunitiesOnStartup = async (testCase) => {
     },
   });
 
-  // @ts-ignore
-  app.store.dispatch({ type: 'testFinished' });
+  watchResults(
+    [app],
+    app,
+    'Community and registrar are launched when user reopens the app'
+  );
+  app.runSaga(integrationTest, launchCommunitiesOnStartupSaga)
 };
 
 export default {
