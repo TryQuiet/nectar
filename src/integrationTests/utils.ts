@@ -65,12 +65,14 @@ function testReducer(
   }
 }
 
-export function* integrationTest(saga, ...args: any[]): Generator {
+
+
+export function* integrationTest(saga: any, ...args: any[]): Generator {
   /**
    *  Integration test saga wrapper for catching errors
    */
   try {
-    yield* call(saga, ...args);
+    yield* saga(...args);
   } catch (e) {
     yield* put({ type: 'testFailed', payload: e.message });
   }
@@ -201,7 +203,7 @@ export const createApp = async (
     yield* take(createAction('testFinished'));
     yield* put(appActions.closeServices());
   }
-  return { store, runSaga, rootTask };
+  return { store, runSaga, rootTask, manager };
 };
 
 export const createAppWithoutTor = async (
@@ -254,7 +256,7 @@ export const createAppWithoutTor = async (
     yield* put(appActions.closeServices());
   }
 
-  return { store, runSaga, rootTask };
+  return { store, runSaga, rootTask, manager };
 };
 
 export const assertListElementMatches = (actual: any[], match: RegExp) => {
