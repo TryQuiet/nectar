@@ -8,10 +8,19 @@ import { subscribeForTopicSaga } from './subscribeForTopic.saga';
 
 describe('subscribeForTopicSaga', () => {
   const socket = { emit: jest.fn() } as unknown as Socket;
+
+  const channel = {
+    name: 'general',
+    description: 'stuff',
+    owner: 'nobody',
+    timestamp: 666999666,
+    address: 'hell on the shore of the baltic sea',
+  }
+
   const saga: TestApi = testSaga(
     subscribeForTopicSaga,
     socket,
-    publicChannelsActions.subscribeForTopic(<IChannelInfo>{})
+    publicChannelsActions.subscribeForTopic({peerId: 'string', channelData: channel})
   );
 
   beforeEach(() => {

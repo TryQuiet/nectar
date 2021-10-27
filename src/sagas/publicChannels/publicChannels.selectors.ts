@@ -10,6 +10,7 @@ import { certificatesMapping } from '../users/users.selectors';
 import { mainChannelName } from '../config';
 import { StoreState } from '../store.types';
 import { communitiesSelectors } from '../communities/communities.selectors';
+import { publicChannelsSlice } from './publicChannels.slice';
 
 const publicChannelSlice: CreatedSelectors[StoreKeys.PublicChannels] = (
   state: StoreState
@@ -39,6 +40,16 @@ export const publicChannels = createSelector(
     return [];
   }
 );
+
+export const publicChannelsByCommunityId = (id: string) => createSelector(publicChannelSlice,
+  (publicChannelsState) => {
+    const selected = channelsByCommunityAdapter
+    .getSelectors()
+    .selectById(publicChannelsState, id);
+    const channels = publicChannelsAdapter.getSelectors().selectAll(selected.channels)
+    return channels || []
+  }
+)
 
 
 export const ZbayChannel = createSelector(
@@ -132,6 +143,7 @@ export const currentChannelDisplayableMessages = createSelector(
 
 export const publicChannelsSelectors = {
   publicChannels,
+  publicChannelsByCommunityId,
   ZbayChannel,
   currentChannel,
   channelMessages,

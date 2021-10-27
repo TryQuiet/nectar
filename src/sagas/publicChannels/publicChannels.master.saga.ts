@@ -8,7 +8,9 @@ import {
   loadPublicChannelsSaga,
 } from './getPublicChannels/getPublicChannels.saga';
 import { publicChannelsActions } from './publicChannels.slice';
+import { communitiesActions } from '../communities/communities.slice';
 import { subscribeForTopicSaga } from './subscribeForTopic/subscribeForTopic.saga';
+import { subscribeForAllTopicsSaga } from './subscribeForAllTopics/subscribeForAllTopics.saga';
 
 export function* publicChannelsMasterSaga(socket: Socket): Generator {
   yield all([
@@ -33,9 +35,13 @@ export function* publicChannelsMasterSaga(socket: Socket): Generator {
       socket
     ),
     takeEvery(
-      publicChannelsActions.createChannel.type,
-      createChannelSaga,
-      socket
+      communitiesActions.community.type,
+      subscribeForAllTopicsSaga,
     ),
+    // takeEvery(
+    //   publicChannelsActions.createChannel.type,
+    //   createChannelSaga,
+    //   socket
+    // ),
   ]);
 }

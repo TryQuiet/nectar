@@ -1,5 +1,6 @@
 import { createAction } from '@reduxjs/toolkit';
 import assert from 'assert';
+import { publicChannelsSelectors } from '../sagas/publicChannels/publicChannels.selectors';
 import { delay, fork, put, select, take } from 'typed-redux-saga';
 import { identity } from '../index';
 import { communitiesSelectors } from '../sagas/communities/communities.selectors';
@@ -45,6 +46,27 @@ function* assertReceivedCertificates(
   );
   log(`User ${userName} received all certificates`);
   runTestCaseSaga(putAction, 'userReplicatedCertificates');
+}
+
+
+function* assertReceivedChannels(  runTestCaseSaga,
+  userName: string,
+  expectedCount: number,
+  maxTime: number = 600000) {
+
+  log(`User ${userName} starts waiting ${maxTime}ms for certificates`);
+  yield delay(maxTime);
+  const community = yield* select(identitySelectors.currentIdentity)
+  const channels = yield* select(publicChannelsSelectors.publicChannelsByCommunityId(community.id));
+  const channelsCount = Object.keys(channels).length;
+  // assert.equal(
+  //   channelsCount,
+  //   expectedCount,
+  //   `User ${userName} received ${channelsCount} channels after ${maxTime}ms, expected ${expectedCount}`
+  // );
+  log(`channelsCount is ${channelsCount}`)
+  log(`User ${userName} received all channels`);
+  runTestCaseSaga(putAction, 'userReplicatedChannels');
 }
 
 function* createCommunityTestSaga(payload): Generator {
@@ -184,6 +206,27 @@ const testUsersCreateAndJoinCommunitySuccessfully = async (testCase) => {
         'Owner',
         3
       );
+      user2.runSaga(
+        integrationTest,
+        assertReceivedChannels,
+        testCase.runSaga,
+        'User2',
+        1
+      );
+      user1.runSaga(
+        integrationTest,
+        assertReceivedChannels,
+        testCase.runSaga,
+        'User1',
+        1
+      );
+      owner.runSaga(
+        integrationTest,
+        assertReceivedChannels,
+        testCase.runSaga,
+        'Owner',
+        1
+      );
     }
   });
 
@@ -203,7 +246,7 @@ const testUsersCreateAndJoinCommunitySuccessfully = async (testCase) => {
     // Check if all users replicated certificates. If so, finish the test
     if (
       testCase.store.getState().Test.usersWithReplicatedCertificates ===
-      allUsers.length
+      allUsers.length && testCase.store.getState().Test.usersWithReplicatedChannels === 1
     ) {
       testCaseUnsubscribe();
       user2.runSaga(finishTestSaga);
@@ -243,6 +286,7 @@ const testUsersCreateAndJoinCommunitySuccessfullyWithoutTor = async (
       user2.runSaga(
         integrationTest,
         assertReceivedCertificates,
+        
         testCase.runSaga,
         'User2',
         3
@@ -250,6 +294,7 @@ const testUsersCreateAndJoinCommunitySuccessfullyWithoutTor = async (
       user1.runSaga(
         integrationTest,
         assertReceivedCertificates,
+        
         testCase.runSaga,
         'User1',
         3
@@ -257,6 +302,7 @@ const testUsersCreateAndJoinCommunitySuccessfullyWithoutTor = async (
       owner.runSaga(
         integrationTest,
         assertReceivedCertificates,
+  
         testCase.runSaga,
         'Owner',
         3
@@ -280,7 +326,7 @@ const testUsersCreateAndJoinCommunitySuccessfullyWithoutTor = async (
     // Check if all users replicated certificates. If so, finish the test
     if (
       testCase.store.getState().Test.usersWithReplicatedCertificates ===
-      allUsers.length
+      allUsers.length && testCase.store.getState().Test.usersWithReplicatedChannels === 1
     ) {
       testCaseUnsubscribe();
       user2.runSaga(finishTestSaga);

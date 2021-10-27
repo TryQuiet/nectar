@@ -6,12 +6,12 @@ import logger from '../../../utils/logger'
 const log = logger('socket')
 
 // import { nativeServicesActions } from '../../nativeServices/nativeServices.slice';
-// import {
-//   AskForMessagesResponse,
-//   ChannelMessagesIdsResponse,
-//   GetPublicChannelsResponse,
-//   publicChannelsActions,
-// } from '../../publicChannels/publicChannels.slice';
+import {
+  AskForMessagesResponse,
+  ChannelMessagesIdsResponse,
+  GetPublicChannelsResponse,
+  publicChannelsActions,
+} from '../../publicChannels/publicChannels.slice';
 import { publicChannelsMasterSaga } from '../../publicChannels/publicChannels.master.saga';
 import { ErrorPayload, errorsActions } from '../../errors/errors.slice';
 import { identityActions } from '../../identity/identity.slice';
@@ -65,12 +65,12 @@ export function subscribe(socket: Socket) {
     | ReturnType<typeof communitiesActions.storePeerList>
     | ReturnType<typeof communitiesActions.updateCommunity>
   >((emit) => {
-    // socket.on(
-    //   SocketActionTypes.RESPONSE_GET_PUBLIC_CHANNELS,
-    //   (payload: GetPublicChannelsResponse) => {
-    //     emit(publicChannelsActions.responseGetPublicChannels(payload));
-    //   }
-    // );
+    socket.on(
+      SocketActionTypes.RESPONSE_GET_PUBLIC_CHANNELS,
+      (payload: GetPublicChannelsResponse) => {
+        emit(publicChannelsActions.responseGetPublicChannels(payload));
+      }
+    );
     // socket.on(
     //   SocketActionTypes.SEND_MESSAGES_IDS,
     //   (payload: ChannelMessagesIdsResponse) => {
@@ -117,7 +117,7 @@ export function subscribe(socket: Socket) {
     socket.on(SocketActionTypes.COMMUNITY, (payload: any) => {
       log('COMMUNITY');
       log(payload);
-      emit(communitiesActions.community());
+      emit(communitiesActions.community(payload));
     });
     socket.on(
       SocketActionTypes.ERROR,

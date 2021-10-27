@@ -53,6 +53,11 @@ export interface AskForMessagesPayload {
   ids: string[];
 }
 
+export interface subscribeForTopicPayload {
+  peerId: string,
+  channelData: IChannelInfo
+}
+
 export interface SetCurrentChannelPayload {
   communityId: string
 channel: string
@@ -99,6 +104,26 @@ export const publicChannelsSlice = createSlice({
         },
       });
     },
+    addChannel: (
+      state,
+      action: PayloadAction<CreateChannelPayload>
+    ) => {
+      const {channel, communityId} = action.payload
+      channelsByCommunityAdapter.updateOne(state, {
+        id: communityId,
+        changes: {
+          channels: publicChannelsAdapter.addOne(
+            state.entities[communityId].channels,
+            channel
+          ),
+          channelMessages: {...state.entities[communityId].channelMessages, 
+          [channel.address]: {
+            ids: [],
+            messages: {}
+          }}
+        },
+      });
+    },
     addPublicChannelsList: (state, action: PayloadAction<string>) => {
       channelsByCommunityAdapter.addOne(
         state,
@@ -110,6 +135,10 @@ export const publicChannelsSlice = createSlice({
       state,
       action: PayloadAction<GetPublicChannelsResponse>
     ) => {
+      console.log('replicated channel into necatar')
+      console.log(action.payload.communityId)
+      console.log(action.payload.channels)
+      console.log({...state.entities})
       channelsByCommunityAdapter.updateOne(state, {
         id: action.payload.communityId,
         changes: {
@@ -130,7 +159,8 @@ export const publicChannelsSlice = createSlice({
         changes: { currentChannel: action.payload.channel },
       });
     },
-    subscribeForTopic: (state, _action: PayloadAction<IChannelInfo>) => state,
+    subscribeForTopic: (state, _action: PayloadAction<subscribeForTopicPayload>) => state,
+    subscribeForAllTopics: (state, _action: PayloadAction<string>) => state,
     responseSendMessagesIds: (
       state,
       action: PayloadAction<ChannelMessagesIdsResponse>
