@@ -6,7 +6,7 @@ import { StoreKeys } from '../../store.keys';
 import { communitiesActions } from '../communities.slice';
 import { responseCreateCommunitySaga } from './responseCreateCommunity.saga';
 import { identityAdapter } from '../../identity/identity.adapter';
-import { identityReducer } from '../../identity/identity.slice';
+import { identityReducer, IdentityState } from '../../identity/identity.slice';
 import { Identity } from '../../identity/identity.slice';
 
 describe('responseCreateCommunity', () => {
@@ -26,7 +26,7 @@ describe('responseCreateCommunity', () => {
       communitiesActions.responseCreateCommunity(responseCreateCommunityPayload)
     )
       .withReducer(combineReducers({ [StoreKeys.Identity]: identityReducer }), {
-        [StoreKeys.Identity]: identityAdapter.getInitialState(),
+        [StoreKeys.Identity]: {...new IdentityState()},
       })
       .provide([
         [call.fn(generateDmKeyPair), { publicKey: 'pub', privateKey: 'priv' }],

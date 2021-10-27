@@ -9,21 +9,17 @@ import { formatMessageDisplayDate } from '../../utils/functions/formatMessageDis
 import { certificatesMapping } from '../users/users.selectors';
 import { mainChannelName } from '../config';
 import { StoreState } from '../store.types';
-import { communitiesSelectors } from '../communities/communities.selectors';
-import { publicChannelsSlice } from './publicChannels.slice';
+import { currentCommunityId } from '../communities/communities.selectors';
+
 
 const publicChannelSlice: CreatedSelectors[StoreKeys.PublicChannels] = (
   state: StoreState
 ) => state[StoreKeys.PublicChannels];
-const communitiesSlice: CreatedSelectors[StoreKeys.Communities] = (
-  state: StoreState
-) => state[StoreKeys.Communities];
 
 export const currentCommunityChannels = createSelector(
   publicChannelSlice,
-  communitiesSlice,
-  (publicChannelsState, communitiesState) => {
-    const id = communitiesState.currentCommunity;
+  currentCommunityId,
+  (publicChannelsState, id) => {
     const selected = channelsByCommunityAdapter
       .getSelectors()
       .selectById(publicChannelsState, id);

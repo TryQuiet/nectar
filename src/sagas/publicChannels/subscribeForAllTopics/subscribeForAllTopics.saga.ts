@@ -8,10 +8,9 @@ export function* subscribeForAllTopicsSaga(
 ): Generator {
 
   console.log('subscribing to all topics after')
-  console.log(`${action.payload.id} is payload`)
+  console.log(`${action.payload} is payload`)
   const identity = yield* select(identitySelectors.currentIdentity)
-  identity.peerId.id
-    const channels = yield* select(publicChannelsSelectors.publicChannelsByCommunityId(action.payload.id));
+    const channels = yield* select(publicChannelsSelectors.publicChannelsByCommunityId(action.payload));
     for (const channel of channels) {
       console.log(`subscribing for ${channel.name}`)
       yield* put(publicChannelsActions.subscribeForTopic({peerId: identity.peerId.id, channelData: channel}));

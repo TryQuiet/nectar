@@ -8,7 +8,7 @@ import {
   publicChannelsActions,
 } from '../publicChannels.slice';
 import {
-  identityReducer, Identity
+  identityReducer, Identity, IdentityState
 } from '../../identity/identity.slice';
 import {
   Community,CommunitiesState, communitiesReducer
@@ -53,9 +53,11 @@ describe('createChannelSaga', () => {
         }),
         {
           [StoreKeys.Identity]: {
-            ...identityAdapter.setAll(identityAdapter.getInitialState(), [
-              identity,
-            ]),
+            ...new IdentityState(),
+            identities: identityAdapter.setAll(
+              identityAdapter.getInitialState(),
+              [identity]
+            ),
           },
           [StoreKeys.Communities]: {
             ...new CommunitiesState(),

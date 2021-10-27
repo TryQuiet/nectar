@@ -12,6 +12,7 @@ export function* createCommunitySaga(
   socket,
   action: PayloadAction<string>
 ): Generator {
+  console.log('createCOmmuity')
   const notBeforeDate = new Date(Date.UTC(2010, 11, 28, 10, 10, 10));
   const notAfterDate = new Date(Date.UTC(2030, 11, 28, 10, 10, 10));
   const rootCa = yield* call(
