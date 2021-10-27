@@ -8,9 +8,17 @@ import {
 } from '../publicChannels.slice';
 import { checkForMessagesSaga } from './checkForMessages.saga';
 import { channelsByCommunityAdapter } from '../publicChannels.adapter';
+import { communitiesReducer, CommunitiesState, Community } from '../../communities/communities.slice';
+import { communitiesAdapter } from '../../communities/communities.adapter';
 
 describe('checkForMessagesSaga', () => {
   let communityChannels = new CommunityChannels('id');
+    const community = new Community({
+      name: '',
+      id: 'id',
+      registrarUrl: 'registrarUrl',
+      CA: {},
+    });
 
   communityChannels.currentChannel =
     'zs10zkaj29rcev9qd5xeuzck4ly5q64kzf6m6h9nfajwcvm8m2vnjmvtqgr0mzfjywswwkwke68t00';
@@ -31,17 +39,27 @@ describe('checkForMessagesSaga', () => {
         },
       },
   }),
+
+
     test('ask for missing messages', () => {
       expectSaga(checkForMessagesSaga)
         .withReducer(
           combineReducers({
-            [StoreKeys.PublicChannels]: publicChannelsReducer,
+            [StoreKeys.PublicChannels]: publicChannelsReducer, [StoreKeys.Communities]: communitiesReducer
           }),
           {
             [StoreKeys.PublicChannels]: {
               ...channelsByCommunityAdapter.setAll(
                 channelsByCommunityAdapter.getInitialState(),
                 [communityChannels]
+              ),
+            },
+            [StoreKeys.Communities]: {
+              ...new CommunitiesState(),
+              currentCommunity: 'id-0',
+              communities: communitiesAdapter.setAll(
+                communitiesAdapter.getInitialState(),
+                [community]
               ),
             },
           }

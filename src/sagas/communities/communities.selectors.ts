@@ -39,7 +39,7 @@ export const currentCommunity = createSelector(
 
 export const currentCommunityId = createSelector(
   communitiesSlice,
-  (reducerState) => reducerState.currentCommunity
+  (reducerState) => {return reducerState.currentCommunity}
 );
 
 export const registrarUrl = createSelector(currentCommunity, (community) => {
