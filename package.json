@@ -57,6 +57,7 @@
     "waggle": "^4.3.3"
   },
   "jest": {
+    "extensionsToTreatAsEsm": [".ts"],
     "moduleFileExtensions": [
       "ts",
       "tsx",
