@@ -107,7 +107,7 @@ describe('registerUsernameSaga', () => {
             ...new IdentityState(),
             identities: identityAdapter.setAll(
               identityAdapter.getInitialState(),
-              [identity]
+              [identityWithoutPeerId]
             ),
           },
           [StoreKeys.Communities]: {
@@ -126,9 +126,11 @@ describe('registerUsernameSaga', () => {
       // )
       .hasFinalState({
         [StoreKeys.Identity]: {
-          ...identityAdapter.setAll(identityAdapter.getInitialState(), [
-            identityWithoutPeerId,
-          ]),
+          ...new IdentityState(),
+          identities: identityAdapter.setAll(
+            identityAdapter.getInitialState(),
+            [identityWithoutPeerId]
+          ),
         },
         [StoreKeys.Communities]: {
           ...new CommunitiesState(),

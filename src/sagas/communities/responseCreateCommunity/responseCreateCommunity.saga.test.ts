@@ -34,8 +34,9 @@ describe('responseCreateCommunity', () => {
       ])
       .hasFinalState({
         [StoreKeys.Identity]: {
-          ids: ['id'],
-          entities: {
+          identities: {
+            ids: ['id'],
+            entities: {
             id: new Identity({
               id: 'id',
               hiddenService: {
@@ -47,6 +48,7 @@ describe('responseCreateCommunity', () => {
             }),
           },
         },
+      }
       })
       .run();
   });

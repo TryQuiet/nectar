@@ -15,12 +15,15 @@ describe('subscribeForTopicSaga', () => {
     owner: 'nobody',
     timestamp: 666999666,
     address: 'hell on the shore of the baltic sea',
-  }
+  };
 
   const saga: TestApi = testSaga(
     subscribeForTopicSaga,
     socket,
-    publicChannelsActions.subscribeForTopic({peerId: 'string', channelData: channel})
+    publicChannelsActions.subscribeForTopic({
+      peerId: 'peerId',
+      channelData: channel,
+    })
   );
 
   beforeEach(() => {
@@ -30,7 +33,11 @@ describe('subscribeForTopicSaga', () => {
   test('should be defined', () => {
     saga
       .next()
-      .apply(socket, socket.emit, [SocketActionTypes.SUBSCRIBE_FOR_TOPIC, {}])
+      .apply(socket, socket.emit, [
+        SocketActionTypes.SUBSCRIBE_FOR_TOPIC,
+        'peerId',
+        channel,
+      ])
       .next()
       .isDone();
   });
