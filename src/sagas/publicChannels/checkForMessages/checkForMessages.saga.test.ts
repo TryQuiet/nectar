@@ -39,6 +39,7 @@ describe('checkForMessagesSaga', () => {
         },
       },
   }),
+  communityChannels.id = 'id'
 
 
     test('ask for missing messages', () => {
@@ -56,7 +57,7 @@ describe('checkForMessagesSaga', () => {
             },
             [StoreKeys.Communities]: {
               ...new CommunitiesState(),
-              currentCommunity: 'id-0',
+              currentCommunity: 'id',
               communities: communitiesAdapter.setAll(
                 communitiesAdapter.getInitialState(),
                 [community]
@@ -71,6 +72,6 @@ describe('checkForMessagesSaga', () => {
             ids: ['2', '3'],
           })
         )
-        .run();
+        .silentRun();
     });
 });
