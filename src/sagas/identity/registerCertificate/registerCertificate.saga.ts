@@ -39,7 +39,7 @@ export function* registerCertificateSaga(
   } else {
     yield* apply(socket, socket.emit, [
       SocketActionTypes.REGISTER_USER_CERTIFICATE,
-      action.payload.registrarAddress,
+      `http://${action.payload.registrarAddress}.onion`,
       action.payload.userCsr.userCsr,
       action.payload.communityId,
     ]);
