@@ -2,6 +2,8 @@ import { StoreKeys } from '../store.keys';
 import { createSelector } from 'reselect';
 import { communitiesAdapter } from './communities.adapter';
 import { CreatedSelectors, StoreState } from '../store.types';
+import logger from '../../utils/logger'
+const log = logger('communities')
 
 const communitiesSlice: CreatedSelectors[StoreKeys.Communities] = (
   state: StoreState
@@ -28,8 +30,7 @@ export const ownCommunities = createSelector(allCommunities, (communities) => {
 export const currentCommunity = createSelector(
   communitiesSlice,
   (reducerState) => {
-    console.log(reducerState, 'reducerstate')
-    console.log(`selecting by current ID ${reducerState.currentCommunity}`)
+    log(`current community ${reducerState.currentCommunity}`)
     const id = reducerState.currentCommunity;
     return communitiesAdapter
       .getSelectors()
@@ -40,7 +41,7 @@ export const currentCommunity = createSelector(
 export const currentCommunityId = createSelector(
   communitiesSlice,
   (reducerState) => {
-    console.log(reducerState.currentCommunity, 'currentCOmmunity')
+    log('current community id', reducerState.currentCommunity)
     return reducerState.currentCommunity
   }
 );
