@@ -6,6 +6,6 @@ jest.mock('pkijs/src/common', () => ({
   setEngine: jest.fn(),
 }));
 
-jest.mock('@zbayapp/identity/lib/generateRootCA', () => ({
-  createRootCA: jest.fn(),
-}));
+// jest.mock('@zbayapp/identity/lib/generateRootCA', () => ({
+//   createRootCA: jest.fn(),
+// }));
