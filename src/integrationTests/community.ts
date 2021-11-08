@@ -51,32 +51,20 @@ export function* assertReceivedCertificates(
   expectedCount: number,
   maxTime: number
 ) {
-  console.log(`userName ${userName}`)
-  console.log(`expectedCount ${expectedCount}`)
-  console.log(`maxTime ${maxTime}`)
-  console.log('inside assert receive certificates')
   function* check() {
-    console.log('inside CHECK')
     const certificates = yield* select(usersSelectors.certificates);
     const certificatesCount = Object.keys(certificates).length;
-
     if (
-      certificatesCount === 1
+      certificatesCount === expectedCount
       ) {
-        console.log('dispatching receivedAll action')
-        yield* put(createAction('receivedAll')())
+        console.log('received all certs')
+      } else {
+        console.log('calling another check', Math.random())
+        yield* delay(1000)
+        yield* call(check)
       }
     }
-
-    const certificates = yield* select(usersSelectors.certificates);
-    const certificatesCount = Object.keys(certificates).length;
-    console.log('assertReceivedCertificates', certificatesCount)
-    yield* takeEvery(publicChannelsActions.responseGetPublicChannels, check)
-    
-    yield* put(createAction('receivedAll')())
-  console.log('before calling promise')
-  console.log('after calling promise')
-  yield* take('receivedAll')
+  yield* call(check)
 }
 
 export function* assertReceivedChannels(  runTestCaseSaga,
@@ -106,7 +94,7 @@ export function* createCommunityTestSaga(payload): Generator {
     log(`step 2: extrat userName from payload : ${userName} `)
     const communityName = 'CommunityName';
     log(`step 3: communityName is : ${communityName} `)
-    yield* spawn(assertNoErrors);
+    // yield* spawn(assertNoErrors);
     log(`step 4: communityName is : ${communityName} `)
     yield* put(communitiesActions.createNewCommunity(communityName));
     
