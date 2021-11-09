@@ -15,13 +15,6 @@ export function* registerCertificateSaga(
 ): Generator {
   const currentCommunity = yield* select(communitiesSelectors.currentCommunity);
 
-console.log(`currentCommunity ${currentCommunity.id}`)
-console.log(`currentCommunity ${currentCommunity.name}`)
-console.log(`currentCommunity ${currentCommunity.onionAddress}`)
-console.log(`currentCommunity ${currentCommunity.registrarUrl}`)
-console.log(`currentCommunity ${currentCommunity.CA}`)
-
-
   if (currentCommunity.CA.rootCertString) {
     yield* apply(socket, socket.emit, [
       SocketActionTypes.REGISTER_OWNER_CERTIFICATE,

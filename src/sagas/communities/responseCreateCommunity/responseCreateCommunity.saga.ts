@@ -7,9 +7,6 @@ import { PayloadAction } from '@reduxjs/toolkit';
 export function* responseCreateCommunitySaga(
   action: PayloadAction<ResponseCreateCommunityPayload>
 ): Generator {
-  console.log('responseCreateCommunitySaga')
-  console.log(`id is ${action.payload.id}`)
-  console.log(`hs is ${action.payload.payload.hiddenService}`)
   const id = action.payload.id;
   const hiddenService = action.payload.payload.hiddenService;
 
