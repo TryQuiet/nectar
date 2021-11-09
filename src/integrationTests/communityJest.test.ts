@@ -1,81 +1,121 @@
-import { expectSaga } from 'redux-saga-test-plan';
 import {
   createCommunityTestSaga,
   joinCommunityTestSaga,
   getCommunityOwnerData,
-  assertReceivedCertificates
+  assertReceivedCertificates,
 } from './community';
-import { createApp, finishTestSaga, integrationTest, userIsReady } from './utils';
+import { createApp, createAppWithoutTor, integrationTest } from './utils';
+
+const sleep = () =>
+  new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve();
+    }, 4000);
+  });
 
 jest.setTimeout(600_000);
-expectSaga.DEFAULT_TIMEOUT = 100_000;
 
-describe('communityJest', () => {
-  test('communityJest', async () => {
+describe('integration test', () => {
+  test.skip('create, join community, assert replication of general channel and certificates - with tor', async () => {
     const owner = await createApp();
-    // const user1 = await createApp();
-    // const user2 = await createApp();
-    
-    const ownerPromise = await owner
+    const user1 = await createApp();
+    const user2 = await createApp();
+
+    await owner
       .runSaga(integrationTest, createCommunityTestSaga, {
         userName: 'Owner',
       })
-      .toPromise()
+      .toPromise();
 
-   console.log(ownerPromise, 'ownerPromise')
+    await user1
+      .runSaga(integrationTest, joinCommunityTestSaga, {
+        userName: 'User1',
+        ...getCommunityOwnerData(owner.store),
+        expectedPeersCount: 2,
+      })
+      .toPromise();
 
-// const userOnePromise = await user1.runSaga(integrationTest, joinCommunityTestSaga, {
-//   userName: 'User1',
-//   ...getCommunityOwnerData(owner.store),
-//   expectedPeersCount: 2,
-// }).toPromise()
+    await user2
+      .runSaga(integrationTest, joinCommunityTestSaga, {
+        userName: 'User2',
+        ...getCommunityOwnerData(owner.store),
+        expectedPeersCount: 3,
+      })
+      .toPromise();
 
-// //   console.log(userOnePromise, 'userOnePromise')
-  
-//   const userTwoPromise = await user2.runSaga(integrationTest, joinCommunityTestSaga, {
-//     userName: 'User2',
-//     expectedPeersCount: 3,
-//     ...getCommunityOwnerData(owner.store),
-//   }).toPromise();
+    await owner
+      .runSaga(integrationTest, assertReceivedCertificates, 'Owner', 3)
+      .toPromise();
 
-//   console.log(userTwoPromise, 'userTwoPromise')
+    await user1
+      .runSaga(integrationTest, assertReceivedCertificates, 'UserOne', 3)
+      .toPromise();
 
-  // const firstCHeck  = await owner.runSaga(
-  //   integrationTest,
-  //   assertReceivedCertificates,
-  //   'Owner',
-  //   2,
-  //   60_000
-  // ).toPromise();
-  // const secondCheck  = await user1.runSaga(
-  //   integrationTest,
-  //   assertReceivedCertificates,
-  //   'User',
-  //   2,
-  //   60_000
-  // ).toPromise();
-  // const ThirdCheck  = await user2.runSaga(
-  //   integrationTest,
-  //   assertReceivedCertificates,
-  //   'User',
-  //   2,
-  //   60_000
-  // ).toPromise();
+    await user2
+      .runSaga(
+        integrationTest,
+        assertReceivedCertificates,
+        'UserTwo',
+        3,
+      )
+      .toPromise();
 
-  // console.log('after promisek', firstCHeck)
-  
-  // const finishSagaOwner = await owner.runSaga(finishTestSaga).toPromise()
-  await owner.manager.closeAllServices()
-  // const finishSagaUserOne = await user1.runSaga(finishTestSaga).toPromise()
-  // const finishSagaUserTwo = await user2.runSaga(finishTestSaga).toPromise()
+    await sleep();
 
-  // console.log('finishSagaOwner',  finishSagaOwner)
-
-  console.log('after closing services')
-
-    });
+    await owner.manager.closeAllServices();
+    await user1.manager.closeAllServices();
+    await user2.manager.closeAllServices();
   });
-  
-  // await expectSaga(createCommunityTestSaga, payload)
-  // .withReducer(combineReducers({ [StoreKeys.Communities]: communitiesReducer }) , app.store)
-  //   .run();
+  test('create, join community, assert replication of general channel and certificates - without tor', async () => {
+    const owner = await createAppWithoutTor();
+    const user1 = await createAppWithoutTor();
+    const user2 = await createAppWithoutTor();
+
+    await owner
+      .runSaga(integrationTest, createCommunityTestSaga, {
+        userName: 'Owner',
+      })
+      .toPromise();
+
+    await user1
+      .runSaga(integrationTest, joinCommunityTestSaga, {
+        userName: 'User1',
+        ...getCommunityOwnerData(owner.store),
+        expectedPeersCount: 2,
+      })
+      .toPromise();
+
+    await user2
+      .runSaga(integrationTest, joinCommunityTestSaga, {
+        userName: 'User2',
+        ...getCommunityOwnerData(owner.store),
+        expectedPeersCount: 3,
+      })
+      .toPromise();
+
+      console.log('before checking certs')
+
+    await owner
+      .runSaga(integrationTest, assertReceivedCertificates, 'Owner', 3)
+      .toPromise();
+
+    await user1
+      .runSaga(integrationTest, assertReceivedCertificates, 'UserOne', 3)
+      .toPromise();
+
+    await user2
+      .runSaga(
+        integrationTest,
+        assertReceivedCertificates,
+        'UserTwo',
+        3,
+      )
+      .toPromise();
+
+    await sleep();
+
+    await owner.manager.closeAllServices();
+    await user1.manager.closeAllServices();
+    await user2.manager.closeAllServices();
+  });
+});

@@ -49,17 +49,16 @@ function* putAction(actionName: string) {
 export function* assertReceivedCertificates(
   userName: string,
   expectedCount: number,
-  maxTime: number
 ) {
   function* check() {
     const certificates = yield* select(usersSelectors.certificates);
     const certificatesCount = Object.keys(certificates).length;
+    console.log(`certificaes count ${certificatesCount}`)
     if (
       certificatesCount === expectedCount
       ) {
-        console.log('received all certs')
+        console.log(`${userName} received all certificates`)
       } else {
-        console.log('calling another check', Math.random())
         yield* delay(1000)
         yield* call(check)
       }
@@ -94,7 +93,7 @@ export function* createCommunityTestSaga(payload): Generator {
     log(`step 2: extrat userName from payload : ${userName} `)
     const communityName = 'CommunityName';
     log(`step 3: communityName is : ${communityName} `)
-    // yield* spawn(assertNoErrors);
+    yield* spawn(assertNoErrors);
     log(`step 4: communityName is : ${communityName} `)
     yield* put(communitiesActions.createNewCommunity(communityName));
     
@@ -197,96 +196,96 @@ export const getCommunityOwnerData = (ownerStore: any) => {
   };
 };
 
-const testUsersCreateAndJoinCommunitySuccessfully = async (testCase) => {
-  const owner = await createApp();
-  const user1 = await createApp();
-  const user2 = await createApp();
-  const allUsers = [owner, user1, user2];
-  watchResults(allUsers, user2, 'Users create and join community successfully');
-  // Owner creates community and registers
-  owner.runSaga(integrationTest, createCommunityTestSaga, {
-    userName: 'Owner',
-  });
+// const testUsersCreateAndJoinCommunitySuccessfully = async (testCase) => {
+//   const owner = await createApp();
+//   const user1 = await createApp();
+//   const user2 = await createApp();
+//   const allUsers = [owner, user1, user2];
+//   watchResults(allUsers, user2, 'Users create and join community successfully');
+//   // Owner creates community and registers
+//   owner.runSaga(integrationTest, createCommunityTestSaga, {
+//     userName: 'Owner',
+//   });
 
-  const unsubscribeUser1 = user1.store.subscribe(() => {
-    // Second user joins community and registers as soon as the first user finishes registering
-    // TODO: make two users join community at the same time
-    if (userIsReady(user1.store)) {
-      unsubscribeUser1();
-      user2.runSaga(integrationTest, joinCommunityTestSaga, {
-        userName: 'User2',
-        expectedPeersCount: 3,
-        ...getCommunityOwnerData(owner.store),
-      });
-      // Watch all apps for received certificates:
-      user2.runSaga(
-        integrationTest,
-        assertReceivedCertificates,
-        testCase.runSaga,
-        'User2',
-        3
-      );
-      user1.runSaga(
-        integrationTest,
-        assertReceivedCertificates,
-        testCase.runSaga,
-        'User1',
-        3
-      );
-      owner.runSaga(
-        integrationTest,
-        assertReceivedCertificates,
-        testCase.runSaga,
-        'Owner',
-        3
-      );
-      user2.runSaga(
-        integrationTest,
-        assertReceivedChannels,
-        testCase.runSaga,
-        'User2',
-        1
-      );
-      user1.runSaga(
-        integrationTest,
-        assertReceivedChannels,
-        testCase.runSaga,
-        'User1',
-        1
-      );
-      owner.runSaga(
-        integrationTest,
-        assertReceivedChannels,
-        testCase.runSaga,
-        'Owner',
-        1
-      );
-    }
-  });
+//   const unsubscribeUser1 = user1.store.subscribe(() => {
+//     // Second user joins community and registers as soon as the first user finishes registering
+//     // TODO: make two users join community at the same time
+//     if (userIsReady(user1.store)) {
+//       unsubscribeUser1();
+//       user2.runSaga(integrationTest, joinCommunityTestSaga, {
+//         userName: 'User2',
+//         expectedPeersCount: 3,
+//         ...getCommunityOwnerData(owner.store),
+//       });
+//       // Watch all apps for received certificates:
+//       user2.runSaga(
+//         integrationTest,
+//         assertReceivedCertificates,
+//         testCase.runSaga,
+//         'User2',
+//         3
+//       );
+//       user1.runSaga(
+//         integrationTest,
+//         assertReceivedCertificates,
+//         testCase.runSaga,
+//         'User1',
+//         3
+//       );
+//       owner.runSaga(
+//         integrationTest,
+//         assertReceivedCertificates,
+//         testCase.runSaga,
+//         'Owner',
+//         3
+//       );
+//       user2.runSaga(
+//         integrationTest,
+//         assertReceivedChannels,
+//         testCase.runSaga,
+//         'User2',
+//         1
+//       );
+//       user1.runSaga(
+//         integrationTest,
+//         assertReceivedChannels,
+//         testCase.runSaga,
+//         'User1',
+//         1
+//       );
+//       owner.runSaga(
+//         integrationTest,
+//         assertReceivedChannels,
+//         testCase.runSaga,
+//         'Owner',
+//         1
+//       );
+//     }
+//   });
 
-  const unsubscribeOwner = owner.store.subscribe(async () => {
-    // First user joins community and registers as soon as the owner finishes registering
-    if (userIsReady(owner.store)) {
-      unsubscribeOwner();
-      user1.runSaga(integrationTest, joinCommunityTestSaga, {
-        userName: 'User1',
-        ...getCommunityOwnerData(owner.store),
-        expectedPeersCount: 2,
-      });
-    }
-  });
+//   const unsubscribeOwner = owner.store.subscribe(async () => {
+//     // First user joins community and registers as soon as the owner finishes registering
+//     if (userIsReady(owner.store)) {
+//       unsubscribeOwner();
+//       user1.runSaga(integrationTest, joinCommunityTestSaga, {
+//         userName: 'User1',
+//         ...getCommunityOwnerData(owner.store),
+//         expectedPeersCount: 2,
+//       });
+//     }
+//   });
 
-  const testCaseUnsubscribe = testCase.store.subscribe(() => {
-    // Check if all users replicated certificates. If so, finish the test
-    if (
-      testCase.store.getState().Test.usersWithReplicatedCertificates ===
-      allUsers.length && testCase.store.getState().Test.usersWithReplicatedChannels === 1
-    ) {
-      testCaseUnsubscribe();
-      user2.runSaga(finishTestSaga);
-    }
-  });
-};
+//   const testCaseUnsubscribe = testCase.store.subscribe(() => {
+//     // Check if all users replicated certificates. If so, finish the test
+//     if (
+//       testCase.store.getState().Test.usersWithReplicatedCertificates ===
+//       allUsers.length && testCase.store.getState().Test.usersWithReplicatedChannels === 1
+//     ) {
+//       testCaseUnsubscribe();
+//       user2.runSaga(finishTestSaga);
+//     }
+//   });
+// };
 
 // const testUsersCreateAndJoinCommunitySuccessfullyWithoutTor = async (
 //   testCase
@@ -557,7 +556,7 @@ const testUsersCreateAndJoinCommunitySuccessfully = async (testCase) => {
 
 export default {
   // communityTestOfflineRegistrar: testUserTriesToJoinOfflineCommunity,
-  communityTestWithTor: testUsersCreateAndJoinCommunitySuccessfully,
+  // communityTestWithTor: testUsersCreateAndJoinCommunitySuccessfully,
   // communityTestWithoutTor:
   //   testUsersCreateAndJoinCommunitySuccessfullyWithoutTor,
   // communityTestLaunch: testLaunchCommunitiesOnStartup,
