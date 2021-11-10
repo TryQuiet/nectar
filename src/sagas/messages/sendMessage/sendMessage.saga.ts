@@ -29,19 +29,7 @@ export function* sendMessageSaga(
   const identity: Identity = yield* select(identitySelectors.currentIdentity);
   
   const certificate = identity.userCertificate;
-  if (!certificate) {
-    // TODO
-    // yield* call(navigateTo, ScreenNames.ErrorScreen, {
-    //   onPress: (_dispatch: Dispatch<any>) => {
-    //     replaceScreen(ScreenNames.MainScreen);
-    //   },
-    //   icon: appImages.zbay_icon,
-    //   title: 'Error',
-    //   message:
-    //     "User secrets are missing. You're not able to send messages without it. Try to restart the app or install it again.",
-    // });
-    return;
-  }
+
   log('sendMessageSaga-1');
 
   const parsedCertificate = yield* call(parseCertificate, certificate);
