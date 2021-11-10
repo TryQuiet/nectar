@@ -115,7 +115,6 @@ describe('sendMessageSaga', () => {
           },
           [StoreKeys.PublicChannels]: {
             ...new PublicChannelsState(),
-            // @ts-ignore
             channels: channelsByCommunityAdapter.setAll(
               channelsByCommunityAdapter.getInitialState(),
               [communityChannels]

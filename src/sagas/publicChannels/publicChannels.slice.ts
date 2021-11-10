@@ -16,11 +16,7 @@ export class PublicChannelsState {
 }
 
 export class CommunityChannels {
-  constructor(id: string) {
-    this.id = id;
-  }
-
-  public id: string;
+  constructor(public id: string) {}
 
   public channels: EntityState<IChannelInfo> =
     publicChannelsAdapter.getInitialState();
@@ -145,8 +141,6 @@ export const publicChannelsSlice = createSlice({
           action.payload.channels
         )}] for community ${action.payload.communityId}`
       );
-      log(action.payload.channels);
-      log({ ...state.channels.entities });
       channelsByCommunityAdapter.updateOne(state.channels, {
         id: action.payload.communityId,
         changes: {
