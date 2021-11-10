@@ -53,7 +53,7 @@ export interface AskForMessagesPayload {
   ids: string[];
 }
 
-export interface subscribeForTopicPayload {
+export interface SubscribeForTopicPayload {
   peerId: string;
   channelData: IChannelInfo;
 }
@@ -74,7 +74,7 @@ export interface AskForMessagesResponse {
   communityId: string;
 }
 
-export interface onMessagePostedResponse {
+export interface OnMessagePostedResponse {
   message: IMessage;
   channelAddress: string;
   communityId: string;
@@ -162,7 +162,7 @@ export const publicChannelsSlice = createSlice({
     },
     subscribeForTopic: (
       state,
-      _action: PayloadAction<subscribeForTopicPayload>
+      _action: PayloadAction<SubscribeForTopicPayload>
     ) => state,
     subscribeForAllTopics: (state, _action: PayloadAction<string>) => state,
     responseSendMessagesIds: (
@@ -218,7 +218,7 @@ export const publicChannelsSlice = createSlice({
     },
     onMessagePosted: (
       state,
-      action: PayloadAction<onMessagePostedResponse>
+      action: PayloadAction<OnMessagePostedResponse>
     ) => {
       const { message, channelAddress, communityId } = action.payload;
       const messages = {
@@ -229,7 +229,7 @@ export const publicChannelsSlice = createSlice({
         changes: {
           channelMessages: {
             ...state.channels.entities[communityId].channelMessages,
-            channelAddress: {
+              [channelAddress]: {
               ...state.channels.entities[communityId].channelMessages[
                 channelAddress
               ],
