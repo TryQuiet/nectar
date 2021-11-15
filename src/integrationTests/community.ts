@@ -1,13 +1,23 @@
-import { createAction } from '@reduxjs/toolkit';
+import { createAction, Store } from '@reduxjs/toolkit';
 import assert from 'assert';
-import React from 'react'
+import React from 'react';
 import { publicChannelsSelectors } from '../sagas/publicChannels/publicChannels.selectors';
 import { StoreKeys } from '../sagas/store.keys';
-import { delay, fork, put, select, take,call, spawn, takeEvery } from 'typed-redux-saga';
+import {
+  delay,
+  fork,
+  put,
+  select,
+  take,
+  call,
+  spawn,
+  takeEvery,
+} from 'typed-redux-saga';
+import waitForExpect from 'wait-for-expect';
 import { identity } from '../index';
 import { communitiesAdapter } from '../sagas/communities/communities.adapter';
 import { communitiesSelectors } from '../sagas/communities/communities.selectors';
-import {createCommunitySaga} from '../sagas/communities/createCommunity/createCommunity.saga'
+import { createCommunitySaga } from '../sagas/communities/createCommunity/createCommunity.saga';
 import {
   communitiesActions,
   CommunitiesState,
@@ -24,7 +34,7 @@ import {
 import { SocketActionTypes } from '../sagas/socket/const/actionTypes';
 import { usersSelectors } from '../sagas/users/users.selectors';
 import logger from '../utils/logger';
-import {waitFor} from '@testing-library/react'
+
 import {
   assertListElementMatches,
   assertNoErrors,
@@ -40,142 +50,49 @@ import { identityAdapter } from '../sagas/identity/identity.adapter';
 import { UserCsr } from '@zbayapp/identity/lib/requestCertificate';
 import { publicChannelsActions } from '../sagas/publicChannels/publicChannels.slice';
 
+
 const log = logger('tests');
 
-function* putAction(actionName: string) {
-  yield* put(createAction(actionName)());
-}
-
-export function* assertReceivedCertificates(
+export async function assertReceivedCertificates(
   userName: string,
   expectedCount: number,
+  maxTime: number = 600000,
+  store
 ) {
-  function* check() {
-    const certificates = yield* select(usersSelectors.certificates);
-    const certificatesCount = Object.keys(certificates).length;
-    console.log(`certificaes count ${certificatesCount}`)
-    if (
-      certificatesCount === expectedCount
-      ) {
-        console.log(`${userName} received all certificates`)
-      } else {
-        yield* delay(1000)
-        yield* call(check)
-      }
-    }
-  yield* call(check)
+  log(`User ${userName} starts waiting ${maxTime}ms for certificates`);
+
+  await waitForExpect(() => {
+    expect(store.getState().Users.certificates.ids).toHaveLength(expectedCount);
+  }, maxTime);
+
+  log(
+    `User ${userName} received ${
+      store.getState().Users.certificates.ids.length
+    } certificates`
+  );
 }
 
-export function* assertReceivedChannels(  runTestCaseSaga,
+export async function assertReceivedChannels(
   userName: string,
   expectedCount: number,
-  maxTime: number = 600000) {
-
+  maxTime: number = 600000,
+  store
+) {
   log(`User ${userName} starts waiting ${maxTime}ms for channels`);
-  yield delay(maxTime);
-  const community = yield* select(identitySelectors.currentIdentity)
-  const channels = yield* select(publicChannelsSelectors.publicChannelsByCommunityId(community.id));
-  const channelsCount = Object.keys(channels).length;
-  log(`channelsCount is ${channelsCount}`)
-  assert.equal(
-    channelsCount,
-    expectedCount,
-    `User ${userName} received ${channelsCount} channels after ${maxTime}ms, expected ${expectedCount}`
-  );
-  log(`channelsCount is ${channelsCount}`)
-  log(`User ${userName} received all channels`);
-  runTestCaseSaga(putAction, 'userReplicatedChannels');
-}
 
-export function* createCommunityTestSaga(payload): Generator {
-    log('step 1: enterCreateCommunityTestSaga ')
-    const { userName } = payload;
-    log(`step 2: extrat userName from payload : ${userName} `)
-    const communityName = 'CommunityName';
-    log(`step 3: communityName is : ${communityName} `)
-    yield* spawn(assertNoErrors);
-    log(`step 4: communityName is : ${communityName} `)
-    yield* put(communitiesActions.createNewCommunity(communityName));
-    
-    // yield* call(createCommunitySaga, ['asdf' as any,'dipa' as any]);
-    log(`step 5: communityName is : ${communityName} `)
-    yield* take(communitiesActions.responseCreateCommunity);
-    log('before that shitty')
-    // yield* call(waitFor, communitiesActions.responseCreateCommunity)
-    log('after that shitty')
-    log(`step 6: communityName is : ${communityName} `)
-    yield* put(identityActions.registerUsername(userName));
-    log(`step 7: communityName is : ${communityName} `)
-    yield* take(identityActions.storeUserCertificate);
-    yield* take(communitiesActions.community);
-  yield* take(communitiesActions.responseRegistrar);
-  yield* take(identityActions.savedOwnerCertificate);
-  const currentCommunity = yield* select(communitiesSelectors.currentCommunity);
-  assert.equal(currentCommunity.name, communityName);
-  assertNotEmpty(currentCommunity.onionAddress, 'Community.onionAddress');
-  assertNotEmpty(currentCommunity.rootCa, 'Community.rootCa');
-  const createdIdentity = yield* select(identitySelectors.currentIdentity);
-  assert.equal(createdIdentity.zbayNickname, userName);
-  assert.equal(createdIdentity.id, currentCommunity.id);
-  assertNotEmpty(createdIdentity.peerId, 'Identity.peerId');
-  assertNotEmpty(createdIdentity.userCertificate, 'Identity.userCertificate');
-  assertNotEmpty(createdIdentity.hiddenService, 'Identity.hiddenService');
-  yield* put(createAction('testContinue')());
-  log('step 2: leaveCreateCommunitySaga')
-  return 'yo'
-}
+  const communityId = store.getState().Communities.communities.ids[0];
 
-export function* joinCommunityTestSaga(payload): Generator {
-  const {
-    registrarAddress,
-    userName,
-    ownerPeerId,
-    ownerRootCA,
-    expectedPeersCount,
-    registrarPort,
-  } = payload;
-  yield* spawn(assertNoErrors);
-  let address;
-  if (payload.registrarAddress === '0.0.0.0') {
-    address = `${registrarAddress}:${registrarPort}`;
-  } else {
-    address = registrarAddress;
-  }
-  yield* put(communitiesActions.joinCommunity(address));
+  await waitForExpect(() => {
+    expect(
+      store.getState().PublicChannels.entities[communityId].channels.ids
+    ).toHaveLength(expectedCount);
+  }, maxTime);
 
-  yield* take(communitiesActions.responseCreateCommunity);
-  yield* put(identity.actions.registerUsername(userName));
-  yield* take(identityActions.storeUserCertificate);
-  yield* take(communitiesActions.community);
-  const currentCommunity = yield* select(communitiesSelectors.currentCommunity);
-  const createdIdentity = yield* select(identitySelectors.currentIdentity);
-  assert.equal(
-    currentCommunity.rootCa,
-    ownerRootCA,
-    'User joining community should have the same rootCA as the owner'
+  log(
+    `User ${userName} received ${
+      store.getState().PublicChannels.entities[communityId].channels.ids.length
+    } channels`
   );
-  assert.notEqual(
-    currentCommunity.peerList,
-    undefined,
-    'User joining community should have a list of peers to connect to'
-  );
-  assert(
-    currentCommunity.peerList.length >= expectedPeersCount,
-    `User joining community should receive a list of ${expectedPeersCount} peers to connect to, received ${currentCommunity.peerList.length}.`
-  );
-  assertListElementMatches(currentCommunity.peerList, new RegExp(ownerPeerId));
-  assertListElementMatches(
-    currentCommunity.peerList,
-    new RegExp(createdIdentity.peerId.id)
-  );
-  assert.equal(createdIdentity.zbayNickname, userName);
-  assert.equal(createdIdentity.id, currentCommunity.id);
-  assertNotEmpty(createdIdentity.peerId, 'Identity.peerId');
-  assertNotEmpty(createdIdentity.userCertificate, 'Identity.userCertificate');
-  assertNotEmpty(createdIdentity.hiddenService, 'Identity.hiddenService');
-  yield* put(createAction('testContinue')());
-  console.log('after all the tests')
-  return 'yo'
 }
 
 export const getCommunityOwnerData = (ownerStore: any) => {
@@ -190,232 +107,201 @@ export const getCommunityOwnerData = (ownerStore: any) => {
     registrarAddress,
     communityId: community.id,
     ownerPeerId:
-      ownerIdentityState.identities.entities[ownerIdentityState.identities.ids[0]].peerId.id,
+      ownerIdentityState.identities.entities[
+        ownerIdentityState.identities.ids[0]
+      ].peerId.id,
     ownerRootCA: community.rootCa,
     registrarPort: community.port,
   };
 };
 
-// const testUsersCreateAndJoinCommunitySuccessfully = async (testCase) => {
-//   const owner = await createApp();
-//   const user1 = await createApp();
-//   const user2 = await createApp();
-//   const allUsers = [owner, user1, user2];
-//   watchResults(allUsers, user2, 'Users create and join community successfully');
-//   // Owner creates community and registers
-//   owner.runSaga(integrationTest, createCommunityTestSaga, {
-//     userName: 'Owner',
-//   });
+export async function createCommunity({ userName, store }) {
+  const timeout = 50_000;
+  const communityName = 'CommunityName';
 
-//   const unsubscribeUser1 = user1.store.subscribe(() => {
-//     // Second user joins community and registers as soon as the first user finishes registering
-//     // TODO: make two users join community at the same time
-//     if (userIsReady(user1.store)) {
-//       unsubscribeUser1();
-//       user2.runSaga(integrationTest, joinCommunityTestSaga, {
-//         userName: 'User2',
-//         expectedPeersCount: 3,
-//         ...getCommunityOwnerData(owner.store),
-//       });
-//       // Watch all apps for received certificates:
-//       user2.runSaga(
-//         integrationTest,
-//         assertReceivedCertificates,
-//         testCase.runSaga,
-//         'User2',
-//         3
-//       );
-//       user1.runSaga(
-//         integrationTest,
-//         assertReceivedCertificates,
-//         testCase.runSaga,
-//         'User1',
-//         3
-//       );
-//       owner.runSaga(
-//         integrationTest,
-//         assertReceivedCertificates,
-//         testCase.runSaga,
-//         'Owner',
-//         3
-//       );
-//       user2.runSaga(
-//         integrationTest,
-//         assertReceivedChannels,
-//         testCase.runSaga,
-//         'User2',
-//         1
-//       );
-//       user1.runSaga(
-//         integrationTest,
-//         assertReceivedChannels,
-//         testCase.runSaga,
-//         'User1',
-//         1
-//       );
-//       owner.runSaga(
-//         integrationTest,
-//         assertReceivedChannels,
-//         testCase.runSaga,
-//         'Owner',
-//         1
-//       );
-//     }
-//   });
+  store.dispatch(communitiesActions.createNewCommunity(communityName));
 
-//   const unsubscribeOwner = owner.store.subscribe(async () => {
-//     // First user joins community and registers as soon as the owner finishes registering
-//     if (userIsReady(owner.store)) {
-//       unsubscribeOwner();
-//       user1.runSaga(integrationTest, joinCommunityTestSaga, {
-//         userName: 'User1',
-//         ...getCommunityOwnerData(owner.store),
-//         expectedPeersCount: 2,
-//       });
-//     }
-//   });
+  await waitForExpect(() => {
+    expect(store.getState().Identity.identities.ids).toHaveLength(1);
+  }, timeout);
+  await waitForExpect(() => {
+    expect(store.getState().Communities.communities.ids).toHaveLength(1);
+  }, timeout);
 
-//   const testCaseUnsubscribe = testCase.store.subscribe(() => {
-//     // Check if all users replicated certificates. If so, finish the test
-//     if (
-//       testCase.store.getState().Test.usersWithReplicatedCertificates ===
-//       allUsers.length && testCase.store.getState().Test.usersWithReplicatedChannels === 1
-//     ) {
-//       testCaseUnsubscribe();
-//       user2.runSaga(finishTestSaga);
-//     }
-//   });
-// };
+  const communityId = store.getState().Communities.communities.ids[0];
 
-// const testUsersCreateAndJoinCommunitySuccessfullyWithoutTor = async (
-//   testCase
-// ) => {
-//   const owner = await createAppWithoutTor();
-//   const user1 = await createAppWithoutTor();
-//   const user2 = await createAppWithoutTor();
-//   const allUsers = [owner, user1, user2];
-//   watchResults(
-//     allUsers,
-//     user2,
-//     'Users create and join community successfully without tor'
-//   );
+  // console.log(store.getState().Communities.communities.entities[communityId], 'Communities')
+  // console.log(store.getState().Identity.identities.entities[communityId], 'Identity')
+  // console.log(store.getState().PublicChannels.entities[communityId].channels.entities['general'], 'PublicChannels')
 
-//   // Owner creates community and registers
-//   owner.runSaga(integrationTest, createCommunityTestSaga, {
-//     userName: 'Owner',
-//   });
+  await waitForExpect(() => {
+    expect(
+      store.getState().Identity.identities.entities[communityId].hiddenService
+        .onionAddress
+    ).toHaveLength(62);
+  }, timeout);
+  await waitForExpect(() => {
+    expect(
+      store.getState().Identity.identities.entities[communityId].peerId.id
+    ).toHaveLength(46);
+  }, timeout);
 
-//   const unsubscribeUser1 = user1.store.subscribe(() => {
-//     // Second user joins community and registers as soon as the first user finishes registering
-//     // TODO: make two users join community at the same time
-//     if (userIsReady(user1.store)) {
-//       unsubscribeUser1();
-//       user2.runSaga(integrationTest, joinCommunityTestSaga, {
-//         userName: 'User2',
-//         expectedPeersCount: 3,
-//         ...getCommunityOwnerData(owner.store),
-//       });
-//       // Watch all apps for received certificates:
-//       user2.runSaga(
-//         integrationTest,
-//         assertReceivedCertificates,
-//         testCase.runSaga,
-//         'User2',
-//         3
-//       );
-//       user1.runSaga(
-//         integrationTest,
-//         assertReceivedCertificates,
-//         testCase.runSaga,
-//         'User1',
-//         3
-//       );
-//       owner.runSaga(
-//         integrationTest,
-//         assertReceivedCertificates,
-//         testCase.runSaga,
-//         'Owner',
-//         3
-//       );
-//       user2.runSaga(
-//         integrationTest,
-//         assertReceivedChannels,
-//         testCase.runSaga,
-//         'User2',
-//         1
-//       );
-//       user1.runSaga(
-//         integrationTest,
-//         assertReceivedChannels,
-//         testCase.runSaga,
-//         'User1',
-//         1
-//       );
-//       owner.runSaga(
-//         integrationTest,
-//         assertReceivedChannels,
-//         testCase.runSaga,
-//         'Owner',
-//         1
-//       );
-//     }
-//   });
+  store.dispatch(identityActions.registerUsername(userName));
 
-//   const unsubscribeOwner = owner.store.subscribe(async () => {
-//     // First user joins community and registers as soon as the owner finishes registering
-//     if (userIsReady(owner.store)) {
-//       unsubscribeOwner();
-//       user1.runSaga(integrationTest, joinCommunityTestSaga, {
-//         userName: 'User1',
-//         ...getCommunityOwnerData(owner.store),
-//         expectedPeersCount: 2,
-//       });
-//     }
-//   });
+  await waitForExpect(() => {
+    expect(
+      store.getState().Identity.identities.entities[communityId].userCertificate
+    ).toBeTruthy();
+  }, timeout);
+  await waitForExpect(() => {
+    expect(
+      store.getState().Communities.communities.entities[communityId].CA
+    ).toHaveProperty('rootObject');
+  }, timeout);
+  await waitForExpect(() => {
+    expect(
+      store.getState().Communities.communities.entities[communityId]
+        .onionAddress
+    ).toHaveLength(56);
+  }, timeout);
+  await waitForExpect(() => {
+    expect(store.getState().Users.certificates.ids).toHaveLength(1);
+  }, timeout);
+}
 
-//   const testCaseUnsubscribe = testCase.store.subscribe(() => {
-//     // Check if all users replicated certificates. If so, finish the test
-//     if (
-//       testCase.store.getState().Test.usersWithReplicatedCertificates ===
-//       allUsers.length && testCase.store.getState().Test.usersWithReplicatedChannels === 1
-//     ) {
-//       testCaseUnsubscribe();
-//       user2.runSaga(finishTestSaga);
-//     }
-//   });
-// };
+export async function joinCommunity(payload) {
+  const {
+    registrarAddress,
+    userName,
+    ownerPeerId,
+    ownerRootCA,
+    expectedPeersCount,
+    registrarPort,
+    store,
+  } = payload;
 
-// function* tryToJoinOfflineRegistrarTestSaga(): Generator {
-//   yield* put(
-//     communitiesActions.joinCommunity(
-//       `yjnblkcrvqexxmntrs7hscywgebrizvz2jx4g4m5wq4x7uzi5syv5cid`
-//     )
-//   );
-//   yield* take(communitiesActions.responseCreateCommunity);
-//   const currentCommunityId = yield* select(
-//     communitiesSelectors.currentCommunityId
-//   );
-//   yield* put(identity.actions.registerUsername('IamTheUser'));
-//   yield* take(errorsActions.addError);
-//   const registrarError = (yield* select(
-//     errorsSelectors.currentCommunityErrorsByType
-//   ))[SocketActionTypes.REGISTRAR];
-//   assertNotEmpty(registrarError, 'Registrar error');
-//   assert.equal(registrarError.communityId, currentCommunityId);
-//   assert.equal(registrarError.code, 500);
-//   assert.equal(registrarError.message, 'Registering username failed.');
-//   yield* put(createAction('testFinished')());
-// }
+  const timeout = 50_000;
 
-// const testUserTriesToJoinOfflineCommunity = async (testCase) => {
-//   const app = await createApp();
-//   watchResults(
-//     [app],
-//     app,
-//     'User receives error when tries to connect to offline registrar'
-//   );
-//   app.runSaga(integrationTest, tryToJoinOfflineRegistrarTestSaga);
-// };
+  let address;
+  if (payload.registrarAddress === '0.0.0.0') {
+    address = `${registrarAddress}:${registrarPort}`;
+  } else {
+    address = registrarAddress;
+  }
+
+  store.dispatch(communitiesActions.joinCommunity(address));
+
+  await waitForExpect(() => {
+    expect(store.getState().Identity.identities.ids).toHaveLength(1);
+  }, timeout);
+  await waitForExpect(() => {
+    expect(store.getState().Communities.communities.ids).toHaveLength(1);
+  }, timeout);
+
+  const communityId = store.getState().Communities.communities.ids[0];
+
+  // console.log(store.getState().Communities.communities.entities[communityId], 'Communities')
+  // console.log(store.getState().Identity.identities.entities[communityId], 'Identity')
+  // console.log(store.getState().PublicChannels.entities[communityId].channels.entities['general'], 'PublicChannels')
+
+  await waitForExpect(() => {
+    expect(
+      store.getState().Identity.identities.entities[communityId].hiddenService
+        .onionAddress
+    ).toHaveLength(62);
+  }, timeout);
+  await waitForExpect(() => {
+    expect(
+      store.getState().Identity.identities.entities[communityId].peerId.id
+    ).toHaveLength(46);
+  }, timeout);
+
+  store.dispatch(identityActions.registerUsername(userName));
+
+  // yield* take(identityActions.storeUserCertificate);
+  // yield* take(communitiesActions.community);
+  // const currentCommunity = yield* select(communitiesSelectors.currentCommunity);
+  // const createdIdentity = yield* select(identitySelectors.currentIdentity);
+
+  // assert.equal(
+  //   currentCommunity.rootCa,
+  //   ownerRootCA,
+  //   'User joining community should have the same rootCA as the owner'
+  // );
+  // assert.notEqual(
+  //   currentCommunity.peerList,
+  //   undefined,
+  //   'User joining community should have a list of peers to connect to'
+  // );
+  // assert(
+  //   currentCommunity.peerList.length >= expectedPeersCount,
+  //   `User joining community should receive a list of ${expectedPeersCount} peers to connect to, received ${currentCommunity.peerList.length}.`
+  // );
+  // assertListElementMatches(currentCommunity.peerList, new RegExp(ownerPeerId));
+  // assertListElementMatches(
+  //   currentCommunity.peerList,
+  //   new RegExp(createdIdentity.peerId.id)
+  // );
+  // assert.equal(createdIdentity.zbayNickname, userName);
+  // assert.equal(createdIdentity.id, currentCommunity.id);
+  // assertNotEmpty(createdIdentity.peerId, 'Identity.peerId');
+  // assertNotEmpty(createdIdentity.userCertificate, 'Identity.userCertificate');
+  // assertNotEmpty(createdIdentity.hiddenService, 'Identity.hiddenService');
+}
+
+const sleep = (time) => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve()
+    }, time)
+  })
+}
+
+export async function tryToJoinOfflineRegistrar(store) {
+
+  const timeout = 50_000
+  const userName = 'userName'
+
+store.dispatch(communitiesActions.joinCommunity('yjnblkcrvqexxmntrs7hscywgebrizvz2jx4g4m5wq4x7uzi5syv5cid'))
+
+  await waitForExpect(() => {
+    expect(store.getState().Identity.identities.ids).toHaveLength(1);
+  }, timeout);
+  await waitForExpect(() => {
+    expect(store.getState().Communities.communities.ids).toHaveLength(1);
+  }, timeout);
+
+  const communityId = store.getState().Communities.communities.ids[0];
+
+  await waitForExpect(() => {
+    expect(
+      store.getState().Identity.identities.entities[communityId].hiddenService
+        .onionAddress
+    ).toHaveLength(62);
+  }, timeout);
+  await waitForExpect(() => {
+    expect(
+      store.getState().Identity.identities.entities[communityId].peerId.id
+    ).toHaveLength(46);
+  }, timeout);
+
+  store.dispatch(identityActions.registerUsername(userName));
+
+  await sleep(50_000)
+
+  console.log(store.getState(), 'Errors')
+
+  const registrarError = null
+
+  // yield* take(errorsActions.addError);
+  // const registrarError = (yield* select(
+  //   errorsSelectors.currentCommunityErrorsByType
+  // ))[SocketActionTypes.REGISTRAR];
+  // assertNotEmpty(registrarError, 'Registrar error');
+  // assert.equal(registrarError.communityId, currentCommunityId);
+  // assert.equal(registrarError.code, 500);
+  // assert.equal(registrarError.message, 'Registering username failed.');
+}
 
 // function* launchCommunitiesOnStartupSaga(communitiesAmount: number): Generator {
 //   yield* fork(assertNoErrors);
@@ -553,11 +439,3 @@ export const getCommunityOwnerData = (ownerStore: any) => {
 //   );
 //   app.runSaga(integrationTest, launchCommunitiesOnStartupSaga)
 // };
-
-export default {
-  // communityTestOfflineRegistrar: testUserTriesToJoinOfflineCommunity,
-  // communityTestWithTor: testUsersCreateAndJoinCommunitySuccessfully,
-  // communityTestWithoutTor:
-  //   testUsersCreateAndJoinCommunitySuccessfullyWithoutTor,
-  // communityTestLaunch: testLaunchCommunitiesOnStartup,
-};
