@@ -1,15 +1,13 @@
 import { Socket } from 'socket.io-client';
-import { all, call, put, take, fork } from 'typed-redux-saga';
+import { all, call, put, takeEvery, fork } from 'typed-redux-saga';
 import { eventChannel } from 'redux-saga';
 import { SocketActionTypes } from '../const/actionTypes';
 import logger from '../../../utils/logger'
 const log = logger('socket')
 
-// import { nativeServicesActions } from '../../nativeServices/nativeServices.slice';
 import {
-  AskForMessagesResponse,
-  ChannelMessagesIdsResponse,
   GetPublicChannelsResponse,
+  OnMessagePostedResponse,
   publicChannelsActions,
 } from '../../publicChannels/publicChannels.slice';
 import { publicChannelsMasterSaga } from '../../publicChannels/publicChannels.master.saga';
@@ -21,7 +19,6 @@ import {
   SendCertificatesResponse,
   usersActions,
 } from '../../users/users.slice';
-// import { IMessage } from '../../publicChannels/publicChannels.types';
 import { communitiesMasterSaga } from '../../communities/communities.master.saga';
 import { errorsMasterSaga } from '../../errors/errors.master.saga';
 import {
@@ -46,11 +43,11 @@ export function* useIO(socket: Socket): Generator {
 
 export function* handleActions(socket: Socket): Generator {
   const socketChannel = yield* call(subscribe, socket);
-  while (true) {
-    const action = yield* take(socketChannel);
+  yield takeEvery(socketChannel, function* (action) {
     yield put(action);
-  }
+  });
 }
+
 
 export function subscribe(socket: Socket) {
   return eventChannel<
@@ -84,9 +81,9 @@ export function subscribe(socket: Socket) {
     //     emit(publicChannelsActions.responseAskForMessages(payload));
     //   }
     // );
-    // socket.on(SocketActionTypes.MESSAGE, (payload: { message: IMessage }) => {
-    //   emit(publicChannelsActions.onMessagePosted(payload));
-    // });
+    socket.on(SocketActionTypes.MESSAGE, (payload: OnMessagePostedResponse) => {
+      emit(publicChannelsActions.onMessagePosted(payload));
+    });
     socket.on(
       SocketActionTypes.RESPONSE_GET_CERTIFICATES,
       (payload: SendCertificatesResponse) => {
