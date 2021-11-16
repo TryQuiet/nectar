@@ -1,6 +1,5 @@
 import { createAction, Store } from '@reduxjs/toolkit';
 import assert from 'assert';
-import React from 'react';
 import { publicChannelsSelectors } from '../sagas/publicChannels/publicChannels.selectors';
 import { StoreKeys } from '../sagas/store.keys';
 import {
@@ -50,7 +49,6 @@ import { identityAdapter } from '../sagas/identity/identity.adapter';
 import { UserCsr } from '@zbayapp/identity/lib/requestCertificate';
 import { publicChannelsActions } from '../sagas/publicChannels/publicChannels.slice';
 
-
 const log = logger('tests');
 
 export async function assertReceivedCertificates(
@@ -82,15 +80,17 @@ export async function assertReceivedChannels(
 
   const communityId = store.getState().Communities.communities.ids[0];
 
+  console.log(communityId, 'communityId')
+
   await waitForExpect(() => {
     expect(
-      store.getState().PublicChannels.entities[communityId].channels.ids
+      store.getState().PublicChannels.channels.entities[communityId].channels.ids
     ).toHaveLength(expectedCount);
   }, maxTime);
 
   log(
     `User ${userName} received ${
-      store.getState().PublicChannels.entities[communityId].channels.ids.length
+      store.getState().PublicChannels.channels.entities[communityId].channels.ids.length
     } channels`
   );
 }
@@ -218,30 +218,46 @@ export async function joinCommunity(payload) {
 
   store.dispatch(identityActions.registerUsername(userName));
 
-  // yield* take(identityActions.storeUserCertificate);
-  // yield* take(communitiesActions.community);
-  // const currentCommunity = yield* select(communitiesSelectors.currentCommunity);
-  // const createdIdentity = yield* select(identitySelectors.currentIdentity);
+  await waitForExpect(() => {
+    expect(
+      store.getState().Identity.identities.entities[communityId].userCertificate
+    ).toBeTruthy();
+  }, timeout);
+  await waitForExpect(() => {
+    expect(
+      store.getState().Communities.communities.entities[communityId]
+        .rootCa
+    ).toEqual(ownerRootCA);
+  }, timeout)
+  await waitForExpect(() => {
+    expect(
+      store.getState().Communities.communities.entities[communityId]
+        .peerList
+    ).toBeTruthy();
+  }, timeout)
+  console.log(store.getState().Communities.communities.entities[communityId])
+  await waitForExpect(() => {
+    expect(
+      store.getState().Communities.communities.entities[communityId]
+        .peerList.length
+    ).toEqual(expectedPeersCount);
+  }, timeout)
+  await waitForExpect(() => {
+    expect(
+      store.getState().Communities.communities.entities[communityId]
+        .peerList[0]
+    ).toMatch(new RegExp(ownerPeerId))
+  }, timeout)
 
-  // assert.equal(
-  //   currentCommunity.rootCa,
-  //   ownerRootCA,
-  //   'User joining community should have the same rootCA as the owner'
-  // );
-  // assert.notEqual(
-  //   currentCommunity.peerList,
-  //   undefined,
-  //   'User joining community should have a list of peers to connect to'
-  // );
-  // assert(
-  //   currentCommunity.peerList.length >= expectedPeersCount,
-  //   `User joining community should receive a list of ${expectedPeersCount} peers to connect to, received ${currentCommunity.peerList.length}.`
-  // );
+
+
   // assertListElementMatches(currentCommunity.peerList, new RegExp(ownerPeerId));
   // assertListElementMatches(
   //   currentCommunity.peerList,
   //   new RegExp(createdIdentity.peerId.id)
   // );
+
+
   // assert.equal(createdIdentity.zbayNickname, userName);
   // assert.equal(createdIdentity.id, currentCommunity.id);
   // assertNotEmpty(createdIdentity.peerId, 'Identity.peerId');
@@ -252,17 +268,20 @@ export async function joinCommunity(payload) {
 const sleep = (time) => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
-      resolve()
-    }, time)
-  })
-}
+      resolve();
+    }, time);
+  });
+};
 
 export async function tryToJoinOfflineRegistrar(store) {
+  const timeout = 50_000;
+  const userName = 'userName';
 
-  const timeout = 50_000
-  const userName = 'userName'
-
-store.dispatch(communitiesActions.joinCommunity('yjnblkcrvqexxmntrs7hscywgebrizvz2jx4g4m5wq4x7uzi5syv5cid'))
+  store.dispatch(
+    communitiesActions.joinCommunity(
+      'yjnblkcrvqexxmntrs7hscywgebrizvz2jx4g4m5wq4x7uzi5syv5cid'
+    )
+  );
 
   await waitForExpect(() => {
     expect(store.getState().Identity.identities.ids).toHaveLength(1);
@@ -287,20 +306,26 @@ store.dispatch(communitiesActions.joinCommunity('yjnblkcrvqexxmntrs7hscywgebrizv
 
   store.dispatch(identityActions.registerUsername(userName));
 
-  await sleep(50_000)
-
-  console.log(store.getState(), 'Errors')
-
-  const registrarError = null
-
-  // yield* take(errorsActions.addError);
-  // const registrarError = (yield* select(
-  //   errorsSelectors.currentCommunityErrorsByType
-  // ))[SocketActionTypes.REGISTRAR];
-  // assertNotEmpty(registrarError, 'Registrar error');
-  // assert.equal(registrarError.communityId, currentCommunityId);
-  // assert.equal(registrarError.code, 500);
-  // assert.equal(registrarError.message, 'Registering username failed.');
+  await waitForExpect(() => {
+    expect(
+      store.getState().Errors[communityId].entities.registrar.type
+    ).toEqual('registrar');
+  }, timeout);
+  await waitForExpect(() => {
+    expect(
+      store.getState().Errors[communityId].entities.registrar.message
+    ).toEqual('Registering username failed.');
+  }, timeout);
+  await waitForExpect(() => {
+    expect(
+      store.getState().Errors[communityId].entities.registrar.communityId
+    ).toEqual(communityId);
+  }, timeout);
+  await waitForExpect(() => {
+    expect(
+      store.getState().Errors[communityId].entities.registrar.code
+    ).toEqual(500);
+  }, timeout);
 }
 
 // function* launchCommunitiesOnStartupSaga(communitiesAmount: number): Generator {
