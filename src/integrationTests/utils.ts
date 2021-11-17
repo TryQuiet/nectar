@@ -6,7 +6,7 @@ import {
   createAction,
   createStore,
 } from '@reduxjs/toolkit';
-import { all, call, delay, fork, put, take, takeEvery } from 'typed-redux-saga';
+import { all, call, fork, put, take, takeEvery } from 'typed-redux-saga';
 import createSagaMiddleware from 'redux-saga';
 import thunk from 'redux-thunk';
 import waggle from 'waggle';
@@ -103,7 +103,6 @@ export const watchResults = (apps: any[], finalApp: any, testName: string) => {
 
 export function* finishTestSaga() {
   yield* put(createAction('testFinished')());
-  yield* delay(5000)
 }
 
 export const userIsReady = (userStore: any): boolean => {
@@ -147,8 +146,6 @@ export const prepareStore = (
 };
 
 const connectToDataport = (url: string, name: string): Socket => {
-  console.log('url', url)
-  console.log(typeof io)
   const socket = io(url);
   socket.on('connect', async () => {
     log(`websocket connection is ready for app ${name}`);
