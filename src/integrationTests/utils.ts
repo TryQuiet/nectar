@@ -147,6 +147,8 @@ export const prepareStore = (
 };
 
 const connectToDataport = (url: string, name: string): Socket => {
+  console.log('url', url)
+  console.log(typeof io)
   const socket = io(url);
   socket.on('connect', async () => {
     log(`websocket connection is ready for app ${name}`);

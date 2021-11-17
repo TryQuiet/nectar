@@ -1,3 +1,4 @@
+import { Crypto } from '@peculiar/webcrypto'
 import {
   createCommunity,
   joinCommunity,
@@ -10,7 +11,13 @@ import { createApp, createAppWithoutTor } from './utils';
 
 jest.setTimeout(600_000);
 
+const crypto = new Crypto()
+
+global.crypto = crypto
+
+
 describe('integration test', () => {
+
   test('create, join community, assert replication of general channel and certificates - with tor', async () => {
     const owner = await createApp();
     const userOne = await createApp();
@@ -28,19 +35,19 @@ describe('integration test', () => {
     });
     
     await joinCommunity({
-        ...ownerData,
+      ...ownerData,
       store: userTwo.store,
       userName: 'username2',
-    expectedPeersCount: 3
+      expectedPeersCount: 3
     });
-
+    
     await assertReceivedCertificates('owner', 3, 120_000, owner.store);
     await assertReceivedCertificates('userOne', 3, 120_000, userOne.store);
     await assertReceivedCertificates('userTwo', 3, 120_000, userTwo.store);
     await assertReceivedChannels('owner', 1, 120_000, owner.store);
     await assertReceivedChannels('userTwo', 1, 120_000, userOne.store);
     await assertReceivedChannels('userTwo', 1, 120_000, userTwo.store);
-    
+
     await owner.manager.closeAllServices();
     await userOne.manager.closeAllServices();
     await userTwo.manager.closeAllServices();

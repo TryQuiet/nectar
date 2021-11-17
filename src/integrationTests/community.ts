@@ -80,8 +80,6 @@ export async function assertReceivedChannels(
 
   const communityId = store.getState().Communities.communities.ids[0];
 
-  console.log(communityId, 'communityId')
-
   await waitForExpect(() => {
     expect(
       store.getState().PublicChannels.channels.entities[communityId].channels.ids
@@ -130,10 +128,6 @@ export async function createCommunity({ userName, store }) {
 
   const communityId = store.getState().Communities.communities.ids[0];
 
-  // console.log(store.getState().Communities.communities.entities[communityId], 'Communities')
-  // console.log(store.getState().Identity.identities.entities[communityId], 'Identity')
-  // console.log(store.getState().PublicChannels.entities[communityId].channels.entities['general'], 'PublicChannels')
-
   await waitForExpect(() => {
     expect(
       store.getState().Identity.identities.entities[communityId].hiddenService
@@ -180,7 +174,7 @@ export async function joinCommunity(payload) {
     store,
   } = payload;
 
-  const timeout = 50_000;
+  const timeout = 120_000;
 
   let address;
   if (payload.registrarAddress === '0.0.0.0') {
@@ -200,10 +194,6 @@ export async function joinCommunity(payload) {
 
   const communityId = store.getState().Communities.communities.ids[0];
 
-  // console.log(store.getState().Communities.communities.entities[communityId], 'Communities')
-  // console.log(store.getState().Identity.identities.entities[communityId], 'Identity')
-  // console.log(store.getState().PublicChannels.entities[communityId].channels.entities['general'], 'PublicChannels')
-
   await waitForExpect(() => {
     expect(
       store.getState().Identity.identities.entities[communityId].hiddenService
@@ -215,6 +205,8 @@ export async function joinCommunity(payload) {
       store.getState().Identity.identities.entities[communityId].peerId.id
     ).toHaveLength(46);
   }, timeout);
+
+  const userPeerId = store.getState().Identity.identities.entities[communityId].peerId.id
 
   store.dispatch(identityActions.registerUsername(userName));
 
@@ -229,49 +221,29 @@ export async function joinCommunity(payload) {
         .rootCa
     ).toEqual(ownerRootCA);
   }, timeout)
-  await waitForExpect(() => {
-    expect(
-      store.getState().Communities.communities.entities[communityId]
-        .peerList
-    ).toBeTruthy();
-  }, timeout)
-  console.log(store.getState().Communities.communities.entities[communityId])
+
   await waitForExpect(() => {
     expect(
       store.getState().Communities.communities.entities[communityId]
         .peerList.length
     ).toEqual(expectedPeersCount);
   }, timeout)
+
+  const peerList = store.getState().Communities.communities.entities[communityId]
+  .peerList
+  
   await waitForExpect(() => {
     expect(
-      store.getState().Communities.communities.entities[communityId]
-        .peerList[0]
+      peerList[0]
     ).toMatch(new RegExp(ownerPeerId))
   }, timeout)
 
-
-
-  // assertListElementMatches(currentCommunity.peerList, new RegExp(ownerPeerId));
-  // assertListElementMatches(
-  //   currentCommunity.peerList,
-  //   new RegExp(createdIdentity.peerId.id)
-  // );
-
-
-  // assert.equal(createdIdentity.zbayNickname, userName);
-  // assert.equal(createdIdentity.id, currentCommunity.id);
-  // assertNotEmpty(createdIdentity.peerId, 'Identity.peerId');
-  // assertNotEmpty(createdIdentity.userCertificate, 'Identity.userCertificate');
-  // assertNotEmpty(createdIdentity.hiddenService, 'Identity.hiddenService');
+  await waitForExpect(() => {
+    expect(
+      peerList[peerList.length-1]
+    ).toMatch(new RegExp(userPeerId))
+  }, timeout)
 }
-
-const sleep = (time) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      resolve();
-    }, time);
-  });
-};
 
 export async function tryToJoinOfflineRegistrar(store) {
   const timeout = 50_000;
@@ -328,13 +300,13 @@ export async function tryToJoinOfflineRegistrar(store) {
   }, timeout);
 }
 
-// function* launchCommunitiesOnStartupSaga(communitiesAmount: number): Generator {
-//   yield* fork(assertNoErrors);
-//   yield* take(communitiesActions.launchRegistrar);
-//   yield* take(communitiesActions.responseRegistrar);
-//   // TODO: add assertions
-//   yield* put(createAction('testFinished')());
-// }
+function* launchCommunitiesOnStartupSaga(communitiesAmount: number): Generator {
+  yield* fork(assertNoErrors);
+  yield* take(communitiesActions.launchRegistrar);
+  yield* take(communitiesActions.responseRegistrar);
+  // TODO: add assertions
+  yield* put(createAction('testFinished')());
+}
 
 // const testLaunchCommunitiesOnStartup = async (testCase) => {
 //   const community = new Community({
