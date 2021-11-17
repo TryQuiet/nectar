@@ -1,11 +1,10 @@
 import { createAction } from '@reduxjs/toolkit';
 import { StoreKeys } from '../sagas/store.keys';
+import { fork, put, take } from 'typed-redux-saga';
 import {
-  fork,
-  put,
-  take,
-} from 'typed-redux-saga';
-import { createUserCsr, UserCsr } from '@zbayapp/identity/lib/requestCertificate';
+  createUserCsr,
+  UserCsr,
+} from '@zbayapp/identity/lib/requestCertificate';
 import config from '@zbayapp/identity/lib/config';
 import waitForExpect from 'wait-for-expect';
 
@@ -63,13 +62,15 @@ export async function assertReceivedChannels(
 
   await waitForExpect(() => {
     expect(
-      store.getState().PublicChannels.channels.entities[communityId].channels.ids
+      store.getState().PublicChannels.channels.entities[communityId].channels
+        .ids
     ).toHaveLength(expectedCount);
   }, maxTime);
 
   log(
     `User ${userName} received ${
-      store.getState().PublicChannels.channels.entities[communityId].channels.ids.length
+      store.getState().PublicChannels.channels.entities[communityId].channels
+        .ids.length
     } channels`
   );
 }
@@ -187,7 +188,8 @@ export async function joinCommunity(payload) {
     ).toHaveLength(46);
   }, timeout);
 
-  const userPeerId = store.getState().Identity.identities.entities[communityId].peerId.id
+  const userPeerId =
+    store.getState().Identity.identities.entities[communityId].peerId.id;
 
   store.dispatch(identityActions.registerUsername(userName));
 
@@ -198,32 +200,27 @@ export async function joinCommunity(payload) {
   }, timeout);
   await waitForExpect(() => {
     expect(
-      store.getState().Communities.communities.entities[communityId]
-        .rootCa
+      store.getState().Communities.communities.entities[communityId].rootCa
     ).toEqual(ownerRootCA);
-  }, timeout)
+  }, timeout);
 
   await waitForExpect(() => {
     expect(
-      store.getState().Communities.communities.entities[communityId]
-        .peerList.length
+      store.getState().Communities.communities.entities[communityId].peerList
+        .length
     ).toEqual(expectedPeersCount);
-  }, timeout)
+  }, timeout);
 
-  const peerList = store.getState().Communities.communities.entities[communityId]
-  .peerList
-  
-  await waitForExpect(() => {
-    expect(
-      peerList[0]
-    ).toMatch(new RegExp(ownerPeerId))
-  }, timeout)
+  const peerList =
+    store.getState().Communities.communities.entities[communityId].peerList;
 
   await waitForExpect(() => {
-    expect(
-      peerList[peerList.length-1]
-    ).toMatch(new RegExp(userPeerId))
-  }, timeout)
+    expect(peerList[0]).toMatch(new RegExp(ownerPeerId));
+  }, timeout);
+
+  await waitForExpect(() => {
+    expect(peerList[peerList.length - 1]).toMatch(new RegExp(userPeerId));
+  }, timeout);
 }
 
 export async function tryToJoinOfflineRegistrar(store) {
@@ -293,8 +290,10 @@ const testLaunchCommunitiesOnStartup = async (testCase) => {
     name: 'communityName',
     id: 'id',
     CA: {
-      rootCertString: "MIIBTTCB8wIBATAKBggqhkjOPQQDAjASMRAwDgYDVQQDEwdaYmF5IENBMB4XDTEwMTIyODEwMTAxMFoXDTMwMTIyODEwMTAxMFowEjEQMA4GA1UEAxMHWmJheSBDQTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABPX+UupXOLEZGsM+2ZSTBLnn1tYTraMW2jqz+PLd8iuxPnXlf17sYUMh+xRkwr0ZK0gFJzM0WojewpDPF4RHFLqjPzA9MA8GA1UdEwQIMAYBAf8CAQMwCwYDVR0PBAQDAgCGMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATAKBggqhkjOPQQDAgNJADBGAiEAklQrkfh6RLNj+dawO5bOU1AffnGR8liq/fSr0U5sSn0CIQCRhfZxIxM1qDveJGtY0wNCpHZEl+UnXn9U7XOsMu/wYA==",
-      rootKeyString: "MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgRMHbInrFakg3vXEsHX1aKTlj+3LxXsYNYpsmHQYl8begCgYIKoZIzj0DAQehRANCAAT1/lLqVzixGRrDPtmUkwS559bWE62jFto6s/jy3fIrsT515X9e7GFDIfsUZMK9GStIBSczNFqI3sKQzxeERxS6"
+      rootCertString:
+        'MIIBTTCB8wIBATAKBggqhkjOPQQDAjASMRAwDgYDVQQDEwdaYmF5IENBMB4XDTEwMTIyODEwMTAxMFoXDTMwMTIyODEwMTAxMFowEjEQMA4GA1UEAxMHWmJheSBDQTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABPX+UupXOLEZGsM+2ZSTBLnn1tYTraMW2jqz+PLd8iuxPnXlf17sYUMh+xRkwr0ZK0gFJzM0WojewpDPF4RHFLqjPzA9MA8GA1UdEwQIMAYBAf8CAQMwCwYDVR0PBAQDAgCGMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATAKBggqhkjOPQQDAgNJADBGAiEAklQrkfh6RLNj+dawO5bOU1AffnGR8liq/fSr0U5sSn0CIQCRhfZxIxM1qDveJGtY0wNCpHZEl+UnXn9U7XOsMu/wYA==',
+      rootKeyString:
+        'MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgRMHbInrFakg3vXEsHX1aKTlj+3LxXsYNYpsmHQYl8begCgYIKoZIzj0DAQehRANCAAT1/lLqVzixGRrDPtmUkwS559bWE62jFto6s/jy3fIrsT515X9e7GFDIfsUZMK9GStIBSczNFqI3sKQzxeERxS6',
     },
     registrarUrl: '',
   });
@@ -302,8 +301,7 @@ const testLaunchCommunitiesOnStartup = async (testCase) => {
   const identity = new Identity({
     id: 'id',
     hiddenService: {
-      onionAddress:
-        'ugmx77q2tnm5fliyfxfeen5hsuzjtbsz44tsldui2ju7vl5xj4d447yd',
+      onionAddress: 'ugmx77q2tnm5fliyfxfeen5hsuzjtbsz44tsldui2ju7vl5xj4d447yd',
       privateKey:
         'ED25519-V3:eECPVkKQxx0SADnjaqAxheH797Q79D0DqGu8Pbc83mpfaZSujZdxqJ6r5ZwUDWCYAegWx2xNkMt7zUKXyxKOuQ==',
     },
@@ -326,10 +324,11 @@ const testLaunchCommunitiesOnStartup = async (testCase) => {
     zbayNickname: 'holmes',
     commonName: 'vwikdxgxlsangu3cajkxhltl6goxtll75heg6qcx5wwicg3r5gcunyyd',
     peerId: 'QmdC8GmN2ZQPquaMsSJScJ3PrfZsG8B4Szw16hmDSCBNb9',
-    dmPublicKey: '9d1832bd9fb8154be6975046a41538a71f3505d508dc8f286850445080e054a6',
+    dmPublicKey:
+      '9d1832bd9fb8154be6975046a41538a71f3505d508dc8f286850445080e054a6',
     signAlg: config.signAlg,
     hashAlg: config.hashAlg,
-  })
+  });
 
   identity.userCsr = userCsr;
   identity.userCertificate =
@@ -360,5 +359,5 @@ const testLaunchCommunitiesOnStartup = async (testCase) => {
     app,
     'Community and registrar are launched when user reopens the app'
   );
-  app.runSaga(integrationTest, launchCommunitiesOnStartupSaga)
+  app.runSaga(integrationTest, launchCommunitiesOnStartupSaga);
 };
