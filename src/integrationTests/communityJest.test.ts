@@ -53,7 +53,7 @@ describe('integration test', () => {
     await userTwo.manager.closeAllServices();
   });
 
-  test.skip('create, join community, assert replication of general channel and certificates - without tor', async () => {
+  test('create, join community, assert replication of general channel and certificates - without tor', async () => {
     const owner = await createAppWithoutTor();
     const userOne = await createAppWithoutTor();
     const userTwo = await createAppWithoutTor();
@@ -88,7 +88,7 @@ describe('integration test', () => {
     await userTwo.manager.closeAllServices();
   });
   
-  test.skip('try to join offline registrar', async () => {
+  test('try to join offline registrar', async () => {
     const user = await createApp();
     
     await tryToJoinOfflineRegistrar(user.store)

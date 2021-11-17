@@ -113,7 +113,7 @@ export async function createCommunity({ userName, store }) {
     expect(
       store.getState().Identity.identities.entities[communityId].hiddenService
         .onionAddress
-    ).toHaveLength(62);
+    ).toBeTruthy();
   }, timeout);
   await waitForExpect(() => {
     expect(
@@ -137,7 +137,7 @@ export async function createCommunity({ userName, store }) {
     expect(
       store.getState().Communities.communities.entities[communityId]
         .onionAddress
-    ).toHaveLength(56);
+    ).toBeTruthy();
   }, timeout);
   await waitForExpect(() => {
     expect(store.getState().Users.certificates.ids).toHaveLength(1);
@@ -179,7 +179,7 @@ export async function joinCommunity(payload) {
     expect(
       store.getState().Identity.identities.entities[communityId].hiddenService
         .onionAddress
-    ).toHaveLength(62);
+    ).toBeTruthy();
   }, timeout);
   await waitForExpect(() => {
     expect(
