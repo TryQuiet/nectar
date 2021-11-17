@@ -54,7 +54,7 @@ describe('integration test', () => {
   test('create, join community, assert replication of general channel and certificates - without tor', async () => {
     const owner = await createAppWithoutTor();
     const userOne = await createAppWithoutTor();
-    const userTwo = await createAppWithoutTor();
+    // const userTwo = await createAppWithoutTor();
 
     await createCommunity({ userName: 'Owner', store: owner.store });
 
@@ -67,23 +67,23 @@ describe('integration test', () => {
       userName: 'username1',
     });
 
-    await joinCommunity({
-      ...ownerData,
-      expectedPeersCount: 3,
-      store: userTwo.store,
-      userName: 'username2',
-    });
+    // await joinCommunity({
+    //   ...ownerData,
+    //   expectedPeersCount: 3,
+    //   store: userTwo.store,
+    //   userName: 'username2',
+    // });
 
-    await assertReceivedCertificates('owner', 3, 120_000, owner.store);
-    await assertReceivedCertificates('userOne', 3, 120_000, userOne.store);
-    await assertReceivedCertificates('userTwo', 3, 120_000, userTwo.store);
+    await assertReceivedCertificates('owner', 2, 120_000, owner.store);
+    await assertReceivedCertificates('userOne', 2, 120_000, userOne.store);
+    // await assertReceivedCertificates('userTwo', 3, 120_000, userTwo.store);
     await assertReceivedChannels('owner', 1, 120_000, owner.store);
     await assertReceivedChannels('userTwo', 1, 120_000, userOne.store);
-    await assertReceivedChannels('userTwo', 1, 120_000, userTwo.store);
+    // await assertReceivedChannels('userTwo', 1, 120_000, userTwo.store);
 
     await owner.manager.closeAllServices();
     await userOne.manager.closeAllServices();
-    await userTwo.manager.closeAllServices();
+    // await userTwo.manager.closeAllServices();
   });
 
   test('try to join offline registrar', async () => {
