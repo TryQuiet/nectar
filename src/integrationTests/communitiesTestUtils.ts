@@ -1,33 +1,20 @@
-import { createAction } from '@reduxjs/toolkit';
-import { StoreKeys } from '../sagas/store.keys';
-import { fork, put, take } from 'typed-redux-saga';
-import {
-  createUserCsr,
-  UserCsr,
-} from '@zbayapp/identity/lib/requestCertificate';
-import config from '@zbayapp/identity/lib/config';
-import waitForExpect from 'wait-for-expect';
 
-import { communitiesAdapter } from '../sagas/communities/communities.adapter';
+import {take, spawn } from 'typed-redux-saga';
+import waitForExpect from 'wait-for-expect';
 import {
   communitiesActions,
-  CommunitiesState,
-  Community,
 } from '../sagas/communities/communities.slice';
 import {
-  Identity,
   identityActions,
-  IdentityState,
 } from '../sagas/identity/identity.slice';
+import {
+  messagesActions,
+} from '../sagas/messages/messages.slice';
 import logger from '../utils/logger';
 import {
   assertNoErrors,
-  createApp,
-  integrationTest,
-  watchResults,
 } from './utils';
-import { identityAdapter } from '../sagas/identity/identity.adapter';
-import { sendMessageSaga } from 'src/sagas/messages/sendMessage/sendMessage.saga';
+import { publicChannelsActions } from '../sagas/publicChannels/publicChannels.slice';
 
 const log = logger('tests');
 
@@ -38,7 +25,7 @@ export async function assertReceivedCertificates(
   store
 ) {
   log(`User ${userName} starts waiting ${maxTime}ms for certificates`);
-
+  
   await waitForExpect(() => {
     expect(store.getState().Users.certificates.ids).toHaveLength(expectedCount);
   }, maxTime);
@@ -50,7 +37,7 @@ export async function assertReceivedCertificates(
   );
 }
 
-export async function assertReceivedChannels(
+export async function assertReceivedChannelsAndSubscribe(
   userName: string,
   expectedCount: number,
   maxTime: number = 600000,
@@ -67,11 +54,42 @@ export async function assertReceivedChannels(
     ).toHaveLength(expectedCount);
   }, maxTime);
 
+  await store.dispatch(publicChannelsActions.setCurrentChannel(store.getState().PublicChannels.channels.entities[communityId].channels
+  .ids[0]))
+  await store.dispatch(publicChannelsActions.subscribeForAllTopics(communityId))
+
   log(
     `User ${userName} received ${
       store.getState().PublicChannels.channels.entities[communityId].channels
         .ids.length
     } channels`
+  );
+}
+
+export async function sendMessage(message, store) {
+  await store.dispatch(messagesActions.sendMessage(message))
+}
+
+export async function assertReceivedMessages(
+  userName: string,
+  expectedCount: number,
+  maxTime: number = 600000,
+  store
+) {
+  log(`User ${userName} starts waiting ${maxTime}ms for messages`);
+
+  const communityId = store.getState().Communities.communities.ids[0];
+
+  await waitForExpect(() => {
+    expect(
+      store.getState().PublicChannels.channels.entities[communityId].channelMessages.general.ids
+    ).toHaveLength(expectedCount);
+  }, maxTime);
+
+  log(
+    `User ${userName} received ${
+      store.getState().PublicChannels.channels.entities[communityId].channelMessages.general.ids.length
+    } messages`
   );
 }
 
@@ -96,7 +114,7 @@ export const getCommunityOwnerData = (ownerStore: any) => {
 };
 
 export async function createCommunity({ userName, store }) {
-  const timeout = 50_000;
+  const timeout = 120_000;
   const communityName = 'CommunityName';
 
   store.dispatch(communitiesActions.createNewCommunity(communityName));
@@ -224,7 +242,7 @@ export async function joinCommunity(payload) {
 }
 
 export async function tryToJoinOfflineRegistrar(store) {
-  const timeout = 50_000;
+  const timeout = 120_000;
   const userName = 'userName';
 
   store.dispatch(
@@ -278,86 +296,8 @@ export async function tryToJoinOfflineRegistrar(store) {
   }, timeout);
 }
 
-function* launchCommunitiesOnStartupSaga(communitiesAmount: number): Generator {
-  yield* fork(assertNoErrors);
+export function* launchCommunitiesOnStartupSaga(): Generator {
+  yield* spawn(assertNoErrors);
   yield* take(communitiesActions.launchRegistrar);
   yield* take(communitiesActions.responseRegistrar);
-  yield* put(createAction('testFinished')());
 }
-
-const testLaunchCommunitiesOnStartup = async (testCase) => {
-  const community = new Community({
-    name: 'communityName',
-    id: 'id',
-    CA: {
-      rootCertString:
-        'MIIBTTCB8wIBATAKBggqhkjOPQQDAjASMRAwDgYDVQQDEwdaYmF5IENBMB4XDTEwMTIyODEwMTAxMFoXDTMwMTIyODEwMTAxMFowEjEQMA4GA1UEAxMHWmJheSBDQTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABPX+UupXOLEZGsM+2ZSTBLnn1tYTraMW2jqz+PLd8iuxPnXlf17sYUMh+xRkwr0ZK0gFJzM0WojewpDPF4RHFLqjPzA9MA8GA1UdEwQIMAYBAf8CAQMwCwYDVR0PBAQDAgCGMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATAKBggqhkjOPQQDAgNJADBGAiEAklQrkfh6RLNj+dawO5bOU1AffnGR8liq/fSr0U5sSn0CIQCRhfZxIxM1qDveJGtY0wNCpHZEl+UnXn9U7XOsMu/wYA==',
-      rootKeyString:
-        'MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgRMHbInrFakg3vXEsHX1aKTlj+3LxXsYNYpsmHQYl8begCgYIKoZIzj0DAQehRANCAAT1/lLqVzixGRrDPtmUkwS559bWE62jFto6s/jy3fIrsT515X9e7GFDIfsUZMK9GStIBSczNFqI3sKQzxeERxS6',
-    },
-    registrarUrl: '',
-  });
-
-  const identity = new Identity({
-    id: 'id',
-    hiddenService: {
-      onionAddress: 'ugmx77q2tnm5fliyfxfeen5hsuzjtbsz44tsldui2ju7vl5xj4d447yd',
-      privateKey:
-        'ED25519-V3:eECPVkKQxx0SADnjaqAxheH797Q79D0DqGu8Pbc83mpfaZSujZdxqJ6r5ZwUDWCYAegWx2xNkMt7zUKXyxKOuQ==',
-    },
-    peerId: {
-      id: 'QmPdB7oUGiDEz3oanj58Eba595H2dtNiKtW7bNTrBey5Az',
-      privKey:
-        'CAASqAkwggSkAgEAAoIBAQCUGW9AvS5miIuhu2xk+OiaQpaTBPDjS22KOi2KfXXFfzwyZvduO0ZsOE5HxoGQ/kqL4QR2RhbTCZ8CNdkWPDR/s8fb7JGVRLkoexLzgMNs7OFg0JFy9AjmZ/vspE6y3irr/DH3bp/qiHTWiSvOGMaws3Ma74mqUyBKfK+hIri0/1xHGWNcIyhhjMy7f/ulZCOyd+G/jPA54BI36dSprzWSxdHbpcjAJo95OID9Y4HLOWP3BeMCodzslWpkPg+F9x4XjiXoFTgfGQqi3JpWNdgWHzpAQVgOGv5DO1a+OOKxjakAnFXgmg0CnbnzQR7oIHeutizz2MSmhrrKcG5WaDyBAgMBAAECggEAXUbrwE2m9ONZdqLyMWJoNghsh+qbwbzXIDFmT4yXaa2qf2BExQPGZhDMlP5cyrKuxw0RX2DjrUWpBZ5evVdsBWZ5IXYNd4NST0G8/OsDqw5DIVQb19gF5wBlNnWCL7woMnukCOB/Dhul4x2AHo2STuanP7bQ8RrsAp4njAivZydZADv2Xo4+ll+CBquJOHRMjcIqXzaKLoXTf80euskHfizFT4cFsI6oZygx8yqstoz2SBj2Qr3hvkUmSBFhE+dChIRrpcYuuz0JPpUTBmGgCLdKarUJHH1GJ4+wc6YU9YmJJ3kqyR+h/oVGaB1j4YOd5ubtJAIvf7uj0Ofhq1FJhQKBgQDrgsrUAZCafk81HAU25EmfrvH0jbTvZ7LmM86lntov8viOUDVk31F3u+CWGP7L/UomMIiveqO8J9OpQCvK8/AgIahtcB6rYyyb7XGLBn+njfVzdg8e2S4G91USeNuugYtwgpylkotOaAZrmiLgl415UgJvhAaOf+sMzV5xLREWMwKBgQCg+9iU7rDpgx8Tcd9tf5hGCwK9sorC004ffxtMXa+nN1I+gCfQH9eypFbmVnAo6YRQS02sUr9kSfB1U4f7Hk1VH/Wu+nRJNdTfz4uV5e65dSIo3kga8aTZ8YTIlqtDwcVv0GDCxDcstpdmR3scua0p2Oq22cYrmHOBgSGgdX0mewKBgQCPm/rImoet3ZW5IfQAC+blK424/Ww2jDpn63F4Rsxvbq6oQTq93vtTksoZXPaKN1KuxOukbZlIU9TaoRnTMTrcrQmCalsZUWlTT8/r4bOX3ZWtqXEA85gAgXNrxyzWVYJMwih5QkoWLpKzrJLV9zQ6pYp8q7o/zLrs3JJZWwzPRwKBgDrHWfAfKvdICfu2k0bO1NGWSZzr6OBz+M1lQplih7U9bMknT+IdDkvK13Po0bEOemI67JRj7j/3A1ZDdp4JFWFkdvc5uWXVwvEpPaUwvDZ4/0z+xEMaQf/VwI7g/I2T3bwS0JGsxRyNWsBcjyYQ4Zoq+qBi6YmXc20wsg99doGrAoGBAIXD8SW9TNhbo3uGK0Tz7y8bdYT4M9krM53M7I62zU6yLMZLTZHX1qXjbAFhEU5wVm6Mq0m83r1fiwnTrBQbn1JBtEIaxCeQ2ZH7jWmAaAOQ2z3qrHenD41WQJBzpWh9q/tn9JKD1KiWykQDfEnMgBt9+W/g3VgAF+CnR+feX6aH',
-      pubKey:
-        'CAASpgIwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCUGW9AvS5miIuhu2xk+OiaQpaTBPDjS22KOi2KfXXFfzwyZvduO0ZsOE5HxoGQ/kqL4QR2RhbTCZ8CNdkWPDR/s8fb7JGVRLkoexLzgMNs7OFg0JFy9AjmZ/vspE6y3irr/DH3bp/qiHTWiSvOGMaws3Ma74mqUyBKfK+hIri0/1xHGWNcIyhhjMy7f/ulZCOyd+G/jPA54BI36dSprzWSxdHbpcjAJo95OID9Y4HLOWP3BeMCodzslWpkPg+F9x4XjiXoFTgfGQqi3JpWNdgWHzpAQVgOGv5DO1a+OOKxjakAnFXgmg0CnbnzQR7oIHeutizz2MSmhrrKcG5WaDyBAgMBAAE=',
-    },
-    dmKeys: {
-      publicKey:
-        '0bd934b164fdbf09a2675233bd9d5c396ce3a5944f92485c8c98b72ec3148f51',
-      privateKey:
-        '51da400fb7323793604ec204c60f3e1c96b1b3023d2eadc515376e37faf4b9f8',
-    },
-  });
-
-  const userCsr: UserCsr = await createUserCsr({
-    zbayNickname: 'holmes',
-    commonName: 'vwikdxgxlsangu3cajkxhltl6goxtll75heg6qcx5wwicg3r5gcunyyd',
-    peerId: 'QmdC8GmN2ZQPquaMsSJScJ3PrfZsG8B4Szw16hmDSCBNb9',
-    dmPublicKey:
-      '9d1832bd9fb8154be6975046a41538a71f3505d508dc8f286850445080e054a6',
-    signAlg: config.signAlg,
-    hashAlg: config.hashAlg,
-  });
-
-  identity.userCsr = userCsr;
-  identity.userCertificate =
-    'MIICDjCCAbMCBgF8o6yIiTAKBggqhkjOPQQDAjASMRAwDgYDVQQDEwdaYmF5IENBMB4XDTIxMTAyMTE2MjYwNVoXDTMwMDEzMTIzMDAwMFowSTFHMEUGA1UEAxM+cDd3aXVhdHlwdHc0bmdncWo3dXAzdXg2enltNGhqanB1bTU1d2VqdGd5bWsybndzcGxic2h0eWQub25pb24wWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAAS2dbszx01KQW10y9xnwMHUOR5DfxDLekYtS5kxxUlG6W/gN+OtsGAhdhBqrQ9WwOsKgXE6J2gJFCtPUEdVGMnho4HCMIG/MAkGA1UdEwQCMAAwCwYDVR0PBAQDAgCOMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATAvBgkqhkiG9w0BCQwEIgQgC9k0sWT9vwmiZ1IzvZ1cOWzjpZRPkkhcjJi3LsMUj1EwFgYKKwYBBAGDjBsCAQQIEwZ3aWt0b3IwPQYJKwYBAgEPAwEBBDATLlFtZGk4YlUzR1B0aHRudjJMQVpIcFE5eW1YRzhtQWY5ZHFnbVU1c2M3cGZUaHMwCgYIKoZIzj0EAwIDSQAwRgIhANOMmwDQ8P9nlYHiGDSV8xPO06UU3AqJgsdUS6YZhMUMAiEAu5ftYuNPnRWzRGv5kX4HaeNtvIUIUPAMhCnZ5r+r1l0=';
-
-  const app = await createApp({
-    [StoreKeys.Communities]: {
-      ...new CommunitiesState(),
-      currentCommunity: 'id',
-      communities: {
-        ...communitiesAdapter.setAll(communitiesAdapter.getInitialState(), [
-          community,
-        ]),
-      },
-    },
-    [StoreKeys.Identity]: {
-      ...new IdentityState(),
-      identities: {
-        ...identityAdapter.setAll(identityAdapter.getInitialState(), [
-          identity,
-        ]),
-      },
-    },
-  });
-
-  watchResults(
-    [app],
-    app,
-    'Community and registrar are launched when user reopens the app'
-  );
-  app.runSaga(integrationTest, launchCommunitiesOnStartupSaga);
-};
