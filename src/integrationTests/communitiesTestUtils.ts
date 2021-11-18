@@ -299,5 +299,6 @@ export async function tryToJoinOfflineRegistrar(store) {
 export function* launchCommunitiesOnStartupSaga(): Generator {
   yield* spawn(assertNoErrors);
   yield* take(communitiesActions.launchRegistrar);
+  yield* take(communitiesActions.community);
   yield* take(communitiesActions.responseRegistrar);
 }
