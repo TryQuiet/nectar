@@ -20,6 +20,8 @@ import { communitiesAdapter } from '../communities/communities.adapter';
 import { certificatesAdapter } from '../users/users.adapter';
 import { keyFromCertificate, parseCertificate } from '@zbayapp/identity/lib';
 
+process.env.TZ = 'UTC';
+
 describe('publicChannelsSelectors', () => {
   let store: Store;
 
@@ -47,7 +49,6 @@ describe('publicChannelsSelectors', () => {
   const parsedCert2 = parseCertificate(userCertString2);
 
   const userPubKey1 = keyFromCertificate(parsedCert1);
-
   const userPubKey2 = keyFromCertificate(parsedCert2);
 
   communityChannels.currentChannel = 'currentChannel';
@@ -239,7 +240,7 @@ Array [
     "day": "Today",
     "messages": Array [
       Object {
-        "createdAt": "2:54 PM",
+        "createdAt": "1:54 PM",
         "id": "1",
         "message": "message1",
         "nickname": "userName",
@@ -251,7 +252,7 @@ Array [
     "day": "Nov 17",
     "messages": Array [
       Object {
-        "createdAt": " 12:57 PM",
+        "createdAt": " 11:57 AM",
         "id": "0",
         "message": "message0",
         "nickname": "userName",
@@ -263,21 +264,21 @@ Array [
     "day": "Nov 28",
     "messages": Array [
       Object {
-        "createdAt": " 7:12 AM",
+        "createdAt": " 6:12 AM",
         "id": "4",
         "message": "message4",
         "nickname": "userName",
         "type": 1,
       },
       Object {
-        "createdAt": " 7:12 AM",
+        "createdAt": " 6:12 AM",
         "id": "7",
         "message": "message7",
         "nickname": "userName2",
         "type": 1,
       },
       Object {
-        "createdAt": " 7:11 AM",
+        "createdAt": " 6:11 AM",
         "id": "6",
         "message": "message6
 message2",
@@ -285,7 +286,7 @@ message2",
         "type": 1,
       },
       Object {
-        "createdAt": " 6:53 AM",
+        "createdAt": " 5:53 AM",
         "id": "5",
         "message": "message5",
         "nickname": "userName",
@@ -298,5 +299,5 @@ message2",
   });
 });
 
-export { };
+export {};
 // TODO wiadomosci od innych uzytkownikow
