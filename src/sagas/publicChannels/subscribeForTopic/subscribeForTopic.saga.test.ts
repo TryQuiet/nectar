@@ -1,10 +1,13 @@
-import { TestApi, testSaga } from 'redux-saga-test-plan';
 import { Socket } from 'socket.io-client';
+import { expectSaga } from 'redux-saga-test-plan';
+import { combineReducers } from '@reduxjs/toolkit';
 import { SocketActionTypes } from '../../socket/const/actionTypes';
+import { StoreKeys } from '../../store.keys';
 import { publicChannelsActions } from '../publicChannels.slice';
-import { IChannelInfo } from '../publicChannels.types';
-
 import { subscribeForTopicSaga } from './subscribeForTopic.saga';
+import { Identity } from '../../identity/identity.slice';
+import { identityAdapter } from '../../identity/identity.adapter';
+import { identityReducer, IdentityState } from '../../identity/identity.slice';
 
 describe('subscribeForTopicSaga', () => {
   const socket = { emit: jest.fn() } as unknown as Socket;
@@ -16,29 +19,47 @@ describe('subscribeForTopicSaga', () => {
     timestamp: 666999666,
     address: 'hell on the shore of the baltic sea',
   };
-
-  const saga: TestApi = testSaga(
-    subscribeForTopicSaga,
-    socket,
-    publicChannelsActions.subscribeForTopic({
-      peerId: 'peerId',
-      channelData: channel,
-    })
-  );
-
-  beforeEach(() => {
-    saga.restart();
+  const identity = new Identity({
+    id: 'id',
+    hiddenService: { onionAddress: 'onionAddress', privateKey: 'privateKey' },
+    dmKeys: { publicKey: 'publicKey', privateKey: 'privateKey' },
+    peerId: { id: 'peerId', pubKey: 'pubKey', privKey: 'privKey' },
   });
 
-  test('should be defined', () => {
-    saga
-      .next()
+  test('subscribe for topic', () => {
+    expectSaga(
+      subscribeForTopicSaga,
+      socket,
+      publicChannelsActions.subscribeForTopic({
+        peerId: 'peerid',
+        channelData: channel,
+      })
+    )
+      .withReducer(
+        combineReducers({
+          [StoreKeys.Identity]: identityReducer,
+        }),
+        {
+          [StoreKeys.Identity]: {
+            ...new IdentityState(),
+            identities: identityAdapter.setAll(
+              identityAdapter.getInitialState(),
+              [identity]
+            ),
+          },
+        }
+      )
+      .put(
+        publicChannelsActions.subscribeForTopic({
+          channelData: channel,
+          peerId: 'peerId',
+        })
+      )
       .apply(socket, socket.emit, [
         SocketActionTypes.SUBSCRIBE_FOR_TOPIC,
         'peerId',
         channel,
       ])
-      .next()
-      .isDone();
+      .run();
   });
 });
