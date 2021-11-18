@@ -54,7 +54,7 @@ describe('publicChannelsSelectors', () => {
   communityChannels.currentChannel = 'currentChannel';
   (communityChannels.channelMessages = {
     currentChannel: {
-      ids: ['1', '0', '2', '4', '5', '6', '7'],
+      ids: ['1', '0', '2', '4', '5', '6', '7', '8'],
       messages: {
         '0': {
           id: '0',
@@ -114,6 +114,15 @@ describe('publicChannelsSelectors', () => {
           id: '6',
           message: 'message6',
           createdAt: 1417155108, // November 28, 2014 6:11:48
+          channelId: '',
+          pubKey: userPubKey1,
+          signature: '',
+          type: 1,
+        },
+        '8': {
+          id: '8',
+          message: 'message8',
+          createdAt: 1417155107, // November 28, 2014 6:11:48
           channelId: '',
           pubKey: userPubKey1,
           signature: '',
@@ -225,6 +234,15 @@ describe('publicChannelsSelectors', () => {
           "signature": "",
           "type": 1,
         },
+        Object {
+          "channelId": "",
+          "createdAt": 1417155107,
+          "id": "8",
+          "message": "message8",
+          "pubKey": "BPeZAjdqR+hMPeL3hklkyZnZFmzAR5DRpbSiD79W7NQlBuVVD5R0fqS4oWOrsFO12NhMxII73B8+i0Ffzz6nYq4=",
+          "signature": "",
+          "type": 1,
+        },
       ]
     `);
   });
@@ -235,69 +253,64 @@ describe('publicChannelsSelectors', () => {
     );
 
     expect(messages).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "day": "Today",
-    "messages": Array [
-      Object {
-        "createdAt": "1:54 PM",
-        "id": "1",
-        "message": "message1",
-        "nickname": "userName",
-        "type": 1,
-      },
-    ],
-  },
-  Object {
-    "day": "Nov 17",
-    "messages": Array [
-      Object {
-        "createdAt": " 11:57 AM",
-        "id": "0",
-        "message": "message0",
-        "nickname": "userName",
-        "type": 1,
-      },
-    ],
-  },
-  Object {
-    "day": "Nov 28",
-    "messages": Array [
-      Object {
-        "createdAt": " 6:12 AM",
-        "id": "4",
-        "message": "message4",
-        "nickname": "userName",
-        "type": 1,
-      },
-      Object {
-        "createdAt": " 6:12 AM",
-        "id": "7",
-        "message": "message7",
-        "nickname": "userName2",
-        "type": 1,
-      },
-      Object {
-        "createdAt": " 6:11 AM",
-        "id": "6",
-        "message": "message6
-message2",
-        "nickname": "userName",
-        "type": 1,
-      },
-      Object {
-        "createdAt": " 5:53 AM",
-        "id": "5",
-        "message": "message5",
-        "nickname": "userName",
-        "type": 1,
-      },
-    ],
-  },
-]
-`);
+      Array [
+        Object {
+          "day": "Nov 17",
+          "messages": Array [
+            Object {
+              "createdAt": " 1:54 PM",
+              "id": "1",
+              "message": "message1",
+              "nickname": "userName",
+              "type": 1,
+            },
+            Object {
+              "createdAt": " 11:57 AM",
+              "id": "0",
+              "message": "message0",
+              "nickname": "userName",
+              "type": 1,
+            },
+          ],
+        },
+        Object {
+          "day": "Nov 28",
+          "messages": Array [
+            Object {
+              "createdAt": " 6:12 AM",
+              "id": "4",
+              "message": "message4",
+              "nickname": "userName",
+              "type": 1,
+            },
+            Object {
+              "createdAt": " 6:12 AM",
+              "id": "7",
+              "message": "message7",
+              "nickname": "userName2",
+              "type": 1,
+            },
+            Object {
+              "createdAt": " 6:11 AM",
+              "id": "6",
+              "message": "message6
+      message8
+      message2",
+              "nickname": "userName",
+              "type": 1,
+            },
+            Object {
+              "createdAt": " 5:53 AM",
+              "id": "5",
+              "message": "message5",
+              "nickname": "userName",
+              "type": 1,
+            },
+          ],
+        },
+      ]
+    `);
   });
 });
 
-export {};
-// TODO wiadomosci od innych uzytkownikow
+export { };

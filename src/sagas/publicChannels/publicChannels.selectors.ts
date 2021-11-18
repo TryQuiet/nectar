@@ -10,6 +10,7 @@ import { certificatesMapping } from '../users/users.selectors';
 import { mainChannelName } from '../config';
 import { StoreState } from '../store.types';
 import { currentCommunityId } from '../communities/communities.selectors';
+import { MessagesGroupedByDay } from './publicChannels.types';
 
 const publicChannelSlice: CreatedSelectors[StoreKeys.PublicChannels] = (
   state: StoreState
@@ -136,16 +137,9 @@ export const currentChannelDisplayableMessages = createSelector(
     })
 );
 
-// returns array of messages SORTED by createdAt
-export const currentChannelMessagesSortedByTime = createSelector(
-  currentChannelDisplayableMessages,
-  (messages) =>
-    messages.sort((a, b) => b.createdAt - a.createdAt)
-);
-
 // returns array of messages SORTED and GROUPED by createdAt and user
-export const currentChannelMessagesGroupedByUserTime = createSelector(
-  currentChannelMessagesSortedByTime,
+export const currentChannelMessagesMergedBySender = createSelector(
+  currentChannelDisplayableMessages,
   (messages) => {
     const timeOfGroupingMessages = 300
     let newMessages = []
@@ -172,12 +166,9 @@ export const currentChannelMessagesGroupedByUserTime = createSelector(
 
 // returns array of 'day' object with day and grouped messages
 export const currentChannelMessagesGroupedByDay = createSelector(
-  currentChannelMessagesGroupedByUserTime,
+  currentChannelMessagesMergedBySender,
   (messages) => {
-    let messagesByDay: Array<{
-      day: string,
-      messages: any[]
-    }> = []
+    let messagesByDay: MessagesGroupedByDay = []
 
     for (const message of messages) {
       const split = formatMessageDisplayDate(message.createdAt).split(',')
@@ -237,7 +228,6 @@ export const publicChannelsSelectors = {
   missingCurrentChannelMessages,
   validCurrentChannelMessages,
   currentChannelDisplayableMessages,
-  currentChannelMessagesSortedByTime,
-  currentChannelMessagesGroupedByUserTime,
+  currentChannelMessagesMergedBySender,
   currentChannelMessagesGroupedByDay
 };
