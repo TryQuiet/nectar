@@ -8,6 +8,12 @@ import { subscribeForTopicSaga } from './subscribeForTopic.saga';
 import { Identity } from '../../identity/identity.slice';
 import { identityAdapter } from '../../identity/identity.adapter';
 import { identityReducer, IdentityState } from '../../identity/identity.slice';
+import {
+  communitiesReducer,
+  CommunitiesState,
+  Community,
+} from '../../communities/communities.slice';
+import { communitiesAdapter } from '../../communities/communities.adapter';
 
 describe('subscribeForTopicSaga', () => {
   const socket = { emit: jest.fn() } as unknown as Socket;
@@ -19,6 +25,12 @@ describe('subscribeForTopicSaga', () => {
     timestamp: 666999666,
     address: 'hell on the shore of the baltic sea',
   };
+  const community = new Community({
+    name: '',
+    id: 'id',
+    registrarUrl: 'registrarUrl',
+    CA: {},
+  });
   const identity = new Identity({
     id: 'id',
     hiddenService: { onionAddress: 'onionAddress', privateKey: 'privateKey' },
@@ -31,13 +43,13 @@ describe('subscribeForTopicSaga', () => {
       subscribeForTopicSaga,
       socket,
       publicChannelsActions.subscribeForTopic({
-        peerId: 'peerid',
+        peerId: 'peerId',
         channelData: channel,
       })
     )
       .withReducer(
         combineReducers({
-          [StoreKeys.Identity]: identityReducer,
+          [StoreKeys.Identity]: identityReducer, [StoreKeys.Communities]: communitiesReducer
         }),
         {
           [StoreKeys.Identity]: {
@@ -47,12 +59,20 @@ describe('subscribeForTopicSaga', () => {
               [identity]
             ),
           },
+          [StoreKeys.Communities]: {
+            ...new CommunitiesState(),
+            currentCommunity: 'id',
+            communities: communitiesAdapter.setAll(
+              communitiesAdapter.getInitialState(),
+              [community]
+            ),
+          },
         }
       )
       .put(
-        publicChannelsActions.subscribeForTopic({
-          channelData: channel,
-          peerId: 'peerId',
+        publicChannelsActions.addChannel({
+          communityId: 'id',
+          channel: channel,
         })
       )
       .apply(socket, socket.emit, [
