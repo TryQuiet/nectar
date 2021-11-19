@@ -5,7 +5,11 @@ import {
   getCommunityOwnerData,
   tryToJoinOfflineRegistrar,
   assertReceivedCertificates,
-  assertReceivedChannelsAndSubscribe,assertReceivedMessages, launchCommunitiesOnStartupSaga, sendMessage
+  assertReceivedChannelsAndSubscribe,
+  assertReceivedMessages,
+  launchCommunitiesOnStartupSaga,
+  sendMessage,
+  assertReceivedMessagesAreValid,
 } from './communitiesTestUtils';
 import {
   createUserCsr,
@@ -20,10 +24,7 @@ import {
   CommunitiesState,
   Community,
 } from '../sagas/communities/communities.slice';
-import {
-  Identity,
-  IdentityState,
-} from '../sagas/identity/identity.slice';
+import { Identity, IdentityState } from '../sagas/identity/identity.slice';
 
 import {
   CommunityChannels,
@@ -31,21 +32,34 @@ import {
 } from '../sagas/publicChannels/publicChannels.slice';
 import { channelsByCommunityAdapter } from '../sagas/publicChannels/publicChannels.adapter';
 
-
 jest.setTimeout(600_000);
 
 const crypto = new Crypto();
 
 global.crypto = crypto;
 
-describe('test creating, joining and relaunching communities, sending messages, replicate channels, messages and certificates', () => {
-  test('create, join community, assert replication of channels, messages and certificates - with tor', async () => {
-    const owner = await createApp();
-    const userOne = await createApp();
-    const userTwo = await createApp();
+describe('communities - with tor', () => {
+  let owner;
+  let userOne;
+  let userTwo;
 
+  beforeAll(async () => {
+    owner = await createApp();
+    userOne = await createApp();
+    userTwo = await createApp();
+  });
+
+  afterAll(async () => {
+    await owner.manager.closeAllServices();
+    await userOne.manager.closeAllServices();
+    await userTwo.manager.closeAllServices();
+  });
+
+  test('Owner creates community', async () => {
     await createCommunity({ userName: 'Owner', store: owner.store });
+  });
 
+  test('Two users join community', async () => {
     const ownerData = getCommunityOwnerData(owner.store);
 
     await joinCommunity({
@@ -61,62 +75,168 @@ describe('test creating, joining and relaunching communities, sending messages, 
       userName: 'username2',
       expectedPeersCount: 3,
     });
+  });
 
+  test('Owner and users received certificates', async () => {
     await assertReceivedCertificates('owner', 3, 120_000, owner.store);
     await assertReceivedCertificates('userOne', 3, 120_000, userOne.store);
     await assertReceivedCertificates('userTwo', 3, 120_000, userTwo.store);
-    await assertReceivedChannelsAndSubscribe('owner', 1, 120_000, owner.store);
-    await assertReceivedChannelsAndSubscribe('userTwo', 1, 120_000, userOne.store);
-    await assertReceivedChannelsAndSubscribe('userTwo', 1, 120_000, userTwo.store);
-
-    await sendMessage('HELLO', owner.store)
-    await sendMessage('HELLO', userOne.store)
-    await sendMessage('HELLO', userTwo.store)
-
-    await assertReceivedMessages('owner', 3, 120_000, owner.store)
-    await assertReceivedMessages('userOne', 3, 120_000, userOne.store)
-    await assertReceivedMessages('userTwo', 3, 120_000, userTwo.store)
-    
-    await owner.manager.closeAllServices();
-    await userOne.manager.closeAllServices();
-    await userTwo.manager.closeAllServices();
   });
 
-  test('create, join community, assert replication of channels, messages and certificates - without tor', async () => {
-    const owner = await createAppWithoutTor();
-    const userOne = await createAppWithoutTor();
-    // const userTwo = await createAppWithoutTor();
-
-    await createCommunity({ userName: 'Owner', store: owner.store });
-
-    const ownerData = getCommunityOwnerData(owner.store);
-
-    await joinCommunity({
-      ...ownerData,
-      expectedPeersCount: 2,
-      store: userOne.store,
-      userName: 'username1',
-    });
-
-    // await joinCommunity({
-    //   ...ownerData,
-    //   expectedPeersCount: 3,
-    //   store: userTwo.store,
-    //   userName: 'username2',
-    // });
-
-    await assertReceivedCertificates('owner', 2, 120_000, owner.store);
-    await assertReceivedCertificates('userOne', 2, 120_000, userOne.store);
-    // await assertReceivedCertificates('userTwo', 3, 120_000, userTwo.store);
+  test('Users replicated channel and subscribed to it', async () => {
     await assertReceivedChannelsAndSubscribe('owner', 1, 120_000, owner.store);
-    await assertReceivedChannelsAndSubscribe('userTwo', 1, 120_000, userOne.store);
-    // await assertReceivedChannels('userTwo', 1, 120_000, userTwo.store);
+    await assertReceivedChannelsAndSubscribe(
+      'userTwo',
+      1,
+      120_000,
+      userOne.store
+    );
+    await assertReceivedChannelsAndSubscribe(
+      'userTwo',
+      1,
+      120_000,
+      userTwo.store
+    );
+  });
 
+  let ownerMessageData;
+  let userOneMessageData;
+  let userTwoMessageData;
+
+  test('Every user sends one message to general channel', async () => {
+    ownerMessageData = await sendMessage('owner says hi', owner.store);
+    userOneMessageData = await sendMessage('userOne says hi', userOne.store);
+    userTwoMessageData = await sendMessage('userTwo says hi', userTwo.store);
+  });
+
+  test('Every user replicated all messages', async () => {
+    await assertReceivedMessages('owner', 3, 120_000, owner.store);
+    await assertReceivedMessages('userOne', 3, 120_000, userOne.store);
+    await assertReceivedMessages('userTwo', 3, 120_000, userTwo.store);
+  });
+
+  test('Replicated messages are valid', async () => {
+    await assertReceivedMessagesAreValid(
+      'owner',
+      [ownerMessageData, userOneMessageData, userTwoMessageData],
+      20000,
+      owner.store
+    );
+    await assertReceivedMessagesAreValid(
+      'userOne',
+      [ownerMessageData, userOneMessageData, userTwoMessageData],
+      20000,
+      owner.store
+    );
+    await assertReceivedMessagesAreValid(
+      'userTwo',
+      [ownerMessageData, userOneMessageData, userTwoMessageData],
+      20000,
+      owner.store
+    );
+  });
+});
+
+describe('communities - without tor', () => {
+  let owner;
+  let userOne;
+  let userTwo;
+
+  beforeAll(async () => {
+    owner = await createAppWithoutTor();
+    userOne = await createAppWithoutTor();
+    // userTwo = await createAppWithoutTor();
+  });
+
+  afterAll(async () => {
     await owner.manager.closeAllServices();
     await userOne.manager.closeAllServices();
     // await userTwo.manager.closeAllServices();
   });
 
+  test('Owner creates community', async () => {
+    await createCommunity({ userName: 'Owner', store: owner.store });
+  });
+
+  test('Two users join community', async () => {
+    const ownerData = getCommunityOwnerData(owner.store);
+
+    await joinCommunity({
+      ...ownerData,
+      store: userOne.store,
+      userName: 'username1',
+      expectedPeersCount: 2,
+    });
+
+    // await joinCommunity({
+    //   ...ownerData,
+    //   store: userTwo.store,
+    //   userName: 'username2',
+    //   expectedPeersCount: 3,
+    // });
+  });
+
+  test('Owner and users received certificates', async () => {
+    await assertReceivedCertificates('owner', 3, 120_000, owner.store);
+    await assertReceivedCertificates('userOne', 3, 120_000, userOne.store);
+    // await assertReceivedCertificates('userTwo', 3, 120_000, userTwo.store);
+  });
+
+  test('Users replicated channel and subscribed to it', async () => {
+    await assertReceivedChannelsAndSubscribe('owner', 1, 120_000, owner.store);
+    await assertReceivedChannelsAndSubscribe(
+      'userTwo',
+      1,
+      120_000,
+      userOne.store
+    );
+    // await assertReceivedChannelsAndSubscribe(
+    //   'userTwo',
+    //   1,
+    //   120_000,
+    //   userTwo.store
+    // );
+  });
+
+  let ownerMessageData;
+  let userOneMessageData;
+  // let userTwoMessageData;
+
+  test('Every user sends one message to general channel', async () => {
+    ownerMessageData = await sendMessage('owner says hi', owner.store);
+    userOneMessageData = await sendMessage('userOne says hi', userOne.store);
+    // userTwoMessageData = await sendMessage('userTwo says hi', userTwo.store);
+  });
+
+  test('Every user replicated all messages', async () => {
+    await assertReceivedMessages('owner', 3, 120_000, owner.store);
+    await assertReceivedMessages('userOne', 3, 120_000, userOne.store);
+    // await assertReceivedMessages('userTwo', 3, 120_000, userTwo.store);
+  });
+
+  test('Replicated messages are valid', async () => {
+    await assertReceivedMessagesAreValid(
+      'owner',
+      [ownerMessageData, userOneMessageData],
+      20000,
+      owner.store
+    );
+    await assertReceivedMessagesAreValid(
+      'userOne',
+      [ownerMessageData, userOneMessageData],
+      20000,
+      owner.store
+    );
+    // await assertReceivedMessagesAreValid(
+    //   'userTwo',
+    //   [ownerMessageData, userOneMessageData, userTwoMessageData],
+    //   20000,
+    //   owner.store
+    // );
+  });
+});
+
+describe('registrar', () => {
   test('try to join offline registrar', async () => {
     const user = await createApp();
 
@@ -126,7 +246,6 @@ describe('test creating, joining and relaunching communities, sending messages, 
   });
 
   test('launch communities and registrars on startup', async () => {
-
     // TODO: Move store mock into separate module and share between all the tests across nectar
     const community = new Community({
       name: 'communityName',
@@ -139,11 +258,12 @@ describe('test creating, joining and relaunching communities, sending messages, 
       },
       registrarUrl: '',
     });
-  
+
     const identity = new Identity({
       id: 'F1141EBCF93387E5A28696C5B41E2177',
       hiddenService: {
-        onionAddress: 'ybrmqwsudwxjpzugnl66hx2526nox5nzgmrtzveteud5f7anpjw62zqd',
+        onionAddress:
+          'ybrmqwsudwxjpzugnl66hx2526nox5nzgmrtzveteud5f7anpjw62zqd',
         privateKey:
           'ED25519-V3:uJESjXQXngfVDTyKrztYrnY00lR5XZSNcHlxZlM/JV+exmG1nI8I+HVlpM6+G7yk4b53Lb3xnFmDWJ7GSN3gDQ==',
       },
@@ -162,7 +282,9 @@ describe('test creating, joining and relaunching communities, sending messages, 
       },
     });
 
-    let communityChannels = new CommunityChannels('F1141EBCF93387E5A28696C5B41E2177');
+    let communityChannels = new CommunityChannels(
+      'F1141EBCF93387E5A28696C5B41E2177'
+    );
 
     communityChannels.currentChannel = 'general';
 
@@ -176,12 +298,13 @@ describe('test creating, joining and relaunching communities, sending messages, 
       hashAlg: config.hashAlg,
     });
 
-    userCsr.userKey = 'MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgrSJ366ji2AfRNC9BDnViHl5V+A+fnjiUdUuPav3G8rygCgYIKoZIzj0DAQehRANCAAQpI18Np+59RC7UXkAfcl8mu8mrtgAwjv5pN18RmzGw2vV6iHbJ8RrujJZF9Z5rDqGYZAP2UCTyKzWTOC6740RD'
-  
+    userCsr.userKey =
+      'MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgrSJ366ji2AfRNC9BDnViHl5V+A+fnjiUdUuPav3G8rygCgYIKoZIzj0DAQehRANCAAQpI18Np+59RC7UXkAfcl8mu8mrtgAwjv5pN18RmzGw2vV6iHbJ8RrujJZF9Z5rDqGYZAP2UCTyKzWTOC6740RD';
+
     identity.userCsr = userCsr;
     identity.userCertificate =
       'MIICDTCCAbMCBgF9Lq/VWDAKBggqhkjOPQQDAjASMRAwDgYDVQQDEwdaYmF5IENBMB4XDTIxMTExNzE2MTY1NVoXDTMwMDEzMTIzMDAwMFowSTFHMEUGA1UEAxM+eWJybXF3c3Vkd3hqcHp1Z25sNjZoeDI1MjZub3g1bnpnbXJ0enZldGV1ZDVmN2FucGp3NjJ6cWQub25pb24wWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAAQpI18Np+59RC7UXkAfcl8mu8mrtgAwjv5pN18RmzGw2vV6iHbJ8RrujJZF9Z5rDqGYZAP2UCTyKzWTOC6740RDo4HCMIG/MAkGA1UdEwQCMAAwCwYDVR0PBAQDAgCOMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATAvBgkqhkiG9w0BCQwEIgQgFzGXNQSk2IzgcI35nT9GmfKunA1jJHOdV6ZWRhOADhIwFgYKKwYBBAGDjBsCAQQIEwZmZ2RnZmcwPQYJKwYBAgEPAwEBBDATLlFtWFJKYjVnZGpjcmI5Vk4xVUVFbmM1VllVSGNEcHBKWXlrcGY1UUhXU3JHakMwCgYIKoZIzj0EAwIDSAAwRQIhAJmsMNFbttx9i0OMYIzKsALrfCUU8rX70S8Oj2IZp/vWAiA0b+6MR0ANnJkjW6HcClS6K2XHvOizmzQab+8rJNJVag==';
-  
+
     const app = await createApp({
       [StoreKeys.Communities]: {
         ...new CommunitiesState(),
@@ -200,19 +323,18 @@ describe('test creating, joining and relaunching communities, sending messages, 
           ]),
         },
       },
-  
-        [StoreKeys.PublicChannels]: {
-          ...new PublicChannelsState(),
-          channels: channelsByCommunityAdapter.setAll(
-            channelsByCommunityAdapter.getInitialState(),
-            [communityChannels]
-          ),
-        },
-      
+
+      [StoreKeys.PublicChannels]: {
+        ...new PublicChannelsState(),
+        channels: channelsByCommunityAdapter.setAll(
+          channelsByCommunityAdapter.getInitialState(),
+          [communityChannels]
+        ),
+      },
     });
 
     await app.runSaga(launchCommunitiesOnStartupSaga).toPromise();
 
-    await app.manager.closeAllServices()
+    await app.manager.closeAllServices();
   });
 });

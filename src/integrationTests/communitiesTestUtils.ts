@@ -1,20 +1,14 @@
-
-import {take, spawn } from 'typed-redux-saga';
+import { take, spawn } from 'typed-redux-saga';
 import waitForExpect from 'wait-for-expect';
-import {
-  communitiesActions,
-} from '../sagas/communities/communities.slice';
-import {
-  identityActions,
-} from '../sagas/identity/identity.slice';
-import {
-  messagesActions,
-} from '../sagas/messages/messages.slice';
+import { communitiesActions } from '../sagas/communities/communities.slice';
+import { identityActions } from '../sagas/identity/identity.slice';
+import { messagesActions } from '../sagas/messages/messages.slice';
 import logger from '../utils/logger';
-import {
-  assertNoErrors,
-} from './utils';
+import { assertNoErrors } from './utils';
 import { publicChannelsActions } from '../sagas/publicChannels/publicChannels.slice';
+
+import { keyFromCertificate, parseCertificate } from '@zbayapp/identity/lib';
+import { Store } from 'redux';
 
 const log = logger('tests');
 
@@ -25,7 +19,7 @@ export async function assertReceivedCertificates(
   store
 ) {
   log(`User ${userName} starts waiting ${maxTime}ms for certificates`);
-  
+
   await waitForExpect(() => {
     expect(store.getState().Users.certificates.ids).toHaveLength(expectedCount);
   }, maxTime);
@@ -54,9 +48,15 @@ export async function assertReceivedChannelsAndSubscribe(
     ).toHaveLength(expectedCount);
   }, maxTime);
 
-  await store.dispatch(publicChannelsActions.setCurrentChannel(store.getState().PublicChannels.channels.entities[communityId].channels
-  .ids[0]))
-  await store.dispatch(publicChannelsActions.subscribeForAllTopics(communityId))
+  await store.dispatch(
+    publicChannelsActions.setCurrentChannel(
+      store.getState().PublicChannels.channels.entities[communityId].channels
+        .ids[0]
+    )
+  );
+  await store.dispatch(
+    publicChannelsActions.subscribeForAllTopics(communityId)
+  );
 
   log(
     `User ${userName} received ${
@@ -66,8 +66,23 @@ export async function assertReceivedChannelsAndSubscribe(
   );
 }
 
-export async function sendMessage(message, store) {
-  await store.dispatch(messagesActions.sendMessage(message))
+export async function sendMessage(
+  message: string,
+  store: Store
+): Promise<{ message: string; publicKey: string }> {
+  store.dispatch(messagesActions.sendMessage(message));
+
+  const communityId = store.getState().Communities.communities.ids[0];
+  const certificate =
+    store.getState().Identity.identities.entities[communityId].userCertificate;
+
+  const parsedCertificate = await parseCertificate(certificate);
+  const publicKey = keyFromCertificate(parsedCertificate);
+
+  return {
+    message,
+    publicKey,
+  };
 }
 
 export async function assertReceivedMessages(
@@ -82,15 +97,50 @@ export async function assertReceivedMessages(
 
   await waitForExpect(() => {
     expect(
-      store.getState().PublicChannels.channels.entities[communityId].channelMessages.general.ids
+      store.getState().PublicChannels.channels.entities[communityId]
+        .channelMessages.general.ids
     ).toHaveLength(expectedCount);
   }, maxTime);
 
   log(
     `User ${userName} received ${
-      store.getState().PublicChannels.channels.entities[communityId].channelMessages.general.ids.length
+      store.getState().PublicChannels.channels.entities[communityId]
+        .channelMessages.general.ids.length
     } messages`
   );
+}
+
+export async function assertReceivedMessagesAreValid(
+  userName: string,
+  messages: any[],
+  maxTime: number = 600000,
+  store
+) {
+  log(`User ${userName} checks is messages are valid`);
+
+  const communityId = store.getState().Communities.communities.ids[0];
+
+  const receivedMessages = Object.values(
+    store.getState().PublicChannels.channels.entities[communityId]
+      .channelMessages.general.messages
+  );
+
+  const validMessages = [];
+
+  for (let receivedMessage of receivedMessages) {
+    console.log('inside loop');
+    const msg = messages.filter(
+      // @ts-ignorets-ignore
+      (message) => message.publicKey === receivedMessage.pubKey
+    );
+    if (msg) {
+      validMessages.push(msg);
+    }
+  }
+
+  await waitForExpect(() => {
+    expect(validMessages).toHaveLength(messages.length);
+  }, maxTime);
 }
 
 export const getCommunityOwnerData = (ownerStore: any) => {

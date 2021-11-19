@@ -72,9 +72,6 @@
       "json",
       "node"
     ],
-    "rootDir": "src",
-    "setupFiles": [
-      "./setupTests.ts"
-    ]
+    "rootDir": "src"
   }
 }
