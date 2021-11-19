@@ -145,13 +145,13 @@ describe('communities - without tor', () => {
   beforeAll(async () => {
     owner = await createAppWithoutTor();
     userOne = await createAppWithoutTor();
-    // userTwo = await createAppWithoutTor();
+    userTwo = await createAppWithoutTor();
   });
 
   afterAll(async () => {
     await owner.manager.closeAllServices();
     await userOne.manager.closeAllServices();
-    // await userTwo.manager.closeAllServices();
+    await userTwo.manager.closeAllServices();
   });
 
   test('Owner creates community', async () => {
@@ -168,18 +168,18 @@ describe('communities - without tor', () => {
       expectedPeersCount: 2,
     });
 
-    // await joinCommunity({
-    //   ...ownerData,
-    //   store: userTwo.store,
-    //   userName: 'username2',
-    //   expectedPeersCount: 3,
-    // });
+    await joinCommunity({
+      ...ownerData,
+      store: userTwo.store,
+      userName: 'username2',
+      expectedPeersCount: 3,
+    });
   });
 
   test('Owner and users received certificates', async () => {
     await assertReceivedCertificates('owner', 3, 120_000, owner.store);
     await assertReceivedCertificates('userOne', 3, 120_000, userOne.store);
-    // await assertReceivedCertificates('userTwo', 3, 120_000, userTwo.store);
+    await assertReceivedCertificates('userTwo', 3, 120_000, userTwo.store);
   });
 
   test('Users replicated channel and subscribed to it', async () => {
@@ -190,53 +190,70 @@ describe('communities - without tor', () => {
       120_000,
       userOne.store
     );
-    // await assertReceivedChannelsAndSubscribe(
-    //   'userTwo',
-    //   1,
-    //   120_000,
-    //   userTwo.store
-    // );
+    await assertReceivedChannelsAndSubscribe(
+      'userTwo',
+      1,
+      120_000,
+      userTwo.store
+    );
   });
 
   let ownerMessageData;
   let userOneMessageData;
-  // let userTwoMessageData;
+  let userTwoMessageData;
 
   test('Every user sends one message to general channel', async () => {
     ownerMessageData = await sendMessage('owner says hi', owner.store);
     userOneMessageData = await sendMessage('userOne says hi', userOne.store);
-    // userTwoMessageData = await sendMessage('userTwo says hi', userTwo.store);
+    userTwoMessageData = await sendMessage('userTwo says hi', userTwo.store);
   });
 
   test('Every user replicated all messages', async () => {
     await assertReceivedMessages('owner', 3, 120_000, owner.store);
     await assertReceivedMessages('userOne', 3, 120_000, userOne.store);
-    // await assertReceivedMessages('userTwo', 3, 120_000, userTwo.store);
+    await assertReceivedMessages('userTwo', 3, 120_000, userTwo.store);
   });
 
   test('Replicated messages are valid', async () => {
     await assertReceivedMessagesAreValid(
       'owner',
-      [ownerMessageData, userOneMessageData],
+      [ownerMessageData, userOneMessageData, userTwoMessageData],
       20000,
       owner.store
     );
     await assertReceivedMessagesAreValid(
       'userOne',
-      [ownerMessageData, userOneMessageData],
+      [ownerMessageData, userOneMessageData, userTwoMessageData],
       20000,
       owner.store
     );
-    // await assertReceivedMessagesAreValid(
-    //   'userTwo',
-    //   [ownerMessageData, userOneMessageData, userTwoMessageData],
-    //   20000,
-    //   owner.store
-    // );
+    await assertReceivedMessagesAreValid(
+      'userTwo',
+      [ownerMessageData, userOneMessageData, userTwoMessageData],
+      20000,
+      owner.store
+    );
   });
 });
 
 describe('registrar', () => {
+
+  let owner;
+  let userOne;
+  let userTwo;
+
+  beforeAll(async () => {
+    owner = await createAppWithoutTor();
+    userOne = await createAppWithoutTor();
+    userTwo = await createAppWithoutTor();
+  });
+
+  afterAll(async () => {
+    await owner.manager.closeAllServices();
+    await userOne.manager.closeAllServices();
+    await userTwo.manager.closeAllServices();
+  });
+
   test('try to join offline registrar', async () => {
     const user = await createApp();
 
@@ -334,7 +351,5 @@ describe('registrar', () => {
     });
 
     await app.runSaga(launchCommunitiesOnStartupSaga).toPromise();
-
-    await app.manager.closeAllServices();
   });
 });
