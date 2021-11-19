@@ -239,27 +239,17 @@ describe('communities - without tor', () => {
 describe('registrar', () => {
 
   let owner;
-  let userOne;
-  let userTwo;
 
   beforeAll(async () => {
     owner = await createAppWithoutTor();
-    userOne = await createAppWithoutTor();
-    userTwo = await createAppWithoutTor();
   });
 
   afterAll(async () => {
     await owner.manager.closeAllServices();
-    await userOne.manager.closeAllServices();
-    await userTwo.manager.closeAllServices();
   });
 
   test('try to join offline registrar', async () => {
-    const user = await createApp();
-
-    await tryToJoinOfflineRegistrar(user.store);
-
-    await user.manager.closeAllServices();
+    await tryToJoinOfflineRegistrar(owner.store);
   });
 
   test('launch communities and registrars on startup', async () => {
@@ -351,5 +341,7 @@ describe('registrar', () => {
     });
 
     await app.runSaga(launchCommunitiesOnStartupSaga).toPromise();
+
+    await app.manager.closeAllServices()
   });
 });
