@@ -255,31 +255,21 @@ describe('publicChannelsSelectors', () => {
     expect(messages).toMatchInlineSnapshot(`
       Array [
         Object {
-          "day": "Nov 17",
-          "messages": Array [
-            Object {
-              "createdAt": " 1:54 PM",
-              "id": "1",
-              "message": "message1",
-              "nickname": "userName",
-              "type": 1,
-            },
-            Object {
-              "createdAt": " 11:57 AM",
-              "id": "0",
-              "message": "message0",
-              "nickname": "userName",
-              "type": 1,
-            },
-          ],
-        },
-        Object {
           "day": "Nov 28",
           "messages": Array [
             Object {
-              "createdAt": " 6:12 AM",
-              "id": "4",
-              "message": "message4",
+              "createdAt": " 5:53 AM",
+              "id": "5",
+              "message": "message5",
+              "nickname": "userName",
+              "type": 1,
+            },
+            Object {
+              "createdAt": " 6:11 AM",
+              "id": "6",
+              "message": "message2
+      message8
+      message6",
               "nickname": "userName",
               "type": 1,
             },
@@ -291,18 +281,28 @@ describe('publicChannelsSelectors', () => {
               "type": 1,
             },
             Object {
-              "createdAt": " 6:11 AM",
-              "id": "6",
-              "message": "message6
-      message8
-      message2",
+              "createdAt": " 6:12 AM",
+              "id": "4",
+              "message": "message4",
+              "nickname": "userName",
+              "type": 1,
+            },
+          ],
+        },
+        Object {
+          "day": "Nov 17",
+          "messages": Array [
+            Object {
+              "createdAt": " 11:57 AM",
+              "id": "0",
+              "message": "message0",
               "nickname": "userName",
               "type": 1,
             },
             Object {
-              "createdAt": " 5:53 AM",
-              "id": "5",
-              "message": "message5",
+              "createdAt": " 1:54 PM",
+              "id": "1",
+              "message": "message1",
               "nickname": "userName",
               "type": 1,
             },

@@ -147,20 +147,19 @@ export const currentChannelMessagesMergedBySender = createSelector(
     for (let indexOfMessages = 0; indexOfMessages < messages.length; indexOfMessages++) {
       let currentMessage = messages[indexOfMessages]
 
-      if (messages[indexOfMessages + 1]) {
-        while ((currentMessage.createdAt - messages[indexOfMessages + 1].createdAt) < timeOfGroupingMessages
-          && currentMessage.nickname === messages[indexOfMessages + 1].nickname) {
-          currentMessage = {
-            ...currentMessage,
-            message: currentMessage.message + "\n" + messages[indexOfMessages + 1].message
-          }
-          indexOfMessages++
+      while (messages[indexOfMessages + 1]
+        && (currentMessage.createdAt - messages[indexOfMessages + 1].createdAt) < timeOfGroupingMessages
+        && currentMessage.nickname === messages[indexOfMessages + 1].nickname) {
+        currentMessage = {
+          ...currentMessage,
+          message: messages[indexOfMessages + 1].message + "\n" + currentMessage.message
         }
+        indexOfMessages++
       }
 
       newMessages.push(currentMessage)
     }
-    return newMessages
+    return newMessages.reverse()
   }
 );
 
