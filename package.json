@@ -1,11 +1,11 @@
 {
   "name": "@zbayapp/nectar",
-  "version": "1.16.0",
+  "version": "1.17.0",
   "description": "",
   "main": "lib/index.js",
   "scripts": {
     "build": "tsc",
-    "test": "jest sagas/*",
+    "test": "TZ=UTC jest sagas/*",
     "test-integration": "DEBUG='waggle*, nectar*' jest integrationTests/*",
     "lint": "eslint --ext .ts ./src/",
     "prettier": "prettier"
