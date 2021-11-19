@@ -99,6 +99,6 @@ describe('checkForMessagesSaga', () => {
           communityId: 'id'
         })
       )
-      .silentRun();
+      .run();
   });
 });
