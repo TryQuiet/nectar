@@ -1,4 +1,3 @@
-import { io, Socket } from 'socket.io-client';
 import Websockets from 'libp2p-websockets';
 import {
   applyMiddleware,
@@ -6,7 +5,7 @@ import {
   createAction,
   createStore,
 } from '@reduxjs/toolkit';
-import { all, call, fork, put, take, takeEvery } from 'typed-redux-saga';
+import { all, put, take, takeEvery } from 'typed-redux-saga';
 import createSagaMiddleware from 'redux-saga';
 import thunk from 'redux-thunk';
 import waggle from 'waggle';
@@ -15,8 +14,6 @@ import assert from 'assert';
 import getPort from 'get-port';
 import tmp from 'tmp';
 import logger from '../utils/logger';
-
-import { useIO } from '../sagas/socket/startConnection/startConnection.saga';
 
 import { appActions } from '../sagas/app/app.slice';
 import { errorsActions } from '../sagas/errors/errors.slice';
@@ -52,10 +49,10 @@ const reducers = {
 };
 
 export const prepareStore = (
-  reducers,
+  reducersList,
   mockedState?: { [key in StoreKeys]?: any }
 ) => {
-  const combinedReducers = combineReducers(reducers);
+  const combinedReducers = combineReducers(reducersList);
   const sagaMiddleware = createSagaMiddleware();
   const store = createStore(
     combinedReducers,
@@ -69,21 +66,7 @@ export const prepareStore = (
   };
 };
 
-const connectToDataport = (url: string, name: string): Socket => {
-  const socket = io(url);
-  socket.on('connect', async () => {
-    log(`websocket connection is ready for app ${name}`);
-  });
-  socket.on('disconnect', () => {
-    log(`socket disconnected for app ${name}`);
-    socket.close();
-  });
-  return socket;
-};
-
-export const createApp = async (
-  mockedState?: { [key in StoreKeys]?: any }
-) => {
+export const createApp = async (mockedState?: { [key in StoreKeys]?: any }) => {
   /**
    * Configure and initialize ConnectionsManager from waggle,
    * configure redux store
@@ -115,18 +98,13 @@ export const createApp = async (
   });
   await manager.init();
 
-  const rootTask = runSaga(root);
-
   function* root(): Generator {
-    const socket = yield* call(
-      connectToDataport,
-      `http://localhost:${dataServerPort1}`,
-      appName
-    );
-    const task = yield* fork(useIO, socket);
     yield* take(createAction('testFinished'));
     yield* put(appActions.closeServices());
   }
+
+  const rootTask = runSaga(root);
+
   return { store, runSaga, rootTask, manager };
 };
 
@@ -167,18 +145,11 @@ export const createAppWithoutTor = async (
   });
   manager.initListeners();
 
-  const rootTask = runSaga(root);
-
   function* root(): Generator {
-    const socket = yield* call(
-      connectToDataport,
-      `http://localhost:${dataServerPort1}`,
-      appName
-    );
-    const task = yield* fork(useIO, socket);
     yield* take(createAction('testFinished'));
     yield* put(appActions.closeServices());
   }
+  const rootTask = runSaga(root);
 
   return { store, runSaga, rootTask, manager };
 };
