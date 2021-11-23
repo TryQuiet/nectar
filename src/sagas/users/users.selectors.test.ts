@@ -14,7 +14,7 @@ import { certificatesAdapter } from '../users/users.adapter';
 import { keyFromCertificate, parseCertificate } from '@zbayapp/identity/lib';
 import { usersSelectors } from './users.selectors';
 
-describe('publicChannelsSelectors', () => {
+describe('users selectors', () => {
   let store: Store;
 
   const communityId = new Community({
