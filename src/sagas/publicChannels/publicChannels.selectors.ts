@@ -151,7 +151,7 @@ export const currentChannelMessagesMergedBySender = createSelector(
         && (currentMessage.createdAt - messages[indexOfMessages + 1].createdAt) < timeOfGroupingMessages
         && currentMessage.nickname === messages[indexOfMessages + 1].nickname) {
         currentMessage = {
-          ...currentMessage,
+          ...messages[indexOfMessages + 1],
           message: messages[indexOfMessages + 1].message + "\n" + currentMessage.message
         }
         indexOfMessages++
