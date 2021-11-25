@@ -1,6 +1,5 @@
-/// <reference path="../../node_modules/@types/factory-girl/index.d.ts" />
-
 declare module 'factory-girl' {
+  type ActionCreator<T> = (payload: T) => { payload: T };
   class FactoryGirl {
     constructor();
 
@@ -10,7 +9,11 @@ declare module 'factory-girl' {
     assocAttrsMany: typeof factory.assocAttrsMany;
     attrs: typeof factory.attrs;
     attrsMany: typeof factory.attrsMany;
-    build: typeof factory.build;
+    build<T extends ActionCreator<P>>(
+      name: string,
+      attrs?: Attributes<Partial<P>>,
+      buildOptions?: BuildOptions
+    ): Promise<ReturnType<T>>;
     buildMany: typeof factory.buildMany;
     cleanUp(): typeof factory.cleanUp;
     create: typeof factory.create;
