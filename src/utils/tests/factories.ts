@@ -1,4 +1,4 @@
-import { FactoryGirl } from 'factory-girl';
+import factoryGirl from 'factory-girl';
 import { CustomReduxAdapter } from './reduxAdapter';
 import { Store } from '../../sagas/store.types';
 
@@ -12,8 +12,7 @@ import {
 import { DateTime } from 'luxon';
 
 export const getFactory = async (store: Store) => {
-
-  const factory = new FactoryGirl()
+  const factory = new factoryGirl.FactoryGirl();
 
   factory.setAdapter(new CustomReduxAdapter(store));
 
@@ -97,7 +96,7 @@ export const getFactory = async (store: Store) => {
           certificate: action.payload.userCertificate,
         });
         return action;
-      }
+      },
     }
   );
 
@@ -164,11 +163,11 @@ export const getFactory = async (store: Store) => {
           action.payload.message.message,
           action.payload.identity.userCertificate,
           action.payload.identity.userCsr.userKey
-          )
-          action.payload.message.signature = signature
-          action.payload.message.pubKey = pubKey
-          // Keep channel address the same
-          action.payload.message.channelId = action.payload.channelAddress
+        );
+        action.payload.message.signature = signature;
+        action.payload.message.pubKey = pubKey;
+        // Keep channel address the same
+        action.payload.message.channelId = action.payload.channelAddress;
         return action;
       },
     }
