@@ -11,7 +11,8 @@
     "prettier": "prettier"
   },
   "files": [
-    "lib/**/*"
+    "lib/**/*",
+    "@types/**/*"
   ],
   "publishConfig": {
     "access": "public"

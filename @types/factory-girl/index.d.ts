@@ -1,7 +1,7 @@
 /// <reference path="../../node_modules/@types/factory-girl/index.d.ts" />
 
 declare module 'factory-girl' {
-  export class FactoryGirl {
+  class FactoryGirl {
     constructor();
 
     assoc: typeof factory.assoc;
@@ -24,4 +24,6 @@ declare module 'factory-girl' {
     resetSeq: typeof factory.resetSeq;
     chance: typeof factory.chance;
   }
+
+  factory.FactoryGirl = FactoryGirl;
 }
