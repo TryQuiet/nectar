@@ -10,18 +10,36 @@ import {
 
 describe('communitiesSelectors', () => {
   let store: Store;
-  const communityAlpha = new Community({
+  const communityAlpha: Community = {
     name: 'alpha',
     id: 'communityAlpha',
     CA: { rootCertString: 'certString', rootKeyString: 'keyString' },
     registrarUrl: '',
-  });
-  const communityBeta = new Community({
+    rootCa: '',
+    peerList: [],
+    registrar: {
+      privateKey: '',
+      address: ''
+    },
+    onionAddress: '',
+    privateKey: '',
+    port: 0
+  };
+  const communityBeta: Community = {
     name: 'beta',
     id: 'communityBeta',
     CA: { rootCertString: 'certString', rootKeyString: 'keyString' },
     registrarUrl: '',
-  });
+    rootCa: '',
+    peerList: [],
+    registrar: {
+      privateKey: '',
+      address: ''
+    },
+    onionAddress: '',
+    privateKey: '',
+    port: 0
+  };
   beforeEach(() => {
     store = createStore(
       combineReducers({
@@ -89,13 +107,21 @@ describe('communitiesSelectors', () => {
 
   it('returns registrar url without port if no port in the store', () => {
     const onionAddress = 'aznu6kiyutsgjhdue4i4xushjzey6boxf4i4isd53admsibvbt6qyiyd'
-    const community = new Community({
+    const community: Community = {
       name: 'new',
       id: 'communityNew',
       CA: { rootCertString: 'certString', rootKeyString: 'keyString' },
       registrarUrl: '',
-    });
-    community.onionAddress = onionAddress
+      rootCa: '',
+      peerList: [],
+      registrar: {
+        privateKey: '',
+        address: ''
+      },
+      onionAddress: onionAddress,
+      privateKey: '',
+      port: 0
+    };
     store = createStore(
       combineReducers({
         [StoreKeys.Communities]: communitiesReducer,
@@ -118,13 +144,21 @@ describe('communitiesSelectors', () => {
   it('returns registrar url with port if port exists in the store', () => {
     const onionAddress = 'aznu6kiyutsgjhdue4i4xushjzey6boxf4i4isd53admsibvbt6qyiyd'
     const port = 7777
-    const community = new Community({
+    const community: Community = {
       name: 'new',
       id: 'communityNew',
       CA: { rootCertString: 'certString', rootKeyString: 'keyString' },
       registrarUrl: '',
-    });
-    community.onionAddress = onionAddress
+      rootCa: '',
+      peerList: [],
+      registrar: {
+        privateKey: '',
+        address: ''
+      },
+      onionAddress: onionAddress,
+      privateKey: '',
+      port: 0
+    };
     community.port = port
     store = createStore(
       combineReducers({
@@ -147,12 +181,21 @@ describe('communitiesSelectors', () => {
 
   it('returns registrar url if no onion address, no port', () => {
     const url = 'http://aznu6kiyutsgjhdue4i4xushjzey6boxf4i4isd53admsibvbt6qyiyd'
-    const community = new Community({
+    const community: Community = {
       name: 'new',
       id: 'communityNew',
       CA: { rootCertString: 'certString', rootKeyString: 'keyString' },
       registrarUrl: url,
-    });
+      rootCa: '',
+      peerList: [],
+      registrar: {
+        privateKey: '',
+        address: ''
+      },
+      onionAddress: '',
+      privateKey: '',
+      port: 0
+    };
     store = createStore(
       combineReducers({
         [StoreKeys.Communities]: communitiesReducer,

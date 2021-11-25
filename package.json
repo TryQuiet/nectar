@@ -21,6 +21,7 @@
   "dependencies": {
     "@reduxjs/toolkit": "^1.6.1",
     "debug": "^4.3.2",
+    "factory-girl": "^5.0.4",
     "get-port": "^5.1.1",
     "luxon": "^2.0.2",
     "redux": "^4.1.1",
@@ -33,6 +34,7 @@
     "@babel/core": "^7.15.0",
     "@babel/preset-env": "^7.15.0",
     "@babel/preset-typescript": "^7.15.0",
+    "@types/factory-girl": "^5.0.8",
     "@types/jest": "^26.0.24",
     "@types/luxon": "^2.0.0",
     "@types/pkijs": "0.0.10",

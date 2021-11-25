@@ -37,7 +37,7 @@ describe('responseCreateCommunity', () => {
           identities: {
             ids: ['id'],
             entities: {
-            id: new Identity({
+            id: {
               id: 'id',
               hiddenService: {
                 onionAddress: 'onionAddress',
@@ -45,7 +45,7 @@ describe('responseCreateCommunity', () => {
               },
               peerId: { id: 'id', pubKey: 'pubKey', privKey: 'privKey' },
               dmKeys: { publicKey: 'pub', privateKey: 'priv' },
-            }),
+            },
           },
         },
       }

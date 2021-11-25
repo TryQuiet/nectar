@@ -16,7 +16,7 @@ import { storeKeys } from 'src';
 describe('registerCertificateSaga', () => {
 
   test('request certificate registration when user is community owner', async () => {
-    const identity = new Identity({
+    const identity: Identity = {
       id: 'id',
       hiddenService: {
         onionAddress: 'onionAddress.onion',
@@ -24,14 +24,23 @@ describe('registerCertificateSaga', () => {
       },
       dmKeys: { publicKey: 'publicKey', privateKey: 'privateKey' },
       peerId: { id: 'peerId', pubKey: 'pubKey', privKey: 'privKey' },
-    });
+      zbayNickname: '',
+      userCsr: undefined,
+      userCertificate: ''
+    };
     identity.zbayNickname = 'bartekDev'
-    const community = new Community({
+    const community: Community = {
       name: 'communityName',
       id: 'id',
       CA: { rootCertString: 'certString', rootKeyString: 'keyString' },
       registrarUrl: '',
-    });
+      rootCa: '',
+      peerList: [],
+      registrar: null,
+      onionAddress: '',
+      privateKey: '',
+      port: 0
+    };
     const socket = { emit: jest.fn(), on: jest.fn() } as unknown as Socket;
     const userCsr = {
       userCsr: 'userCsr',
@@ -88,12 +97,18 @@ describe('registerCertificateSaga', () => {
       .run();
   });
   test('request certificate registration when user is not community owner', async () => {
-    const community = new Community({
+    const community: Community = {
       name: 'communityName',
       id: 'id',
-      CA: {},
+      CA: null,
+      rootCa: '',
+      peerList: [],
       registrarUrl: '',
-    });
+      registrar: null,
+      onionAddress: '',
+      privateKey: '',
+      port: 0
+    };
     const socket = { emit: jest.fn(), on: jest.fn() } as unknown as Socket;
     const userCsr = {
       userCsr: 'userCsr',

@@ -8,6 +8,7 @@ import {
 } from './publicChannels.adapter';
 import { IChannelInfo, IMessage } from './publicChannels.types';
 import logger from '../../utils/logger';
+import { Identity } from '../identity/identity.slice';
 const log = logger('publicChannels');
 
 export class PublicChannelsState {
@@ -49,15 +50,19 @@ export interface ChannelMessagesIdsResponse {
 }
 
 export interface AskForMessagesPayload {
-  peerId: string,
+  peerId: string;
   channelAddress: string;
   ids: string[];
-  communityId: string
+  communityId: string;
 }
 
 export interface SubscribeForTopicPayload {
   peerId: string;
   channelData: IChannelInfo;
+}
+
+export interface addPublicChannelsListPayload {
+  id: string;
 }
 
 export interface SetCurrentChannelPayload {
@@ -127,10 +132,13 @@ export const publicChannelsSlice = createSlice({
         },
       });
     },
-    addPublicChannelsList: (state, action: PayloadAction<string>) => {
+    addPublicChannelsList: (
+      state,
+      action: PayloadAction<addPublicChannelsListPayload>
+    ) => {
       channelsByCommunityAdapter.addOne(
         state.channels,
-        new CommunityChannels(action.payload)
+        new CommunityChannels(action.payload.id)
       );
     },
     getPublicChannels: (state) => state,
@@ -243,6 +251,45 @@ export const publicChannelsSlice = createSlice({
               },
               ids: [
                 ...state.channels.entities[communityId].channelMessages[
+                  channelAddress
+                ].ids,
+                message.id,
+              ],
+            },
+          },
+        },
+      });
+    },
+    // Utility action for testing purposes
+    signMessage: (
+      state,
+      action: PayloadAction<{
+        identity: Identity;
+        message: IMessage;
+        channelAddress: string;
+      }>
+    ) => {
+      const { identity, message, channelAddress } = action.payload;
+      const messages = {
+        [message.id]: message,
+      };
+      channelsByCommunityAdapter.updateOne(state.channels, {
+        id: identity.id, // Identity it should be the same as community id
+        changes: {
+          channelMessages: {
+            ...state.channels.entities[identity.id].channelMessages,
+            [channelAddress]: {
+              ...state.channels.entities[identity.id].channelMessages[
+                channelAddress
+              ],
+              messages: {
+                ...state.channels.entities[identity.id].channelMessages[
+                  channelAddress
+                ].messages,
+                ...messages,
+              },
+              ids: [
+                ...state.channels.entities[identity.id].channelMessages[
                   channelAddress
                 ].ids,
                 message.id,
