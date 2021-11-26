@@ -35,21 +35,21 @@ describe('responseCreateCommunity', () => {
           identities: {
             ids: ['id'],
             entities: {
-            id: {
-              id: 'id',
-              zbayNickname: '',
-              hiddenService: {
-                onionAddress: 'onionAddress',
-                privateKey: 'privateKey',
+              id: {
+                id: 'id',
+                zbayNickname: '',
+                hiddenService: {
+                  onionAddress: 'onionAddress',
+                  privateKey: 'privateKey',
+                },
+                dmKeys: { publicKey: 'pub', privateKey: 'priv' },
+                peerId: { id: 'id', pubKey: 'pubKey', privKey: 'privKey' },
+                userCsr: null,
+                userCertificate: null,
               },
-              dmKeys: { publicKey: 'pub', privateKey: 'priv' },
-              peerId: { id: 'id', pubKey: 'pubKey', privKey: 'privKey' },
-              userCsr: null,
-              userCertificate: null,
             },
           },
         },
-      }
       })
       .run();
   });

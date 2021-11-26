@@ -41,7 +41,9 @@ export function* createCommunitySaga(
     timestamp: Date.now(),
     address: 'general',
   };
-  yield* put(publicChannelsActions.addChannel({communityId:id, channel: channel}))
+  yield* put(
+    publicChannelsActions.addChannel({ communityId: id, channel: channel })
+  );
   yield* put(communitiesActions.setCurrentCommunity(id));
 
   yield* apply(socket, socket.emit, [SocketActionTypes.CREATE_NETWORK, id]);

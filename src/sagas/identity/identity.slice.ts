@@ -49,8 +49,6 @@ export interface DmKeys {
   privateKey: string;
 }
 
-
-
 export interface CreateUserCsrPayload {
   zbayNickname: string;
   commonName: string;

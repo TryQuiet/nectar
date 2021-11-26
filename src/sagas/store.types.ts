@@ -1,8 +1,7 @@
-import { configureStore, combineReducers } from "@reduxjs/toolkit"
-import { reducers } from "./reducers";
-
-const rootReducer = combineReducers(reducers)
-const store = configureStore({ reducer: rootReducer })
+import { configureStore, combineReducers } from '@reduxjs/toolkit';
+import { reducers } from './reducers';
+const rootReducer = combineReducers(reducers);
+const store = configureStore({ reducer: rootReducer });
 
 export type Store = typeof store
 export type StoreState = ReturnType<typeof rootReducer>;
@@ -13,5 +12,5 @@ export type CreatedSelectors = {
 };
 
 export interface StoreModuleStateClass {
-  new(): object;
+  new (): object;
 }

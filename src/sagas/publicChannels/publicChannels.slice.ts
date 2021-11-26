@@ -1,7 +1,6 @@
 import { createSlice, EntityState, PayloadAction } from '@reduxjs/toolkit';
 
 import { StoreKeys } from '../store.keys';
-
 import {
   publicChannelsAdapter,
   channelsByCommunityAdapter,

@@ -8,12 +8,17 @@ import {
   CommunitiesState,
   Community,
 } from '../../communities/communities.slice';
-import { identityActions, identityReducer, UserCsr, IdentityState, Identity } from '../identity.slice';
+import {
+  identityActions,
+  identityReducer,
+  UserCsr,
+  IdentityState,
+  Identity,
+} from '../identity.slice';
 import { identityAdapter } from '../identity.adapter';
 import { registerCertificateSaga } from './registerCertificate.saga';
 
 describe('registerCertificateSaga', () => {
-
   test('request certificate registration when user is community owner', async () => {
     const identity: Identity = {
       id: 'id',
@@ -56,7 +61,10 @@ describe('registerCertificateSaga', () => {
       >(<unknown>{ registrarAddress, userCsr, communityId }))
     )
       .withReducer(
-        combineReducers({ [StoreKeys.Communities]: communitiesReducer, [StoreKeys.Identity]: identityReducer }),
+        combineReducers({
+          [StoreKeys.Communities]: communitiesReducer,
+          [StoreKeys.Identity]: identityReducer,
+        }),
         {
           [StoreKeys.Communities]: {
             ...new CommunitiesState(),
