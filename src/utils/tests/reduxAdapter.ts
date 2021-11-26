@@ -14,4 +14,16 @@ export class CustomReduxAdapter {
   async save(action) {
     return this.store.dispatch(action).payload;
   }
+
+  get(payload, attr, _payload) {
+    return payload[attr];
+  }
+
+  set(props, payload, _payload) {
+    Object.keys(props).forEach((key) => {
+      payload[key] = props[key];
+    });
+    return payload;
+  }
+
 }
