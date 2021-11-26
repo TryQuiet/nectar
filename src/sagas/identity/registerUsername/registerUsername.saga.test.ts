@@ -30,7 +30,7 @@ describe('registerUsernameSaga', () => {
     peerId: { id: 'peerId', pubKey: 'pubKey', privKey: 'privKey' },
     zbayNickname: '',
     userCsr: undefined,
-    userCertificate: ''
+    userCertificate: '',
   };
   const identityWithoutPeerId: Identity = {
     id: 'id',
@@ -42,7 +42,7 @@ describe('registerUsernameSaga', () => {
     peerId: { id: '', pubKey: 'pubKey', privKey: 'privKey' },
     zbayNickname: '',
     userCsr: undefined,
-    userCertificate: ''
+    userCertificate: '',
   };
   const community: Community = {
     name: '',
@@ -54,7 +54,7 @@ describe('registerUsernameSaga', () => {
     registrar: null,
     onionAddress: '',
     privateKey: '',
-    port: 0
+    port: 0,
   };
 
   const connectionError = {

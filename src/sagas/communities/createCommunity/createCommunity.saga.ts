@@ -30,10 +30,10 @@ export function* createCommunitySaga(
     registrar: null,
     onionAddress: '',
     privateKey: '',
-    port: 0
+    port: 0,
   };
   yield* put(communitiesActions.addNewCommunity(payload));
-  yield* put(publicChannelsActions.addPublicChannelsList({id: id}))
+  yield* put(publicChannelsActions.addPublicChannelsList({ id: id }));
   const channel = {
     name: 'general',
     description: 'general',

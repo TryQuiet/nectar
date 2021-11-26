@@ -12,10 +12,9 @@ export const selectById = (id: string) =>
     communitiesAdapter.getSelectors().selectById(reducerState.communities, id)
   );
 
-export const selectEntities = 
-  createSelector(communitiesSlice, (reducerState) =>
-    communitiesAdapter.getSelectors().selectEntities(reducerState.communities)
-  );
+export const selectEntities = createSelector(communitiesSlice, (reducerState) =>
+  communitiesAdapter.getSelectors().selectEntities(reducerState.communities)
+);
 
 export const allCommunities = createSelector(
   communitiesSlice,

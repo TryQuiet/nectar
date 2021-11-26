@@ -7,13 +7,13 @@ export class IdentityState {
 }
 
 export interface Identity {
-   id: string,
-   zbayNickname: string,
-   hiddenService: HiddenService,
-   dmKeys: DmKeys,
-   peerId: PeerId,
-   userCsr: UserCsr | null,
-   userCertificate: string | null,
+  id: string;
+  zbayNickname: string;
+  hiddenService: HiddenService;
+  dmKeys: DmKeys;
+  peerId: PeerId;
+  userCsr: UserCsr | null;
+  userCertificate: string | null;
 }
 
 interface CertData {

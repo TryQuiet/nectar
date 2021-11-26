@@ -24,7 +24,7 @@ export function* joinCommunitySaga(
     port: 0,
   };
   yield* put(communitiesActions.addNewCommunity(payload));
-  yield* put(publicChannelsActions.addPublicChannelsList({id: id}));
+  yield* put(publicChannelsActions.addPublicChannelsList({ id: id }));
   yield* put(communitiesActions.setCurrentCommunity(id));
   yield* apply(socket, socket.emit, [SocketActionTypes.CREATE_NETWORK, id]);
 }

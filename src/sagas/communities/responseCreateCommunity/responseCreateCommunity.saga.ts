@@ -22,7 +22,7 @@ export function* responseCreateCommunitySaga(
       dmKeys: dmKeys,
       zbayNickname: '',
       userCsr: null,
-      userCertificate: null
+      userCertificate: null,
     })
   );
 }

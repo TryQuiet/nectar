@@ -32,7 +32,7 @@ export const usersSlice = createSlice({
       certificatesAdapter.addOne(
         state.certificates,
         parseCertificate(action.payload.certificate)
-      )
+      );
     },
     responseSendCertificates: (
       state,

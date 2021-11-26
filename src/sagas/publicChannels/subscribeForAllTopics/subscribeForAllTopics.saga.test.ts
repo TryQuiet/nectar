@@ -32,7 +32,7 @@ describe('subscribeForAllTopicsSaga', () => {
     registrar: null,
     onionAddress: '',
     privateKey: '',
-    port: 0
+    port: 0,
   };
   const identity: Identity = {
     id: 'id',
@@ -41,7 +41,7 @@ describe('subscribeForAllTopicsSaga', () => {
     peerId: { id: 'peerId', pubKey: 'pubKey', privKey: 'privKey' },
     zbayNickname: '',
     userCsr: undefined,
-    userCertificate: ''
+    userCertificate: '',
   };
 
   const channelOne: IChannelInfo = {

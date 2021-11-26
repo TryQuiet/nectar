@@ -60,7 +60,7 @@ export interface SubscribeForTopicPayload {
   channelData: IChannelInfo;
 }
 
-export interface addPublicChannelsListPayload {
+export interface AddPublicChannelsListPayload {
   id: string;
 }
 
@@ -133,7 +133,7 @@ export const publicChannelsSlice = createSlice({
     },
     addPublicChannelsList: (
       state,
-      action: PayloadAction<addPublicChannelsListPayload>
+      action: PayloadAction<AddPublicChannelsListPayload>
     ) => {
       channelsByCommunityAdapter.addOne(
         state.channels,

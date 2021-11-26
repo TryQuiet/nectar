@@ -35,7 +35,7 @@ describe('subscribeForTopicSaga', () => {
     registrar: null,
     onionAddress: '',
     privateKey: '',
-    port: 0
+    port: 0,
   };
   const identity: Identity = {
     id: 'id',
@@ -44,7 +44,7 @@ describe('subscribeForTopicSaga', () => {
     peerId: { id: 'peerId', pubKey: 'pubKey', privKey: 'privKey' },
     zbayNickname: '',
     userCsr: undefined,
-    userCertificate: ''
+    userCertificate: '',
   };
 
   test('subscribe for topic', () => {

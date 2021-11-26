@@ -27,7 +27,7 @@ describe('createCommunitySaga', () => {
       registrar: null,
       onionAddress: '',
       privateKey: '',
-      port: 0
+      port: 0,
     };
 
     const id = 'id';

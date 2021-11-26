@@ -24,7 +24,7 @@ describe('saveOwnerCertificateToDb', () => {
       registrar: null,
       onionAddress: '',
       privateKey: '',
-      port: 0
+      port: 0,
     };
     const socket = { emit: jest.fn(), on: jest.fn() } as unknown as Socket;
     const identity: Identity = {
@@ -34,7 +34,7 @@ describe('saveOwnerCertificateToDb', () => {
       peerId: { id: 'peerId', pubKey: 'pubKey', privKey: 'privKey' },
       zbayNickname: '',
       userCsr: undefined,
-      userCertificate: ''
+      userCertificate: '',
     };
     const communityId = 'id';
     await expectSaga(saveOwnerCertToDbSaga, socket)

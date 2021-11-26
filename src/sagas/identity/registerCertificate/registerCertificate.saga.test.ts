@@ -30,7 +30,7 @@ describe('registerCertificateSaga', () => {
       dmKeys: { publicKey: 'publicKey', privateKey: 'privateKey' },
       peerId: { id: 'peerId', pubKey: 'pubKey', privKey: 'privKey' },
       userCsr: undefined,
-      userCertificate: ''
+      userCertificate: '',
     };
     const community: Community = {
       name: 'communityName',
@@ -42,7 +42,7 @@ describe('registerCertificateSaga', () => {
       registrar: null,
       onionAddress: '',
       privateKey: '',
-      port: 0
+      port: 0,
     };
     const socket = { emit: jest.fn(), on: jest.fn() } as unknown as Socket;
     const userCsr = {
@@ -104,7 +104,7 @@ describe('registerCertificateSaga', () => {
   });
   test('request certificate registration when user is not community owner', async () => {
     const socket = { emit: jest.fn(), on: jest.fn() } as unknown as Socket;
-    const communityId = 'id'
+    const communityId = 'id';
     const community: Community = {
       name: 'communityName',
       id: communityId,
@@ -115,7 +115,7 @@ describe('registerCertificateSaga', () => {
       registrar: null,
       onionAddress: '',
       privateKey: '',
-      port: 0
+      port: 0,
     };
     const userCsr = {
       userCsr: 'userCsr',

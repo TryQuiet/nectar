@@ -21,7 +21,7 @@ const notBeforeDate = new Date(Date.UTC(2010, 11, 28, 10, 10, 10));
 const notAfterDate = new Date(Date.UTC(2030, 11, 28, 10, 10, 10));
 
 export const createRootCertificateTestHelper = async (): Promise<RootCA> => {
-  return await createRootCA(
+  return createRootCA(
     new Time({ type: 0, value: notBeforeDate }),
     new Time({ type: 0, value: notAfterDate })
   );
@@ -72,27 +72,21 @@ export const createPeerIdTestHelper = (): PeerId => {
 export const createMessageSignatureTestHelper = async (
   message: string,
   certificate: string,
-  userKey: string,
-): Promise<{ signature: string, pubKey: string }> => {
-  const pubKey = keyFromCertificate(parseCertificate(certificate))
-  const keyObject = await loadPrivateKey(
-    userKey, 
-    config.signAlg
-    );
-  const signatureArrayBuffer = await sign(
-    message, 
-    keyObject
-    );
+  userKey: string
+): Promise<{ signature: string; pubKey: string }> => {
+  const pubKey = keyFromCertificate(parseCertificate(certificate));
+  const keyObject = await loadPrivateKey(userKey, config.signAlg);
+  const signatureArrayBuffer = await sign(message, keyObject);
   const signature = arrayBufferToString(signatureArrayBuffer);
   return {
     signature,
-    pubKey
-  }
+    pubKey,
+  };
 };
 
 export default {
   createRootCertificateTestHelper,
   createUserCertificateTestHelper,
   createPeerIdTestHelper,
-  createMessageSignatureTestHelper
-}
+  createMessageSignatureTestHelper,
+};

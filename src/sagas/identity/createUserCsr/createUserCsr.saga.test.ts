@@ -42,7 +42,7 @@ describe('createUserCsrSaga', () => {
       registrar: null,
       onionAddress: '',
       privateKey: '',
-      port: 0
+      port: 0,
     };
     const identity: Identity = {
       id: 'id',
@@ -51,7 +51,7 @@ describe('createUserCsrSaga', () => {
       dmKeys: { publicKey: 'publicKey', privateKey: 'privateKey' },
       peerId: { id: 'peerId', pubKey: 'pubKey', privKey: 'privKey' },
       userCsr: undefined,
-      userCertificate: null
+      userCertificate: null,
     };
     const identityWithCsr: Identity = {
       id: 'id',

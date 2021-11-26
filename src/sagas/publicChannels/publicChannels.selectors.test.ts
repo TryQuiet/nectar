@@ -29,8 +29,10 @@ describe('publicChannelsSelectors', () => {
     name: 'communityId',
     id: 'communityId',
     CA: {
-      rootCertString: 'MIIBVTCB+wIBATAKBggqhkjOPQQDAjASMRAwDgYDVQQDEwdaYmF5IENBMCYYEzIwMjExMTE4MTEzMDAwLjM4N1oYDzIwMzAwMTMxMjMwMDAwWjASMRAwDgYDVQQDEwdaYmF5IENBMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEoKzNP5eKZZjlLb+cm+QMR9lUkSKLSRt6JcvOmR5f4ege4cOP9XQhNumf4yVt3siM5cu2r/81V5HIAcbqmbSgU6M/MD0wDwYDVR0TBAgwBgEB/wIBAzALBgNVHQ8EBAMCAIYwHQYDVR0lBBYwFAYIKwYBBQUHAwIGCCsGAQUFBwMBMAoGCCqGSM49BAMCA0kAMEYCIQCY/PaLvdC2otl+PHIGt5F5uzirg7p2km/EQq1eDptmtAIhAPy+JIT4T81l40bKadTQt6977M+fY+Hfc1GfUiJFOZVV',
-      rootKeyString: 'MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgWBC3C4ARMT8zD1nqYjfs+bDXflWkVFqHRovqQmLQRAKgCgYIKoZIzj0DAQehRANCAASgrM0/l4plmOUtv5yb5AxH2VSRIotJG3oly86ZHl/h6B7hw4/1dCE26Z/jJW3eyIzly7av/zVXkcgBxuqZtKBT',
+      rootCertString:
+        'MIIBVTCB+wIBATAKBggqhkjOPQQDAjASMRAwDgYDVQQDEwdaYmF5IENBMCYYEzIwMjExMTE4MTEzMDAwLjM4N1oYDzIwMzAwMTMxMjMwMDAwWjASMRAwDgYDVQQDEwdaYmF5IENBMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEoKzNP5eKZZjlLb+cm+QMR9lUkSKLSRt6JcvOmR5f4ege4cOP9XQhNumf4yVt3siM5cu2r/81V5HIAcbqmbSgU6M/MD0wDwYDVR0TBAgwBgEB/wIBAzALBgNVHQ8EBAMCAIYwHQYDVR0lBBYwFAYIKwYBBQUHAwIGCCsGAQUFBwMBMAoGCCqGSM49BAMCA0kAMEYCIQCY/PaLvdC2otl+PHIGt5F5uzirg7p2km/EQq1eDptmtAIhAPy+JIT4T81l40bKadTQt6977M+fY+Hfc1GfUiJFOZVV',
+      rootKeyString:
+        'MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgWBC3C4ARMT8zD1nqYjfs+bDXflWkVFqHRovqQmLQRAKgCgYIKoZIzj0DAQehRANCAASgrM0/l4plmOUtv5yb5AxH2VSRIotJG3oly86ZHl/h6B7hw4/1dCE26Z/jJW3eyIzly7av/zVXkcgBxuqZtKBT',
     },
     rootCa: '',
     peerList: [],
@@ -38,7 +40,7 @@ describe('publicChannelsSelectors', () => {
     registrar: null,
     onionAddress: '',
     privateKey: '',
-    port: 0
+    port: 0,
   };
 
   let communityChannels = new CommunityChannels('communityId');

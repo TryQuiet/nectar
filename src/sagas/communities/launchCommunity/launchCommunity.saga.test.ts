@@ -30,7 +30,7 @@ describe('launchCommunity', () => {
       registrar: null,
       onionAddress: '',
       privateKey: '',
-      port: 0
+      port: 0,
     };
 
     const community2: Community = {
@@ -43,7 +43,7 @@ describe('launchCommunity', () => {
       registrar: null,
       onionAddress: '',
       privateKey: '',
-      port: 0
+      port: 0,
     };
 
     const community3: Community = {
@@ -56,7 +56,7 @@ describe('launchCommunity', () => {
       registrar: null,
       onionAddress: '',
       privateKey: '',
-      port: 0
+      port: 0,
     };
 
     await expectSaga(initCommunities)
@@ -101,7 +101,7 @@ describe('launchCommunity', () => {
       registrar: null,
       onionAddress: '',
       privateKey: '',
-      port: 0
+      port: 0,
     };
 
     const identity: Identity = {
@@ -111,7 +111,7 @@ describe('launchCommunity', () => {
       peerId: { id: 'peerId', pubKey: 'pubKey', privKey: 'privKey' },
       zbayNickname: '',
       userCsr: undefined,
-      userCertificate: ''
+      userCertificate: '',
     };
 
     const userCsr = {
@@ -186,7 +186,7 @@ describe('launchCommunity', () => {
       registrar: null,
       onionAddress: '',
       privateKey: '',
-      port: 0
+      port: 0,
     };
 
     community.rootCa = 'rootCert';
@@ -198,7 +198,7 @@ describe('launchCommunity', () => {
       peerId: { id: 'peerId', pubKey: 'pubKey', privKey: 'privKey' },
       zbayNickname: '',
       userCsr: undefined,
-      userCertificate: ''
+      userCertificate: '',
     };
 
     const userCsr = {

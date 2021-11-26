@@ -49,7 +49,7 @@ describe('publicChannelsReducer', () => {
     registrar: null,
     onionAddress: '',
     privateKey: '',
-    port: 0
+    port: 0,
   };
 
   let communityChannels = new CommunityChannels('communityId');

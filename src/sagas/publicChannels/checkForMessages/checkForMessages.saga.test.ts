@@ -34,7 +34,7 @@ describe('checkForMessagesSaga', () => {
     peerId: { id: 'peerId', pubKey: 'pubKey', privKey: 'privKey' },
     zbayNickname: '',
     userCsr: undefined,
-    userCertificate: ''
+    userCertificate: '',
   };
   const community: Community = {
     name: '',
@@ -46,7 +46,7 @@ describe('checkForMessagesSaga', () => {
     registrar: null,
     onionAddress: '',
     privateKey: '',
-    port: 0
+    port: 0,
   };
 
   communityChannels.currentChannel =

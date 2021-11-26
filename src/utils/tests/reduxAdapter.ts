@@ -1,4 +1,4 @@
-import { Store } from "../../sagas/store.types";
+import { Store } from '../../sagas/store.types';
 
 export class CustomReduxAdapter {
   store: Store;

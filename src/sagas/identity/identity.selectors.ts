@@ -13,10 +13,9 @@ export const selectById = (id: string) =>
     identityAdapter.getSelectors().selectById(reducerState.identities, id)
   );
 
-  export const selectEntities = 
-  createSelector(identitySlice, (reducerState) =>
-    identityAdapter.getSelectors().selectEntities(reducerState.identities)
-  );
+export const selectEntities = createSelector(identitySlice, (reducerState) =>
+  identityAdapter.getSelectors().selectEntities(reducerState.identities)
+);
 
 export const currentIdentity = createSelector(
   communitiesSelectors.currentCommunityId,

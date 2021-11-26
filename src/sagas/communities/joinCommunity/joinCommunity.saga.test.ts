@@ -27,7 +27,7 @@ describe('joinCommunity', () => {
       registrar: null,
       onionAddress: '',
       privateKey: '',
-      port: 0
+      port: 0,
     };
 
     await expectSaga(

@@ -31,7 +31,7 @@ describe('launchRegistrar', () => {
       registrar: null,
       onionAddress: '',
       privateKey: '',
-      port: 0
+      port: 0,
     };
     const identity: Identity = {
       id: 'id',
@@ -40,7 +40,7 @@ describe('launchRegistrar', () => {
       peerId: { id: 'peerId', pubKey: 'pubKey', privKey: 'privKey' },
       zbayNickname: '',
       userCsr: undefined,
-      userCertificate: ''
+      userCertificate: '',
     };
     const launchRegistrarPayload = {
       id: 'id',
@@ -99,7 +99,7 @@ describe('launchRegistrar', () => {
       registrar: null,
       onionAddress: '',
       privateKey: '',
-      port: 0
+      port: 0,
     };
     const identity: Identity = {
       id: 'id',
@@ -108,7 +108,7 @@ describe('launchRegistrar', () => {
       peerId: { id: 'peerId', pubKey: 'pubKey', privKey: 'privKey' },
       zbayNickname: '',
       userCsr: undefined,
-      userCertificate: ''
+      userCertificate: '',
     };
     const launchRegistrarPayload = {
       id: 'id',
@@ -167,16 +167,16 @@ describe('launchRegistrar', () => {
       registrar: null,
       onionAddress: '',
       privateKey: '',
-      port: 0
+      port: 0,
     };
-    const identity: Identity= {
+    const identity: Identity = {
       id: 'id',
       hiddenService: { onionAddress: 'onionAddress', privateKey: 'privateKey' },
       dmKeys: { publicKey: 'publicKey', privateKey: 'privateKey' },
       peerId: { id: 'peerId', pubKey: 'pubKey', privKey: 'privKey' },
       zbayNickname: '',
       userCsr: undefined,
-      userCertificate: ''
+      userCertificate: '',
     };
     const launchRegistrarPayload = {
       id: 'id',
@@ -235,7 +235,7 @@ describe('launchRegistrar', () => {
       registrar: null,
       onionAddress: '',
       privateKey: '',
-      port: 0
+      port: 0,
     };
     const identity: Identity = {
       id: 'id',
@@ -244,7 +244,7 @@ describe('launchRegistrar', () => {
       peerId: { id: 'peerId', pubKey: 'pubKey', privKey: 'privKey' },
       zbayNickname: '',
       userCsr: undefined,
-      userCertificate: ''
+      userCertificate: '',
     };
     const launchRegistrarPayload = {
       id: 'id',

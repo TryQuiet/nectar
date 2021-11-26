@@ -49,7 +49,7 @@ describe('sendMessageSaga', () => {
     registrar: null,
     onionAddress: '',
     privateKey: '',
-    port: 0
+    port: 0,
   };
 
   const identity: Identity = {
@@ -59,7 +59,7 @@ describe('sendMessageSaga', () => {
     peerId: { id: 'id', pubKey: 'pubKey', privKey: 'privKey' },
     zbayNickname: '',
     userCsr: undefined,
-    userCertificate: ''
+    userCertificate: '',
   };
 
   const csr = {

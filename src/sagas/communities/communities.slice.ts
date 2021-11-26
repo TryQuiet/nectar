@@ -13,21 +13,21 @@ export class CommunitiesState {
 }
 
 export interface Community {
-  id: string,
-  name: string,
+  id: string;
+  name: string;
   CA: null | {
     rootCertString: string;
     rootKeyString: string;
-  },
-  rootCa: string,
-  peerList: string[],
-  registrarUrl: string,
+  };
+  rootCa: string;
+  peerList: string[];
+  registrarUrl: string;
   registrar: null | {
     privateKey: string;
     address: string;
-  },
-  onionAddress: string,
-  privateKey: string,
+  };
+  onionAddress: string;
+  privateKey: string;
   port: number;
 }
 
@@ -65,10 +65,7 @@ export const communitiesSlice = createSlice({
       state.currentCommunity = action.payload;
     },
     addNewCommunity: (state, action: PayloadAction<Community>) => {
-      communitiesAdapter.addOne(
-        state.communities,
-        action.payload
-      );
+      communitiesAdapter.addOne(state.communities, action.payload);
     },
     updateCommunity: (state, action: PayloadAction<Partial<Community>>) => {
       communitiesAdapter.updateOne(state.communities, {
