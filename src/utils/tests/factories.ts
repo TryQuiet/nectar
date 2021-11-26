@@ -80,21 +80,23 @@ export const getFactory = async (store: Store) => {
         const community = communities.selectors.selectEntities(
           store.getState()
         )[action.payload.id];
-        const userCertData = await createUserCertificateTestHelper(
-          {
-            zbayNickname: action.payload.zbayNickname,
-            commonName: action.payload.hiddenService.onionAddress,
-            peerId: action.payload.peerId.id,
-          },
-          community.CA
-        );
-        action.payload.userCsr = userCertData.userCsr;
-        action.payload.userCertificate = userCertData.userCert.userCertString;
-        // Store user's certificate even if the user won't be stored itself
-        // (to be able to display messages sent by this user)
-        await factory.create('UserCertificate', {
-          certificate: action.payload.userCertificate,
-        });
+        if (community.CA) {
+          const userCertData = await createUserCertificateTestHelper(
+            {
+              zbayNickname: action.payload.zbayNickname,
+              commonName: action.payload.hiddenService.onionAddress,
+              peerId: action.payload.peerId.id,
+            },
+            community.CA
+          );
+          action.payload.userCsr = userCertData.userCsr;
+          action.payload.userCertificate = userCertData.userCert.userCertString;
+          // Store user's certificate even if the user won't be stored itself
+          // (to be able to display messages sent by this user)
+          await factory.create('UserCertificate', {
+            certificate: action.payload.userCertificate,
+          });
+        }
         return action;
       },
     }
