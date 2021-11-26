@@ -11,24 +11,22 @@ import {
 import { identityActions, identityReducer, UserCsr, IdentityState, Identity } from '../identity.slice';
 import { identityAdapter } from '../identity.adapter';
 import { registerCertificateSaga } from './registerCertificate.saga';
-import { storeKeys } from 'src';
 
 describe('registerCertificateSaga', () => {
 
   test('request certificate registration when user is community owner', async () => {
     const identity: Identity = {
       id: 'id',
+      zbayNickname: 'bartekDev',
       hiddenService: {
         onionAddress: 'onionAddress.onion',
         privateKey: 'privateKey',
       },
       dmKeys: { publicKey: 'publicKey', privateKey: 'privateKey' },
       peerId: { id: 'peerId', pubKey: 'pubKey', privKey: 'privKey' },
-      zbayNickname: '',
       userCsr: undefined,
       userCertificate: ''
     };
-    identity.zbayNickname = 'bartekDev'
     const community: Community = {
       name: 'communityName',
       id: 'id',
@@ -97,10 +95,12 @@ describe('registerCertificateSaga', () => {
       .run();
   });
   test('request certificate registration when user is not community owner', async () => {
+    const socket = { emit: jest.fn(), on: jest.fn() } as unknown as Socket;
+    const communityId = 'id'
     const community: Community = {
       name: 'communityName',
-      id: 'id',
-      CA: null,
+      id: communityId,
+      CA: undefined,
       rootCa: '',
       peerList: [],
       registrarUrl: '',
@@ -109,28 +109,26 @@ describe('registerCertificateSaga', () => {
       privateKey: '',
       port: 0
     };
-    const socket = { emit: jest.fn(), on: jest.fn() } as unknown as Socket;
     const userCsr = {
       userCsr: 'userCsr',
       userKey: 'userKey',
       pkcs10: jest.fn(),
     };
-    const communityId = 'id';
     const registrarAddress =
       'wzispgrbrrkt3bari4kljpqz2j6ozzu3vlsoi2wqupgu7ewi4ncibrid';
     await expectSaga(
       registerCertificateSaga,
       socket,
       identityActions.storeUserCsr(<
-        { userCsr: UserCsr; communityId: 'string'; registrarAddress: string }
-      >(<unknown>{ registrarAddress, userCsr, communityId }))
+        { userCsr: UserCsr; communityId: string; registrarAddress: string }
+      >(<unknown>{ userCsr, communityId, registrarAddress }))
     )
       .withReducer(
         combineReducers({ [StoreKeys.Communities]: communitiesReducer }),
         {
           [StoreKeys.Communities]: {
             ...new CommunitiesState(),
-            currentCommunity: 'id',
+            currentCommunity: communityId,
             communities: {
               ids: ['id'],
               entities: {
@@ -151,8 +149,8 @@ describe('registerCertificateSaga', () => {
         communityId,
         userCsr.userCsr,
         {
-          certificate: community.CA.rootCertString,
-          privKey: community.CA.rootKeyString,
+          certificate: community.CA?.rootCertString,
+          privKey: community.CA?.rootKeyString,
         },
       ])
       .run();

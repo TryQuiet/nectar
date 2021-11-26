@@ -17,13 +17,10 @@ describe('communitiesSelectors', () => {
     registrarUrl: '',
     rootCa: '',
     peerList: [],
-    registrar: {
-      privateKey: '',
-      address: ''
-    },
+    registrar: null,
     onionAddress: '',
     privateKey: '',
-    port: 0
+    port: 0,
   };
   const communityBeta: Community = {
     name: 'beta',
@@ -32,13 +29,10 @@ describe('communitiesSelectors', () => {
     registrarUrl: '',
     rootCa: '',
     peerList: [],
-    registrar: {
-      privateKey: '',
-      address: ''
-    },
+    registrar: null,
     onionAddress: '',
     privateKey: '',
-    port: 0
+    port: 0,
   };
   beforeEach(() => {
     store = createStore(
@@ -63,7 +57,7 @@ describe('communitiesSelectors', () => {
       store.getState()
     );
     expect(community).toMatchInlineSnapshot(`
-      Community {
+      Object {
         "CA": Object {
           "rootCertString": "certString",
           "rootKeyString": "keyString",
@@ -72,7 +66,9 @@ describe('communitiesSelectors', () => {
         "name": "beta",
         "onionAddress": "",
         "peerList": Array [],
+        "port": 0,
         "privateKey": "",
+        "registrar": null,
         "registrarUrl": "",
         "rootCa": "",
       }
@@ -89,7 +85,7 @@ describe('communitiesSelectors', () => {
   it('select current community', () => {
     const community = communitiesSelectors.currentCommunity(store.getState());
     expect(community).toMatchInlineSnapshot(`
-      Community {
+      Object {
         "CA": Object {
           "rootCertString": "certString",
           "rootKeyString": "keyString",
@@ -98,7 +94,9 @@ describe('communitiesSelectors', () => {
         "name": "alpha",
         "onionAddress": "",
         "peerList": Array [],
+        "port": 0,
         "privateKey": "",
+        "registrar": null,
         "registrarUrl": "",
         "rootCa": "",
       }
@@ -106,7 +104,8 @@ describe('communitiesSelectors', () => {
   });
 
   it('returns registrar url without port if no port in the store', () => {
-    const onionAddress = 'aznu6kiyutsgjhdue4i4xushjzey6boxf4i4isd53admsibvbt6qyiyd'
+    const onionAddress =
+      'aznu6kiyutsgjhdue4i4xushjzey6boxf4i4isd53admsibvbt6qyiyd';
     const community: Community = {
       name: 'new',
       id: 'communityNew',
@@ -114,13 +113,10 @@ describe('communitiesSelectors', () => {
       registrarUrl: '',
       rootCa: '',
       peerList: [],
-      registrar: {
-        privateKey: '',
-        address: ''
-      },
+      registrar: null,
       onionAddress: onionAddress,
       privateKey: '',
-      port: 0
+      port: 0,
     };
     store = createStore(
       combineReducers({
@@ -138,12 +134,13 @@ describe('communitiesSelectors', () => {
       }
     );
     const registrarUrl = communitiesSelectors.registrarUrl(store.getState());
-    expect(registrarUrl).toBe(onionAddress)
-  })
+    expect(registrarUrl).toBe(onionAddress);
+  });
 
   it('returns registrar url with port if port exists in the store', () => {
-    const onionAddress = 'aznu6kiyutsgjhdue4i4xushjzey6boxf4i4isd53admsibvbt6qyiyd'
-    const port = 7777
+    const onionAddress =
+      'aznu6kiyutsgjhdue4i4xushjzey6boxf4i4isd53admsibvbt6qyiyd';
+    const port = 7777;
     const community: Community = {
       name: 'new',
       id: 'communityNew',
@@ -151,15 +148,12 @@ describe('communitiesSelectors', () => {
       registrarUrl: '',
       rootCa: '',
       peerList: [],
-      registrar: {
-        privateKey: '',
-        address: ''
-      },
+      registrar: null,
       onionAddress: onionAddress,
       privateKey: '',
-      port: 0
+      port: 0,
     };
-    community.port = port
+    community.port = port;
     store = createStore(
       combineReducers({
         [StoreKeys.Communities]: communitiesReducer,
@@ -176,11 +170,12 @@ describe('communitiesSelectors', () => {
       }
     );
     const registrarUrl = communitiesSelectors.registrarUrl(store.getState());
-    expect(registrarUrl).toBe(`${onionAddress}:${port}`)
-  })
+    expect(registrarUrl).toBe(`${onionAddress}:${port}`);
+  });
 
   it('returns registrar url if no onion address, no port', () => {
-    const url = 'http://aznu6kiyutsgjhdue4i4xushjzey6boxf4i4isd53admsibvbt6qyiyd'
+    const url =
+      'http://aznu6kiyutsgjhdue4i4xushjzey6boxf4i4isd53admsibvbt6qyiyd';
     const community: Community = {
       name: 'new',
       id: 'communityNew',
@@ -188,13 +183,10 @@ describe('communitiesSelectors', () => {
       registrarUrl: url,
       rootCa: '',
       peerList: [],
-      registrar: {
-        privateKey: '',
-        address: ''
-      },
+      registrar: null,
       onionAddress: '',
       privateKey: '',
-      port: 0
+      port: 0,
     };
     store = createStore(
       combineReducers({
@@ -212,7 +204,6 @@ describe('communitiesSelectors', () => {
       }
     );
     const registrarUrl = communitiesSelectors.registrarUrl(store.getState());
-    expect(registrarUrl).toBe(url)
-  })
-  
+    expect(registrarUrl).toBe(url);
+  });
 });

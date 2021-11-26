@@ -46,21 +46,21 @@ describe('createUserCsrSaga', () => {
     };
     const identity: Identity = {
       id: 'id',
+      zbayNickname: '',
       hiddenService: { onionAddress: 'onionAddress', privateKey: 'privateKey' },
       dmKeys: { publicKey: 'publicKey', privateKey: 'privateKey' },
       peerId: { id: 'peerId', pubKey: 'pubKey', privKey: 'privKey' },
-      zbayNickname: '',
       userCsr: undefined,
-      userCertificate: ''
+      userCertificate: null
     };
     const identityWithCsr: Identity = {
       id: 'id',
-      hiddenService: { onionAddress: 'onionAddress', privateKey: 'privateKey' },
-      peerId: { id: 'peerId', pubKey: 'pubKey', privKey: 'privKey' },
       zbayNickname: '',
+      hiddenService: { onionAddress: 'onionAddress', privateKey: 'privateKey' },
+      dmKeys: { publicKey: 'publicKey', privateKey: 'privateKey' },
+      peerId: { id: 'peerId', pubKey: 'pubKey', privKey: 'privKey' },
       userCsr: userCsr,
       userCertificate: null,
-      dmKeys: { publicKey: 'publicKey', privateKey: 'privateKey' },
     } as Identity;
     await expectSaga(
       createUserCsrSaga,

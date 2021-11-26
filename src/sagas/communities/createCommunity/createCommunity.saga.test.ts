@@ -24,10 +24,7 @@ describe('createCommunitySaga', () => {
       registrarUrl: '',
       rootCa: '',
       peerList: [],
-      registrar: {
-        privateKey: '',
-        address: ''
-      },
+      registrar: null,
       onionAddress: '',
       privateKey: '',
       port: 0
