@@ -39,19 +39,28 @@ import { IChannelInfo } from 'src';
 describe('sendMessageSaga', () => {
   const communityId = 'id';
 
-  const community = new Community({
+  const community: Community = {
     id: communityId,
     name: 'community',
-    CA: 'CA',
+    CA: null,
+    rootCa: '',
+    peerList: [],
     registrarUrl: 'registrarUrl',
-  });
+    registrar: null,
+    onionAddress: '',
+    privateKey: '',
+    port: 0,
+  };
 
-  const identity = new Identity({
+  const identity: Identity = {
     id: communityId,
     hiddenService: { onionAddress: 'onionAddress', privateKey: 'privateKey' },
     dmKeys: { publicKey: 'publicKey', privateKey: 'privateKey' },
     peerId: { id: 'id', pubKey: 'pubKey', privKey: 'privKey' },
-  });
+    zbayNickname: '',
+    userCsr: undefined,
+    userCertificate: '',
+  };
 
   const csr = {
     userCsr: 'userCsr',
@@ -65,8 +74,8 @@ describe('sendMessageSaga', () => {
     },
   };
 
-  identity.userCertificate = 'userCertificate'
-  identity.userCsr = csr
+  identity.userCertificate = 'userCertificate';
+  identity.userCsr = csr;
 
   const publicChannel: IChannelInfo = {
     name: 'general',
@@ -77,11 +86,11 @@ describe('sendMessageSaga', () => {
   };
 
   const communityChannels = new CommunityChannels(communityId);
-  communityChannels.currentChannel = publicChannel.address
+  communityChannels.currentChannel = publicChannel.address;
   communityChannels.channels = publicChannelsAdapter.setAll(
     publicChannelsAdapter.getInitialState(),
     [publicChannel]
-  )
+  );
 
   test('sign and send message', async () => {
     const socket = { emit: jest.fn() } as unknown as Socket;

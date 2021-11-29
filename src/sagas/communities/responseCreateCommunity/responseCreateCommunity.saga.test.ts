@@ -5,9 +5,7 @@ import { call } from 'redux-saga-test-plan/matchers';
 import { StoreKeys } from '../../store.keys';
 import { communitiesActions } from '../communities.slice';
 import { responseCreateCommunitySaga } from './responseCreateCommunity.saga';
-import { identityAdapter } from '../../identity/identity.adapter';
 import { identityReducer, IdentityState } from '../../identity/identity.slice';
-import { Identity } from '../../identity/identity.slice';
 
 describe('responseCreateCommunity', () => {
   test('response create community', async () => {
@@ -26,7 +24,7 @@ describe('responseCreateCommunity', () => {
       communitiesActions.responseCreateCommunity(responseCreateCommunityPayload)
     )
       .withReducer(combineReducers({ [StoreKeys.Identity]: identityReducer }), {
-        [StoreKeys.Identity]: {...new IdentityState()},
+        [StoreKeys.Identity]: { ...new IdentityState() },
       })
       .provide([
         [call.fn(generateDmKeyPair), { publicKey: 'pub', privateKey: 'priv' }],
@@ -37,18 +35,21 @@ describe('responseCreateCommunity', () => {
           identities: {
             ids: ['id'],
             entities: {
-            id: new Identity({
-              id: 'id',
-              hiddenService: {
-                onionAddress: 'onionAddress',
-                privateKey: 'privateKey',
+              id: {
+                id: 'id',
+                zbayNickname: '',
+                hiddenService: {
+                  onionAddress: 'onionAddress',
+                  privateKey: 'privateKey',
+                },
+                dmKeys: { publicKey: 'pub', privateKey: 'priv' },
+                peerId: { id: 'id', pubKey: 'pubKey', privKey: 'privKey' },
+                userCsr: null,
+                userCertificate: null,
               },
-              peerId: { id: 'id', pubKey: 'pubKey', privKey: 'privKey' },
-              dmKeys: { publicKey: 'pub', privateKey: 'priv' },
-            }),
+            },
           },
         },
-      }
       })
       .run();
   });

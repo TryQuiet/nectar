@@ -1,4 +1,4 @@
-import { apply, select} from 'typed-redux-saga';
+import { apply, select } from 'typed-redux-saga';
 import { PayloadAction } from '@reduxjs/toolkit';
 import { Socket } from 'socket.io-client';
 import { SocketActionTypes } from '../../socket/const/actionTypes';
@@ -21,7 +21,7 @@ export function* launchRegistrarSaga(
 
   const community = yield* select(communitiesSelectors.selectById(communityId));
 
-  if (community.CA.rootCertString) {
+  if (community.CA?.rootCertString) {
     const identity = yield* select(identitySelectors.selectById(communityId));
     yield* apply(socket, socket.emit, [
       SocketActionTypes.LAUNCH_REGISTRAR,

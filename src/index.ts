@@ -15,7 +15,6 @@ import { usersSelectors } from './sagas/users/users.selectors';
 import {
   identityReducer,
   identityActions,
-  Identity,
 } from './sagas/identity/identity.slice';
 import { identitySelectors } from './sagas/identity/identity.selectors';
 
@@ -38,16 +37,19 @@ import { communitiesSelectors } from './sagas/communities/communities.selectors'
 
 import { StoreKeys } from './sagas/store.keys';
 
+export { getFactory } from './utils/tests/factories';
+export * from './utils/tests/helpers';
+
 export {
   DisplayableMessage,
   IChannelInfo,
   IMessage,
 } from './sagas/publicChannels/publicChannels.types';
 
-export { channelsByCommunityAdapter } from './sagas/publicChannels/publicChannels.adapter'
-export { communitiesAdapter } from './sagas/communities/communities.adapter'
+export { channelsByCommunityAdapter } from './sagas/publicChannels/publicChannels.adapter';
+export { communitiesAdapter } from './sagas/communities/communities.adapter';
 
-export { identityAdapter } from './sagas/identity/identity.adapter'
+export { identityAdapter } from './sagas/identity/identity.adapter';
 
 export const publicChannels = {
   reducer: publicChannelsReducer,
@@ -66,7 +68,6 @@ export const identity = {
   reducer: identityReducer,
   actions: identityActions,
   selectors: identitySelectors,
-  Identity: Identity,
 };
 
 export const messages = {

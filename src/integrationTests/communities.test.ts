@@ -237,7 +237,6 @@ describe('communities - without tor', () => {
 });
 
 describe('registrar', () => {
-
   let owner;
 
   beforeAll(async () => {
@@ -254,7 +253,7 @@ describe('registrar', () => {
 
   test('launch communities and registrars on startup', async () => {
     // TODO: Move store mock into separate module and share between all the tests across nectar
-    const community = new Community({
+    const community: Community = {
       name: 'communityName',
       id: 'F1141EBCF93387E5A28696C5B41E2177',
       CA: {
@@ -264,9 +263,18 @@ describe('registrar', () => {
           'MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgmu613x9FrbAQtIVD56oYGfq8YfeZ99ZZ/WXByN2dXzygCgYIKoZIzj0DAQehRANCAAS693xdIctoDmH110CgAdmu4iHCxNjNRUFpUmCziZKgKAbmla97Sfh9cGoY9013QE67eEzaEAElL6a4AmtbTunu',
       },
       registrarUrl: '',
-    });
+      rootCa: '',
+      peerList: [],
+      registrar: {
+        privateKey: '',
+        address: '',
+      },
+      onionAddress: '',
+      privateKey: '',
+      port: 0,
+    };
 
-    const identity = new Identity({
+    const identity: Identity = {
       id: 'F1141EBCF93387E5A28696C5B41E2177',
       hiddenService: {
         onionAddress:
@@ -287,7 +295,10 @@ describe('registrar', () => {
         privateKey:
           '51da400fb7323793604ec204c60f3e1c96b1b3023d2eadc515376e37faf4b9f8',
       },
-    });
+      zbayNickname: '',
+      userCsr: undefined,
+      userCertificate: '',
+    };
 
     let communityChannels = new CommunityChannels(
       'F1141EBCF93387E5A28696C5B41E2177'
@@ -342,6 +353,6 @@ describe('registrar', () => {
 
     await app.runSaga(launchCommunitiesOnStartupSaga).toPromise();
 
-    await app.manager.closeAllServices()
+    await app.manager.closeAllServices();
   });
 });

@@ -8,30 +8,42 @@ import {
   CommunitiesState,
   Community,
 } from '../../communities/communities.slice';
-import { identityActions, identityReducer, UserCsr, IdentityState, Identity } from '../identity.slice';
+import {
+  identityActions,
+  identityReducer,
+  UserCsr,
+  IdentityState,
+  Identity,
+} from '../identity.slice';
 import { identityAdapter } from '../identity.adapter';
 import { registerCertificateSaga } from './registerCertificate.saga';
-import { storeKeys } from 'src';
 
 describe('registerCertificateSaga', () => {
-
   test('request certificate registration when user is community owner', async () => {
-    const identity = new Identity({
+    const identity: Identity = {
       id: 'id',
+      zbayNickname: 'bartekDev',
       hiddenService: {
         onionAddress: 'onionAddress.onion',
         privateKey: 'privateKey',
       },
       dmKeys: { publicKey: 'publicKey', privateKey: 'privateKey' },
       peerId: { id: 'peerId', pubKey: 'pubKey', privKey: 'privKey' },
-    });
-    identity.zbayNickname = 'bartekDev'
-    const community = new Community({
+      userCsr: undefined,
+      userCertificate: '',
+    };
+    const community: Community = {
       name: 'communityName',
       id: 'id',
       CA: { rootCertString: 'certString', rootKeyString: 'keyString' },
       registrarUrl: '',
-    });
+      rootCa: '',
+      peerList: [],
+      registrar: null,
+      onionAddress: '',
+      privateKey: '',
+      port: 0,
+    };
     const socket = { emit: jest.fn(), on: jest.fn() } as unknown as Socket;
     const userCsr = {
       userCsr: 'userCsr',
@@ -49,7 +61,10 @@ describe('registerCertificateSaga', () => {
       >(<unknown>{ registrarAddress, userCsr, communityId }))
     )
       .withReducer(
-        combineReducers({ [StoreKeys.Communities]: communitiesReducer, [StoreKeys.Identity]: identityReducer }),
+        combineReducers({
+          [StoreKeys.Communities]: communitiesReducer,
+          [StoreKeys.Identity]: identityReducer,
+        }),
         {
           [StoreKeys.Communities]: {
             ...new CommunitiesState(),
@@ -88,34 +103,40 @@ describe('registerCertificateSaga', () => {
       .run();
   });
   test('request certificate registration when user is not community owner', async () => {
-    const community = new Community({
-      name: 'communityName',
-      id: 'id',
-      CA: {},
-      registrarUrl: '',
-    });
     const socket = { emit: jest.fn(), on: jest.fn() } as unknown as Socket;
+    const communityId = 'id';
+    const community: Community = {
+      name: 'communityName',
+      id: communityId,
+      CA: undefined,
+      rootCa: '',
+      peerList: [],
+      registrarUrl: '',
+      registrar: null,
+      onionAddress: '',
+      privateKey: '',
+      port: 0,
+    };
     const userCsr = {
       userCsr: 'userCsr',
       userKey: 'userKey',
       pkcs10: jest.fn(),
     };
-    const communityId = 'id';
     const registrarAddress =
       'wzispgrbrrkt3bari4kljpqz2j6ozzu3vlsoi2wqupgu7ewi4ncibrid';
     await expectSaga(
       registerCertificateSaga,
       socket,
       identityActions.storeUserCsr(<
-        { userCsr: UserCsr; communityId: 'string'; registrarAddress: string }
-      >(<unknown>{ registrarAddress, userCsr, communityId }))
+        { userCsr: UserCsr; communityId: string; registrarAddress: string }
+      >(<unknown>{ userCsr, communityId, registrarAddress }))
     )
       .withReducer(
         combineReducers({ [StoreKeys.Communities]: communitiesReducer }),
         {
           [StoreKeys.Communities]: {
             ...new CommunitiesState(),
-            currentCommunity: 'id',
+            currentCommunity: communityId,
             communities: {
               ids: ['id'],
               entities: {
@@ -136,8 +157,8 @@ describe('registerCertificateSaga', () => {
         communityId,
         userCsr.userCsr,
         {
-          certificate: community.CA.rootCertString,
-          privKey: community.CA.rootKeyString,
+          certificate: community.CA?.rootCertString,
+          privKey: community.CA?.rootKeyString,
         },
       ])
       .run();

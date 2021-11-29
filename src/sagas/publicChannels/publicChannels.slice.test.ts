@@ -39,17 +39,24 @@ const mockGetPublicChannels = {
 describe('publicChannelsReducer', () => {
   let store: Store;
 
-  const communityId = new Community({
+  const communityId: Community = {
     name: 'communityId',
     id: 'communityId',
     CA: { rootCertString: 'certString', rootKeyString: 'keyString' },
+    rootCa: '',
+    peerList: [],
     registrarUrl: '',
-  });
+    registrar: null,
+    onionAddress: '',
+    privateKey: '',
+    port: 0,
+  };
 
   let communityChannels = new CommunityChannels('communityId');
 
   communityChannels.currentChannel = 'currentChannel';
-  (communityChannels.channelMessages = {
+
+  communityChannels.channelMessages = {
     currentChannel: {
       ids: ['1', '0', '2', '4'],
       messages: {
@@ -91,32 +98,33 @@ describe('publicChannelsReducer', () => {
         },
       },
     },
-  }),
-    beforeEach(() => {
-      store = createStore(
-        combineReducers({
-          [StoreKeys.PublicChannels]: publicChannelsReducer,
-          [StoreKeys.Communities]: communitiesReducer,
-        }),
-        {
-          [StoreKeys.PublicChannels]: {
-            ...new PublicChannelsState(),
-            channels: channelsByCommunityAdapter.setAll(
-              channelsByCommunityAdapter.getInitialState(),
-              [communityChannels]
-            ),
-          },
-          [StoreKeys.Communities]: {
-            ...new CommunitiesState(),
-            currentCommunity: 'communityId',
-            communities: communitiesAdapter.setAll(
-              communitiesAdapter.getInitialState(),
-              [communityId]
-            ),
-          },
-        }
-      );
-    });
+  };
+
+  beforeEach(() => {
+    store = createStore(
+      combineReducers({
+        [StoreKeys.PublicChannels]: publicChannelsReducer,
+        [StoreKeys.Communities]: communitiesReducer,
+      }),
+      {
+        [StoreKeys.PublicChannels]: {
+          ...new PublicChannelsState(),
+          channels: channelsByCommunityAdapter.setAll(
+            channelsByCommunityAdapter.getInitialState(),
+            [communityChannels]
+          ),
+        },
+        [StoreKeys.Communities]: {
+          ...new CommunitiesState(),
+          currentCommunity: 'communityId',
+          communities: communitiesAdapter.setAll(
+            communitiesAdapter.getInitialState(),
+            [communityId]
+          ),
+        },
+      }
+    );
+  });
 
   it('responseGetPublicChannels should set channels info', () => {
     store.dispatch(

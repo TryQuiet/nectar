@@ -14,7 +14,7 @@ import {
   Community,
 } from '../communities/communities.slice';
 
-import { usersReducer, UsersState, User } from '../users/users.slice';
+import { usersReducer, UsersState } from '../users/users.slice';
 
 import { communitiesAdapter } from '../communities/communities.adapter';
 import { certificatesAdapter } from '../users/users.adapter';
@@ -25,7 +25,7 @@ process.env.TZ = 'UTC';
 describe('publicChannelsSelectors', () => {
   let store: Store;
 
-  const communityId = new Community({
+  const communityId: Community = {
     name: 'communityId',
     id: 'communityId',
     CA: {
@@ -34,8 +34,14 @@ describe('publicChannelsSelectors', () => {
       rootKeyString:
         'MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgWBC3C4ARMT8zD1nqYjfs+bDXflWkVFqHRovqQmLQRAKgCgYIKoZIzj0DAQehRANCAASgrM0/l4plmOUtv5yb5AxH2VSRIotJG3oly86ZHl/h6B7hw4/1dCE26Z/jJW3eyIzly7av/zVXkcgBxuqZtKBT',
     },
+    rootCa: '',
+    peerList: [],
     registrarUrl: '',
-  });
+    registrar: null,
+    onionAddress: '',
+    privateKey: '',
+    port: 0,
+  };
 
   let communityChannels = new CommunityChannels('communityId');
 
@@ -52,7 +58,7 @@ describe('publicChannelsSelectors', () => {
   const userPubKey2 = keyFromCertificate(parsedCert2);
 
   communityChannels.currentChannel = 'currentChannel';
-  (communityChannels.channelMessages = {
+  communityChannels.channelMessages = {
     currentChannel: {
       ids: ['1', '0', '2', '4', '5', '6', '7', '8'],
       messages: {
@@ -130,40 +136,41 @@ describe('publicChannelsSelectors', () => {
         },
       },
     },
-  }),
-    beforeEach(() => {
-      store = createStore(
-        combineReducers({
-          [StoreKeys.PublicChannels]: publicChannelsReducer,
-          [StoreKeys.Communities]: communitiesReducer,
-          [StoreKeys.Users]: usersReducer,
-        }),
-        {
-          [StoreKeys.PublicChannels]: {
-            ...new PublicChannelsState(),
-            channels: channelsByCommunityAdapter.setAll(
-              channelsByCommunityAdapter.getInitialState(),
-              [communityChannels]
-            ),
-          },
-          [StoreKeys.Communities]: {
-            ...new CommunitiesState(),
-            currentCommunity: 'communityId',
-            communities: communitiesAdapter.setAll(
-              communitiesAdapter.getInitialState(),
-              [communityId]
-            ),
-          },
-          [StoreKeys.Users]: {
-            ...new UsersState(),
-            certificates: certificatesAdapter.setAll(
-              certificatesAdapter.getInitialState(),
-              [parsedCert1, parsedCert2]
-            ),
-          },
-        }
-      );
-    });
+  };
+
+  beforeEach(() => {
+    store = createStore(
+      combineReducers({
+        [StoreKeys.PublicChannels]: publicChannelsReducer,
+        [StoreKeys.Communities]: communitiesReducer,
+        [StoreKeys.Users]: usersReducer,
+      }),
+      {
+        [StoreKeys.PublicChannels]: {
+          ...new PublicChannelsState(),
+          channels: channelsByCommunityAdapter.setAll(
+            channelsByCommunityAdapter.getInitialState(),
+            [communityChannels]
+          ),
+        },
+        [StoreKeys.Communities]: {
+          ...new CommunitiesState(),
+          currentCommunity: 'communityId',
+          communities: communitiesAdapter.setAll(
+            communitiesAdapter.getInitialState(),
+            [communityId]
+          ),
+        },
+        [StoreKeys.Users]: {
+          ...new UsersState(),
+          certificates: certificatesAdapter.setAll(
+            certificatesAdapter.getInitialState(),
+            [parsedCert1, parsedCert2]
+          ),
+        },
+      }
+    );
+  });
 
   it('get messages in proper order', () => {
     const messages = publicChannelsSelectors.orderedChannelMessages(

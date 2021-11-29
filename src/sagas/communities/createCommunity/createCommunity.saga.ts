@@ -2,7 +2,7 @@ import { createRootCA } from '@zbayapp/identity';
 // @ts-ignore
 import { Time } from 'pkijs';
 import { call, apply, put } from 'typed-redux-saga';
-import { communitiesActions } from '../communities.slice';
+import { communitiesActions, Community } from '../communities.slice';
 import { SocketActionTypes } from '../../socket/const/actionTypes';
 import { generateId } from '../../../utils/cryptography/cryptography';
 import { PayloadAction } from '@reduxjs/toolkit';
@@ -20,14 +20,20 @@ export function* createCommunitySaga(
     new Time({ type: 0, value: notAfterDate })
   );
   const id = yield* call(generateId);
-  const payload = {
+  const payload: Community = {
     id: id,
     CA: rootCa,
     name: action.payload,
     registrarUrl: '',
+    rootCa: '',
+    peerList: [],
+    registrar: null,
+    onionAddress: '',
+    privateKey: '',
+    port: 0,
   };
   yield* put(communitiesActions.addNewCommunity(payload));
-  yield* put(publicChannelsActions.addPublicChannelsList(id))
+  yield* put(publicChannelsActions.addPublicChannelsList({ id: id }));
   const channel = {
     name: 'general',
     description: 'general',
@@ -35,7 +41,9 @@ export function* createCommunitySaga(
     timestamp: Date.now(),
     address: 'general',
   };
-  yield* put(publicChannelsActions.addChannel({communityId:id, channel: channel}))
+  yield* put(
+    publicChannelsActions.addChannel({ communityId: id, channel: channel })
+  );
   yield* put(communitiesActions.setCurrentCommunity(id));
 
   yield* apply(socket, socket.emit, [SocketActionTypes.CREATE_NETWORK, id]);
