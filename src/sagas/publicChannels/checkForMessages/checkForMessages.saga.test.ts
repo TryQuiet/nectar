@@ -55,7 +55,7 @@ describe('checkForMessagesSaga', () => {
     zs10zkaj29rcev9qd5xeuzck4ly5q64kzf6m6h9nfajwcvm8m2vnjmvtqgr0mzfjywswwkwke68t00:
       {
         ids: ['1', '2', '3'],
-        messages: {
+        entities: {
           1: {
             id: '1',
             type: 0,

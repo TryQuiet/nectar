@@ -4,6 +4,7 @@ import { StoreKeys } from '../store.keys';
 import {
   publicChannelsAdapter,
   channelsByCommunityAdapter,
+  channelMessagesAdapter,
 } from './publicChannels.adapter';
 import { IChannelInfo, IMessage } from './publicChannels.types';
 import logger from '../../utils/logger';
@@ -27,12 +28,7 @@ export class CommunityChannels {
 }
 
 export interface ChannelMessages {
-  [channelAddres: string]: {
-    ids: string[];
-    messages: {
-      [id: string]: IMessage;
-    };
-  };
+  [channelAddres: string]: EntityState<IMessage>;
 }
 
 export interface GetPublicChannelsResponse {
@@ -104,10 +100,7 @@ export const publicChannelsSlice = createSlice({
           ),
           channelMessages: {
             ...state.channels.entities[communityId].channelMessages,
-            [channel.address]: {
-              ids: [],
-              messages: {},
-            },
+            [channel.address]: channelMessagesAdapter.getInitialState(),
           },
         },
       });
@@ -123,10 +116,7 @@ export const publicChannelsSlice = createSlice({
           ),
           channelMessages: {
             ...state.channels.entities[communityId].channelMessages,
-            [channel.address]: {
-              ids: [],
-              messages: {},
-            },
+            [channel.address]: channelMessagesAdapter.getInitialState(),
           },
         },
       });
@@ -200,27 +190,18 @@ export const publicChannelsSlice = createSlice({
       state,
       action: PayloadAction<AskForMessagesResponse>
     ) => {
-      const { channelAddress, communityId } = action.payload;
-      let messages = {};
-      action.payload.messages.forEach((message) => {
-        messages[message.id] = message;
-      });
+      const { channelAddress, communityId, messages } = action.payload;
       channelsByCommunityAdapter.updateOne(state.channels, {
         id: communityId,
         changes: {
           channelMessages: {
             ...state.channels.entities[communityId].channelMessages,
-            [channelAddress]: {
-              ...state.channels.entities[communityId].channelMessages[
+            [channelAddress]: channelMessagesAdapter.addMany(
+              state.channels.entities[communityId].channelMessages[
                 channelAddress
               ],
-              messages: {
-                ...state.channels.entities[communityId].channelMessages[
-                  channelAddress
-                ].messages,
-                ...messages,
-              },
-            },
+              messages
+            ),
           },
         },
       });
@@ -230,31 +211,17 @@ export const publicChannelsSlice = createSlice({
       action: PayloadAction<OnMessagePostedResponse>
     ) => {
       const { message, channelAddress, communityId } = action.payload;
-      const messages = {
-        [message.id]: message,
-      };
       channelsByCommunityAdapter.updateOne(state.channels, {
         id: communityId,
         changes: {
           channelMessages: {
             ...state.channels.entities[communityId].channelMessages,
-            [channelAddress]: {
-              ...state.channels.entities[communityId].channelMessages[
+            [channelAddress]: channelMessagesAdapter.addMany(
+              state.channels.entities[communityId].channelMessages[
                 channelAddress
               ],
-              messages: {
-                ...state.channels.entities[communityId].channelMessages[
-                  channelAddress
-                ].messages,
-                ...messages,
-              },
-              ids: [
-                ...state.channels.entities[communityId].channelMessages[
-                  channelAddress
-                ].ids,
-                message.id,
-              ],
-            },
+              [message]
+            ),
           },
         },
       });
@@ -269,31 +236,17 @@ export const publicChannelsSlice = createSlice({
       }>
     ) => {
       const { identity, message, channelAddress } = action.payload;
-      const messages = {
-        [message.id]: message,
-      };
       channelsByCommunityAdapter.updateOne(state.channels, {
         id: identity.id, // Identity it should be the same as community id
         changes: {
           channelMessages: {
             ...state.channels.entities[identity.id].channelMessages,
-            [channelAddress]: {
-              ...state.channels.entities[identity.id].channelMessages[
+            [channelAddress]: channelMessagesAdapter.addMany(
+              state.channels.entities[identity.id].channelMessages[
                 channelAddress
               ],
-              messages: {
-                ...state.channels.entities[identity.id].channelMessages[
-                  channelAddress
-                ].messages,
-                ...messages,
-              },
-              ids: [
-                ...state.channels.entities[identity.id].channelMessages[
-                  channelAddress
-                ].ids,
-                message.id,
-              ],
-            },
+              [message]
+            ),
           },
         },
       });

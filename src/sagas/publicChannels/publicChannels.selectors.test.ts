@@ -1,7 +1,10 @@
 import { combineReducers, createStore, Store } from '@reduxjs/toolkit';
 import { StoreKeys } from '../store.keys';
 import { publicChannelsSelectors } from './publicChannels.selectors';
-import { channelsByCommunityAdapter } from './publicChannels.adapter';
+import {
+  channelMessagesAdapter,
+  channelsByCommunityAdapter,
+} from './publicChannels.adapter';
 import {
   publicChannelsReducer,
   CommunityChannels,
@@ -19,6 +22,7 @@ import { usersReducer, UsersState } from '../users/users.slice';
 import { communitiesAdapter } from '../communities/communities.adapter';
 import { certificatesAdapter } from '../users/users.adapter';
 import { keyFromCertificate, parseCertificate } from '@zbayapp/identity/lib';
+import { channel } from 'redux-saga';
 
 process.env.TZ = 'UTC';
 
@@ -58,85 +62,89 @@ describe('publicChannelsSelectors', () => {
   const userPubKey2 = keyFromCertificate(parsedCert2);
 
   communityChannels.currentChannel = 'currentChannel';
-  communityChannels.channelMessages = {
-    currentChannel: {
-      ids: ['1', '0', '2', '4', '5', '6', '7', '8'],
-      messages: {
-        '0': {
-          id: '0',
-          message: 'message0',
-          createdAt: 1637150276, // November 17, 2021 11:57:56
-          channelId: '',
-          pubKey: userPubKey1,
-          signature: '',
-          type: 1,
-        },
-        '2': {
-          id: '2',
-          message: 'message2',
-          createdAt: 1417155000, // November 28, 2014 6:10:00
-          channelId: '',
-          pubKey: userPubKey1,
-          signature: '',
-          type: 1,
-        },
-        '4': {
-          id: '4',
-          message: 'message4',
-          createdAt: 1417155128, // November 28, 2014 6:12:08
-          channelId: '',
-          pubKey: userPubKey1,
-          signature: '',
-          type: 1,
-        },
-        '7': {
-          id: '7',
-          message: 'message7',
-          createdAt: 1417155120, // November 28, 2014 6:12:08
-          channelId: '',
-          pubKey: userPubKey2,
-          signature: '',
-          type: 1,
-        },
-        '5': {
-          id: '5',
-          message: 'message5',
-          createdAt: 1417154000, // November 28, 2014 5:53:20
-          channelId: '',
-          pubKey: userPubKey1,
-          signature: '',
-          type: 1,
-        },
-        '1': {
-          id: '1',
-          message: 'message1',
-          createdAt: 1637157276, // November 17, 2021 12:54:36
-          channelId: '',
-          pubKey: userPubKey1,
-          signature: '',
-          type: 1,
-        },
-        '6': {
-          id: '6',
-          message: 'message6',
-          createdAt: 1417155108, // November 28, 2014 6:11:48
-          channelId: '',
-          pubKey: userPubKey1,
-          signature: '',
-          type: 1,
-        },
-        '8': {
-          id: '8',
-          message: 'message8',
-          createdAt: 1417155107, // November 28, 2014 6:11:48
-          channelId: '',
-          pubKey: userPubKey1,
-          signature: '',
-          type: 1,
-        },
-      },
+  communityChannels.channelMessages['currentChannel'] =
+    channelMessagesAdapter.getInitialState();
+
+  const messages = [
+    {
+      id: '0',
+      message: 'message0',
+      createdAt: 1637150276, // November 17, 2021 11:57:56
+      channelId: '',
+      pubKey: userPubKey1,
+      signature: '',
+      type: 1,
     },
-  };
+    {
+      id: '2',
+      message: 'message2',
+      createdAt: 1417155000, // November 28, 2014 6:10:00
+      channelId: '',
+      pubKey: userPubKey1,
+      signature: '',
+      type: 1,
+    },
+    {
+      id: '4',
+      message: 'message4',
+      createdAt: 1417155128, // November 28, 2014 6:12:08
+      channelId: '',
+      pubKey: userPubKey1,
+      signature: '',
+      type: 1,
+    },
+    {
+      id: '7',
+      message: 'message7',
+      createdAt: 1417155120, // November 28, 2014 6:12:08
+      channelId: '',
+      pubKey: userPubKey2,
+      signature: '',
+      type: 1,
+    },
+    {
+      id: '5',
+      message: 'message5',
+      createdAt: 1417154000, // November 28, 2014 5:53:20
+      channelId: '',
+      pubKey: userPubKey1,
+      signature: '',
+      type: 1,
+    },
+    {
+      id: '1',
+      message: 'message1',
+      createdAt: 1637157276, // November 17, 2021 12:54:36
+      channelId: '',
+      pubKey: userPubKey1,
+      signature: '',
+      type: 1,
+    },
+    {
+      id: '6',
+      message: 'message6',
+      createdAt: 1417155108, // November 28, 2014 6:11:48
+      channelId: '',
+      pubKey: userPubKey1,
+      signature: '',
+      type: 1,
+    },
+    {
+      id: '8',
+      message: 'message8',
+      createdAt: 1417155107, // November 28, 2014 6:11:48
+      channelId: '',
+      pubKey: userPubKey1,
+      signature: '',
+      type: 1,
+    },
+  ];
+
+  communityChannels.channelMessages['currentChannel'] =
+    channelMessagesAdapter.addMany(
+      communityChannels.channelMessages['currentChannel'],
+      messages
+    );
 
   beforeEach(() => {
     store = createStore(
@@ -176,6 +184,7 @@ describe('publicChannelsSelectors', () => {
     const messages = publicChannelsSelectors.orderedChannelMessages(
       store.getState()
     );
+    console.log(messages)
     expect(messages).toMatchInlineSnapshot(`
       Array [
         Object {

@@ -59,7 +59,7 @@ describe('publicChannelsReducer', () => {
   communityChannels.channelMessages = {
     currentChannel: {
       ids: ['1', '0', '2', '4'],
-      messages: {
+      entities: {
         '0': {
           id: '0',
           message: 'message0',

@@ -3,6 +3,7 @@ import { StoreKeys } from '../store.keys';
 import {
   publicChannelsAdapter,
   channelsByCommunityAdapter,
+  channelMessagesAdapter
 } from './publicChannels.adapter';
 import { CreatedSelectors } from '../store.types';
 import { formatMessageDisplayDate } from '../../utils/functions/formatMessageDisplayDate/formatMessageDisplayDate';
@@ -93,7 +94,7 @@ export const currentChannelMessages = createSelector(
   (address, messages) => {
     // @ts-ignore
     if (messages && address in messages) {
-      return messages[address].messages;
+      return channelMessagesAdapter.getSelectors().selectAll(messages[address])
     }
     return {};
   }
