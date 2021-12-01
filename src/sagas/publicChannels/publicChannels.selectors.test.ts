@@ -184,6 +184,14 @@ Object {
   "Feb 05": Array [
     Array [
       Object {
+        "createdAt": 1612548120,
+        "date": "Feb 05, 18:02",
+        "id": "7",
+        "message": "message_7",
+        "nickname": "holmes",
+        "type": 1,
+      },
+      Object {
         "createdAt": 1612558200,
         "date": "Feb 05, 20:50",
         "id": "8",
@@ -192,24 +200,38 @@ Object {
         "type": 1,
       },
     ],
-    Array [
-      Object {
-        "createdAt": 1612548120,
-        "date": "Feb 05, 18:02",
-        "id": "7",
-        "message": "message_7",
-        "nickname": "holmes",
-        "type": 1,
-      },
-    ],
   ],
   "Oct 20": Array [
     Array [
       Object {
-        "createdAt": 1603174322,
-        "date": "Oct 20, 6:12",
-        "id": "6",
-        "message": "message_6",
+        "createdAt": 1603173000,
+        "date": "Oct 20, 5:50",
+        "id": "1",
+        "message": "message_1",
+        "nickname": "holmes",
+        "type": 1,
+      },
+      Object {
+        "createdAt": 1603174200,
+        "date": "Oct 20, 6:10",
+        "id": "2",
+        "message": "message_2",
+        "nickname": "holmes",
+        "type": 1,
+      },
+      Object {
+        "createdAt": 1603174290.001,
+        "date": "Oct 20, 6:11",
+        "id": "3",
+        "message": "message_3",
+        "nickname": "holmes",
+        "type": 1,
+      },
+      Object {
+        "createdAt": 1603174290.002,
+        "date": "Oct 20, 6:11",
+        "id": "4",
+        "message": "message_4",
         "nickname": "holmes",
         "type": 1,
       },
@@ -226,36 +248,10 @@ Object {
     ],
     Array [
       Object {
-        "createdAt": 1603174290.002,
-        "date": "Oct 20, 6:11",
-        "id": "4",
-        "message": "message_4",
-        "nickname": "holmes",
-        "type": 1,
-      },
-      Object {
-        "createdAt": 1603174290.001,
-        "date": "Oct 20, 6:11",
-        "id": "3",
-        "message": "message_3",
-        "nickname": "holmes",
-        "type": 1,
-      },
-      Object {
-        "createdAt": 1603174200,
-        "date": "Oct 20, 6:10",
-        "id": "2",
-        "message": "message_2",
-        "nickname": "holmes",
-        "type": 1,
-      },
-    ],
-    Array [
-      Object {
-        "createdAt": 1603173000,
-        "date": "Oct 20, 5:50",
-        "id": "1",
-        "message": "message_1",
+        "createdAt": 1603174322,
+        "date": "Oct 20, 6:12",
+        "id": "6",
+        "message": "message_6",
         "nickname": "holmes",
         "type": 1,
       },

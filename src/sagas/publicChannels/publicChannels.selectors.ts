@@ -168,6 +168,7 @@ export const currentChannelMessagesMergedBySender = createSelector(
         return merged;
       }, []);
     }
+
     return result;
   }
 );
