@@ -69,6 +69,11 @@ export interface SetCurrentChannelPayload {
   channel: string;
 }
 
+export interface JoinChannelPayload {
+  communityId: string;
+  channel: IChannelInfo;
+}
+
 export interface CreateChannelPayload {
   channel: IChannelInfo;
   communityId: string;
@@ -173,6 +178,7 @@ export const publicChannelsSlice = createSlice({
       state,
       _action: PayloadAction<SubscribeForTopicPayload>
     ) => state,
+    joinChannel: (state, _action: PayloadAction<JoinChannelPayload>) => state,
     subscribeForAllTopics: (state, _action: PayloadAction<string>) => state,
     responseSendMessagesIds: (
       state,

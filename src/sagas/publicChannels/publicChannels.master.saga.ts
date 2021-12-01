@@ -5,6 +5,7 @@ import { checkForMessagesSaga } from './checkForMessages/checkForMessages.saga';
 import { getPublicChannelsSaga } from './getPublicChannels/getPublicChannels.saga';
 import { publicChannelsActions } from './publicChannels.slice';
 import { communitiesActions } from '../communities/communities.slice';
+import { joinChannelSaga } from './joinChannel/joinChannel.saga';
 import { subscribeForTopicSaga } from './subscribeForTopic/subscribeForTopic.saga';
 import { subscribeForAllTopicsSaga } from './subscribeForAllTopics/subscribeForAllTopics.saga';
 
@@ -33,6 +34,7 @@ export function* publicChannelsMasterSaga(socket: Socket): Generator {
       askForMessagesSaga,
       socket
     ),
+    takeEvery(publicChannelsActions.joinChannel.type, joinChannelSaga),
     takeEvery(communitiesActions.community.type, subscribeForAllTopicsSaga),
   ]);
 }

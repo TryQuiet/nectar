@@ -37,6 +37,16 @@ export const publicChannels = createSelector(
   }
 );
 
+export const joinedPublicChannels = createSelector(
+  currentCommunityChannels,
+  (channels) => Object.keys(channels.channelMessages)
+);
+
+export const isChannelJoined = (channelName: string) =>
+  createSelector(joinedPublicChannels, (joinedChannels) =>
+    joinedChannels.includes(channelName)
+  );
+
 export const publicChannelsByCommunityId = (id: string) =>
   createSelector(publicChannelSlice, (publicChannelsState) => {
     const selected = channelsByCommunityAdapter
@@ -199,7 +209,6 @@ export const currentChannelMessagesGroupedByDay = createSelector(
           const dayIndex = messagesByDay.findIndex(
             (item) => item.day === 'Today'
           );
-          console.log(dayIndex);
           messagesByDay[dayIndex].messages.push(displayableMessage);
         }
       } else if (split.length === 2) {
@@ -230,6 +239,8 @@ export const currentChannelMessagesGroupedByDay = createSelector(
 
 export const publicChannelsSelectors = {
   publicChannels,
+  joinedPublicChannels,
+  isChannelJoined,
   publicChannelsByCommunityId,
   ZbayChannel,
   currentChannel,

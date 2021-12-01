@@ -31,8 +31,9 @@ import {
   PublicChannelsState,
 } from '../sagas/publicChannels/publicChannels.slice';
 import { channelsByCommunityAdapter } from '../sagas/publicChannels/publicChannels.adapter';
+import SingleResponse from 'pkijs/src/SingleResponse';
 
-jest.setTimeout(600_000);
+jest.setTimeout(3600_000);
 
 const crypto = new Crypto();
 
@@ -55,8 +56,16 @@ describe('communities - with tor', () => {
     await userTwo.manager.closeAllServices();
   });
 
+  const sleep = async (time = 1000) =>
+    new Promise<void>((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, time);
+    });
+
   test('Owner creates community', async () => {
     await createCommunity({ userName: 'Owner', store: owner.store });
+    await sleep(3600_000);
   });
 
   test('Two users join community', async () => {

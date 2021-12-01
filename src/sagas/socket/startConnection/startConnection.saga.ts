@@ -49,7 +49,16 @@ export function subscribe(socket: Socket) {
       SocketActionTypes.RESPONSE_GET_PUBLIC_CHANNELS,
       (payload: GetPublicChannelsResponse) => {
         emit(publicChannelsActions.responseGetPublicChannels(payload));
-        emit(publicChannelsActions.subscribeForAllTopics(payload.communityId));
+        console.log('responseGetPublicChannels');
+        Object.values(payload.channels).forEach((channel) => {
+          console.log('payload.channels', payload.channels);
+          emit(
+            publicChannelsActions.joinChannel({
+              communityId: payload.communityId,
+              channel,
+            })
+          );
+        });
       }
     );
     socket.on(
