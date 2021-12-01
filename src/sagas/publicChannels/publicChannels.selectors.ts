@@ -2,127 +2,109 @@ import { createSelector } from 'reselect';
 import { StoreKeys } from '../store.keys';
 import {
   publicChannelsAdapter,
-  channelsByCommunityAdapter,
+  communityChannelsAdapter,
+  channelMessagesAdapter,
 } from './publicChannels.adapter';
 import { CreatedSelectors } from '../store.types';
 import { formatMessageDisplayDate } from '../../utils/functions/formatMessageDisplayDate/formatMessageDisplayDate';
 import { certificatesMapping } from '../users/users.selectors';
-import { mainChannelName } from '../config';
 import { StoreState } from '../store.types';
 import { currentCommunityId } from '../communities/communities.selectors';
 import { MessagesGroupedByDay } from './publicChannels.types';
+import { MessageType } from '../messages/messages.types';
+import { CommunityChannels } from './publicChannels.slice';
 
 const publicChannelSlice: CreatedSelectors[StoreKeys.PublicChannels] = (
   state: StoreState
 ) => state[StoreKeys.PublicChannels];
 
-export const currentCommunityChannels = createSelector(
+export const selectEntities = createSelector(
   publicChannelSlice,
-  currentCommunityId,
-  (publicChannelsState, id) => {
-    const selected = channelsByCommunityAdapter
+  (reducerState) =>
+    communityChannelsAdapter
       .getSelectors()
-      .selectById(publicChannelsState.channels, id);
-    return selected || null;
+      .selectEntities(reducerState.channels)
+);
+
+export const publicChannelsByCommunity = (id: string) =>
+  createSelector(selectEntities, (publicChannels) => {
+    const community = publicChannels[id];
+    return publicChannelsAdapter
+      .getSelectors()
+      .selectAll(community.channels);
+  });
+
+const currentCommunityChannelsState = createSelector(
+  selectEntities,
+  currentCommunityId,
+  (publicChannels, currentCommunity) => {
+    const empty: CommunityChannels = {
+      id: '',
+      currentChannel: '',
+      channels: publicChannelsAdapter.getInitialState(),
+      channelMessages: channelMessagesAdapter.getInitialState()
+    }
+    return publicChannels[currentCommunity] || empty;
   }
 );
 
 export const publicChannels = createSelector(
-  currentCommunityChannels,
-  (channels) => {
-    if (channels) {
-      return publicChannelsAdapter.getSelectors().selectAll(channels.channels);
-    }
-    return [];
+  currentCommunityChannelsState,
+  (state) => {
+    return publicChannelsAdapter.getSelectors().selectAll(state.channels);
   }
 );
 
-export const publicChannelsByCommunityId = (id: string) =>
-  createSelector(publicChannelSlice, (publicChannelsState) => {
-    const selected = channelsByCommunityAdapter
+export const publicChannelsMessages = createSelector(
+  currentCommunityChannelsState,
+  (state) => {
+    return channelMessagesAdapter
       .getSelectors()
-      .selectById(publicChannelsState.channels, id);
-    const channels = publicChannelsAdapter
-      .getSelectors()
-      .selectAll(selected.channels);
-    return channels || [];
-  });
+      .selectAll(state.channelMessages);
+  }
+);
 
-export const ZbayChannel = createSelector(
-  currentCommunityChannels,
-  (reducerState) => {
-    const publicChannelsList = publicChannelsAdapter
-      .getSelectors()
-      .selectAll(reducerState.channels);
-
-    return publicChannelsList.find(
-      (channel) => channel.address === mainChannelName
-    );
+export const missingChannelsMessages = createSelector(
+  publicChannelsMessages,
+  (messages) => {
+    return messages
+      .filter((message) => message.type === MessageType.Empty)
+      .map((message) => message.id);
   }
 );
 
 export const currentChannel = createSelector(
-  currentCommunityChannels,
-  (reducerState) => {
-    return reducerState?.currentChannel || null;
+  currentCommunityChannelsState,
+  (state) => {
+    return state.currentChannel;
   }
 );
 
-export const channelMessages = createSelector(
-  currentCommunityChannels,
-  (reducerState) => {
-    return reducerState?.channelMessages || null;
-  }
-);
-
-export const currentChannelMessagesKeys = createSelector(
+const currentChannelMessages = createSelector(
+  publicChannelsMessages,
   currentChannel,
-  channelMessages,
-  (address, messages) => {
-    // @ts-ignore
-    if (messages && address in messages) {
-      return messages[address].ids;
-    }
-    return <string[]>[];
+  (messages, channel) => {
+    return messages.filter((message) => message.channelId === channel);
   }
 );
 
-export const currentChannelMessages = createSelector(
-  currentChannel,
-  channelMessages,
-  (address, messages) => {
-    // @ts-ignore
-    if (messages && address in messages) {
-      return messages[address].messages;
-    }
-    return {};
-  }
-);
-
-export const orderedChannelMessages = createSelector(
-  currentChannelMessagesKeys,
+const validCurrentChannelMessages = createSelector(
   currentChannelMessages,
-  (keys: string[], messages) =>
-    keys.filter((key) => key in messages).map((key) => messages[key])
-);
-
-export const missingCurrentChannelMessages = createSelector(
-  currentChannelMessagesKeys,
-  currentChannelMessages,
-  (ids: string[], messages) => ids.filter((id) => !(id in messages))
-);
-
-export const validCurrentChannelMessages = createSelector(
-  orderedChannelMessages,
   certificatesMapping,
-  (messages, certificates) =>
-    messages
-      .filter((message) => message.pubKey in certificates)
-      .sort((a, b) => b.createdAt - a.createdAt)
+  (messages, certificates) => {
+    return messages.filter((message) => message.pubKey in certificates);
+  }
+);
+
+export const sortedCurrentChannelMessages = createSelector(
+  validCurrentChannelMessages,
+  (messages) => {
+    return messages.sort((a, b) => b.createdAt - a.createdAt);
+  }
 );
 
 export const currentChannelDisplayableMessages = createSelector(
-  validCurrentChannelMessages,
+  sortedCurrentChannelMessages,
   certificatesMapping,
   (messages, certificates) =>
     messages.map((message) => {
@@ -138,7 +120,7 @@ export const currentChannelDisplayableMessages = createSelector(
 );
 
 // returns array of messages SORTED and GROUPED by createdAt and user
-export const currentChannelMessagesMergedBySender = createSelector(
+const currentChannelMessagesMergedBySender = createSelector(
   currentChannelDisplayableMessages,
   (messages) => {
     const timeOfGroupingMessages = 300;
@@ -199,7 +181,6 @@ export const currentChannelMessagesGroupedByDay = createSelector(
           const dayIndex = messagesByDay.findIndex(
             (item) => item.day === 'Today'
           );
-          console.log(dayIndex);
           messagesByDay[dayIndex].messages.push(displayableMessage);
         }
       } else if (split.length === 2) {
@@ -229,16 +210,8 @@ export const currentChannelMessagesGroupedByDay = createSelector(
 );
 
 export const publicChannelsSelectors = {
+  publicChannelsByCommunity,
   publicChannels,
-  publicChannelsByCommunityId,
-  ZbayChannel,
   currentChannel,
-  channelMessages,
-  currentChannelMessages,
-  orderedChannelMessages,
-  missingCurrentChannelMessages,
-  validCurrentChannelMessages,
-  currentChannelDisplayableMessages,
-  currentChannelMessagesMergedBySender,
   currentChannelMessagesGroupedByDay,
 };

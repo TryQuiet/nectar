@@ -8,7 +8,11 @@ import {
   PublicChannelsState,
 } from './publicChannels.slice';
 
-import { channelsByCommunityAdapter } from './publicChannels.adapter';
+import {
+  channelMessagesAdapter,
+  communityChannelsAdapter,
+  publicChannelsAdapter,
+} from './publicChannels.adapter';
 import {
   communitiesReducer,
   CommunitiesState,
@@ -40,7 +44,7 @@ describe('publicChannelsReducer', () => {
   let store: Store;
 
   const communityId: Community = {
-    name: 'communityId',
+    name: '',
     id: 'communityId',
     CA: { rootCertString: 'certString', rootKeyString: 'keyString' },
     rootCa: '',
@@ -52,52 +56,53 @@ describe('publicChannelsReducer', () => {
     port: 0,
   };
 
-  let communityChannels = new CommunityChannels('communityId');
-
-  communityChannels.currentChannel = 'currentChannel';
-
-  communityChannels.channelMessages = {
-    currentChannel: {
-      ids: ['1', '0', '2', '4'],
-      messages: {
-        '0': {
-          id: '0',
-          message: 'message0',
-          createdAt: 0,
-          channelId: '',
-          signature: '',
-          pubKey: '12',
-          type: 1,
-        },
-        '2': {
-          id: '2',
-          message: 'message2',
-          createdAt: 0,
-          channelId: '',
-          signature: '',
-          pubKey: '12',
-          type: 1,
-        },
-        '4': {
-          id: '4',
-          message: 'message4',
-          createdAt: 0,
-          channelId: '',
-          signature: '',
-          pubKey: '12',
-          type: 1,
-        },
-        '1': {
-          id: '1',
-          message: 'message1',
-          createdAt: 0,
-          channelId: '',
-          signature: '',
-          pubKey: '12',
-          type: 1,
-        },
-      },
+  const messages = [
+    {
+      id: '0',
+      message: 'message0',
+      createdAt: 0,
+      channelId: '',
+      signature: '',
+      pubKey: '12',
+      type: 1,
     },
+    {
+      id: '2',
+      message: 'message2',
+      createdAt: 0,
+      channelId: '',
+      signature: '',
+      pubKey: '12',
+      type: 1,
+    },
+    {
+      id: '4',
+      message: 'message4',
+      createdAt: 0,
+      channelId: '',
+      signature: '',
+      pubKey: '12',
+      type: 1,
+    },
+    {
+      id: '1',
+      message: 'message1',
+      createdAt: 0,
+      channelId: '',
+      signature: '',
+      pubKey: '12',
+      type: 1,
+    },
+  ];
+
+  let communityChannels: CommunityChannels = {
+    id: 'communityId',
+    currentChannel: 'currentChannel',
+    channels: publicChannelsAdapter.getInitialState(),
+    channelMessages: channelMessagesAdapter.setAll(
+      channelMessagesAdapter.getInitialState(),
+      messages
+    ),
   };
 
   beforeEach(() => {
@@ -109,8 +114,8 @@ describe('publicChannelsReducer', () => {
       {
         [StoreKeys.PublicChannels]: {
           ...new PublicChannelsState(),
-          channels: channelsByCommunityAdapter.setAll(
-            channelsByCommunityAdapter.getInitialState(),
+          channels: communityChannelsAdapter.setAll(
+            communityChannelsAdapter.getInitialState(),
             [communityChannels]
           ),
         },
@@ -135,22 +140,28 @@ describe('publicChannelsReducer', () => {
     );
     const channels = publicChannelsSelectors.publicChannels(store.getState());
     expect(channels).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "address": "zs1ppz4qxctnv85ycex7u4cyxatz2wnduzy7usvyagma6h45lwrx88pdl3mdu25z763uvfy7a0qpfs",
-    "description": "public chat",
-    "name": "public",
-    "owner": "030fdc016427a6e41ca8dccaf0c09cfbf002e5916a13ee16f5fe7240d0dfe50ede",
-    "timestamp": 1587010998,
+Object {
+  "entities": Object {
+    "public": Object {
+      "address": "zs1ppz4qxctnv85ycex7u4cyxatz2wnduzy7usvyagma6h45lwrx88pdl3mdu25z763uvfy7a0qpfs",
+      "description": "public chat",
+      "name": "public",
+      "owner": "030fdc016427a6e41ca8dccaf0c09cfbf002e5916a13ee16f5fe7240d0dfe50ede",
+      "timestamp": 1587010998,
+    },
+    "zbay": Object {
+      "address": "zs10zkaj29rcev9qd5xeuzck4ly5q64kzf6m6h9nfajwcvm8m2vnjmvtqgr0mzfjywswwkwke68t00",
+      "description": "zbay marketplace channel",
+      "name": "zbay",
+      "owner": "030fdc016427a6e41ca8dccaf0c09cfbf002e5916a13ee16f5fe7240d0dfe50ede",
+      "timestamp": 1587009699,
+    },
   },
-  Object {
-    "address": "zs10zkaj29rcev9qd5xeuzck4ly5q64kzf6m6h9nfajwcvm8m2vnjmvtqgr0mzfjywswwkwke68t00",
-    "description": "zbay marketplace channel",
-    "name": "zbay",
-    "owner": "030fdc016427a6e41ca8dccaf0c09cfbf002e5916a13ee16f5fe7240d0dfe50ede",
-    "timestamp": 1587009699,
-  },
-]
+  "ids": Array [
+    "public",
+    "zbay",
+  ],
+}
 `);
   });
 });

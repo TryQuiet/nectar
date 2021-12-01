@@ -1,4 +1,4 @@
-export type IChannelInfo = {
+export type PublicChannel = {
   name: string;
   description: string;
   owner: string;
@@ -6,7 +6,7 @@ export type IChannelInfo = {
   address: string;
 };
 
-export type IMessage = {
+export type ChannelMessage = {
   id: string;
   type: number;
   message: string;
