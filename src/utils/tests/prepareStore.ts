@@ -20,9 +20,7 @@ const reducers = {
   [StoreKeys.PublicChannels]: publicChannels.reducer,
 };
 
-export const prepareStore = (
-  mockedState?: { [key in StoreKeys]?: any }
-) => {
+export const prepareStore = (mockedState?: { [key in StoreKeys]?: any }) => {
   const combinedReducers = combineReducers(reducers);
   const sagaMiddleware = createSagaMiddleware();
   const store = createStore(

@@ -20,7 +20,8 @@ export type DisplayableMessage = {
   id: string;
   type: number;
   message: string;
-  createdAt: string;
+  createdAt: number; // seconds
+  date: string; // displayable
   nickname: string;
 };
 

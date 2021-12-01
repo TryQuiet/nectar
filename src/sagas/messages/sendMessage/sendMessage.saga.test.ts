@@ -93,8 +93,8 @@ describe('sendMessageSaga', () => {
       publicChannelsAdapter.getInitialState(),
       [publicChannel]
     ),
-    channelMessages: channelMessagesAdapter.getInitialState()
-  }
+    channelMessages: channelMessagesAdapter.getInitialState(),
+  };
 
   test('sign and send message', async () => {
     const socket = { emit: jest.fn() } as unknown as Socket;

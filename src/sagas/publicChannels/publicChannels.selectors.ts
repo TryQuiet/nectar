@@ -6,13 +6,13 @@ import {
   channelMessagesAdapter,
 } from './publicChannels.adapter';
 import { CreatedSelectors } from '../store.types';
-import { formatMessageDisplayDate } from '../../utils/functions/formatMessageDisplayDate/formatMessageDisplayDate';
 import { certificatesMapping } from '../users/users.selectors';
 import { StoreState } from '../store.types';
 import { currentCommunityId } from '../communities/communities.selectors';
-import { MessagesGroupedByDay } from './publicChannels.types';
 import { MessageType } from '../messages/messages.types';
 import { CommunityChannels } from './publicChannels.slice';
+import { DisplayableMessage } from '../..';
+import { formatMessageDisplayDate } from '../../utils/functions/dates/formatMessageDisplayDate';
 
 const publicChannelSlice: CreatedSelectors[StoreKeys.PublicChannels] = (
   state: StoreState
@@ -29,9 +29,7 @@ export const selectEntities = createSelector(
 export const publicChannelsByCommunity = (id: string) =>
   createSelector(selectEntities, (publicChannels) => {
     const community = publicChannels[id];
-    return publicChannelsAdapter
-      .getSelectors()
-      .selectAll(community.channels);
+    return publicChannelsAdapter.getSelectors().selectAll(community.channels);
   });
 
 const currentCommunityChannelsState = createSelector(
@@ -42,8 +40,8 @@ const currentCommunityChannelsState = createSelector(
       id: '',
       currentChannel: '',
       channels: publicChannelsAdapter.getInitialState(),
-      channelMessages: channelMessagesAdapter.getInitialState()
-    }
+      channelMessages: channelMessagesAdapter.getInitialState(),
+    };
     return publicChannels[currentCommunity] || empty;
   }
 );
@@ -103,109 +101,73 @@ export const sortedCurrentChannelMessages = createSelector(
   }
 );
 
-export const currentChannelDisplayableMessages = createSelector(
+const displayableCurrentChannelMessages = createSelector(
   sortedCurrentChannelMessages,
   certificatesMapping,
   (messages, certificates) =>
     messages.map((message) => {
       const user = certificates[message.pubKey];
-      return {
+      const date = formatMessageDisplayDate(message.createdAt);
+      const displayableMessage: DisplayableMessage = {
         id: message.id,
         type: message.type,
         message: message.message,
         createdAt: message.createdAt,
+        date: date,
         nickname: user.username,
       };
+      return displayableMessage;
     })
 );
 
-// returns array of messages SORTED and GROUPED by createdAt and user
-const currentChannelMessagesMergedBySender = createSelector(
-  currentChannelDisplayableMessages,
+export const dailyGroupedCurrentChannelMessages = createSelector(
+  displayableCurrentChannelMessages,
   (messages) => {
-    const timeOfGroupingMessages = 300;
-    let newMessages = [];
+    const result: { [date: string]: DisplayableMessage[] } = messages.reduce(
+      (groups, message) => {
+        let date: string;
 
-    for (
-      let indexOfMessages = 0;
-      indexOfMessages < messages.length;
-      indexOfMessages++
-    ) {
-      let currentMessage = messages[indexOfMessages];
+        if (message.date.includes(',')) {
+          date = message.date.split(',')[0];
+        } else {
+          date = 'Today';
+        }
 
-      while (
-        messages[indexOfMessages + 1] &&
-        currentMessage.createdAt - messages[indexOfMessages + 1].createdAt <
-          timeOfGroupingMessages &&
-        currentMessage.nickname === messages[indexOfMessages + 1].nickname
-      ) {
-        currentMessage = {
-          ...messages[indexOfMessages + 1],
-          message:
-            messages[indexOfMessages + 1].message +
-            '\n' +
-            currentMessage.message,
-        };
-        indexOfMessages++;
-      }
+        if (!groups[date]) {
+          groups[date] = [];
+        }
 
-      newMessages.push(currentMessage);
-    }
-    return newMessages.reverse();
+        groups[date].push(message);
+        return groups;
+      },
+      {}
+    );
+
+    return result;
   }
 );
 
-// returns array of 'day' object with day and grouped messages
-export const currentChannelMessagesGroupedByDay = createSelector(
-  currentChannelMessagesMergedBySender,
-  (messages) => {
-    let messagesByDay: MessagesGroupedByDay = [];
+export const currentChannelMessagesMergedBySender = createSelector(
+  dailyGroupedCurrentChannelMessages,
+  (groups) => {
+    for (const day in groups) {
+      groups[day] = groups[day].reduce((merged, message) => {
+        // Get last item from collected array for comparison
+        const last = merged.length && merged[merged.length - 1][0];
 
-    for (const message of messages) {
-      const split = formatMessageDisplayDate(message.createdAt).split(',');
-
-      if (split.length === 1) {
-        const messageTime = split[0];
-        const isDay = messagesByDay.find((item) => item.day === 'Today');
-        const displayableMessage = {
-          ...message,
-          createdAt: messageTime,
-        };
-
-        if (!isDay) {
-          messagesByDay.push({
-            day: 'Today',
-            messages: [displayableMessage],
-          });
+        if (
+          last.nickname === message.nickname &&
+          last.createdAt - message.createdAt < 300
+        ) {
+          merged[merged.length - 1].push(message);
         } else {
-          const dayIndex = messagesByDay.findIndex(
-            (item) => item.day === 'Today'
-          );
-          messagesByDay[dayIndex].messages.push(displayableMessage);
+          merged.push([message]);
         }
-      } else if (split.length === 2) {
-        const messageDay = split[0];
-        const messageTime = split[1];
-        const isDay = messagesByDay.find((item) => item.day === messageDay);
-        const displayableMessage = {
-          ...message,
-          createdAt: messageTime,
-        };
 
-        if (!isDay) {
-          messagesByDay.push({
-            day: messageDay,
-            messages: [displayableMessage],
-          });
-        } else {
-          const dayIndex = messagesByDay.findIndex(
-            (item) => item.day === messageDay
-          );
-          messagesByDay[dayIndex].messages.push(displayableMessage);
-        }
-      }
+        return merged;
+      }, []);
     }
-    return messagesByDay;
+    return groups;
   }
 );
 
@@ -213,5 +175,6 @@ export const publicChannelsSelectors = {
   publicChannelsByCommunity,
   publicChannels,
   currentChannel,
-  currentChannelMessagesGroupedByDay,
+  dailyGroupedCurrentChannelMessages,
+  currentChannelMessagesMergedBySender,
 };

@@ -2,11 +2,11 @@ import { Store } from '../store.types';
 import { getFactory } from '../..';
 import { prepareStore } from '../../utils/tests/prepareStore';
 import {
-  publicChannelsSelectors,
+  currentChannelMessagesMergedBySender,
   sortedCurrentChannelMessages,
 } from './publicChannels.selectors';
-import { communitiesActions } from '../communities/communities.slice';
 import { publicChannelsActions } from './publicChannels.slice';
+import { communitiesActions } from '../communities/communities.slice';
 import { identityActions } from '../identity/identity.slice';
 import { DateTime } from 'luxon';
 import { MessageType } from '../messages/messages.types';
@@ -44,7 +44,7 @@ describe('publicChannelsSelectors', () => {
           day: 20,
           hour: 5,
           minute: 50,
-        }).valueOf(),
+        }).toSeconds(),
         identity: holmes,
       },
       {
@@ -55,7 +55,7 @@ describe('publicChannelsSelectors', () => {
           day: 20,
           hour: 6,
           minute: 10,
-        }).valueOf(),
+        }).toSeconds(),
         identity: holmes,
       },
       {
@@ -68,7 +68,7 @@ describe('publicChannelsSelectors', () => {
           minute: 11,
           second: 30,
           millisecond: 1,
-        }).valueOf(),
+        }).toSeconds(),
         identity: holmes,
       },
       {
@@ -81,7 +81,7 @@ describe('publicChannelsSelectors', () => {
           minute: 11,
           second: 30,
           millisecond: 2,
-        }).valueOf(),
+        }).toSeconds(),
         identity: holmes,
       },
       {
@@ -93,8 +93,8 @@ describe('publicChannelsSelectors', () => {
           hour: 6,
           minute: 12,
           second: 1,
-        }).valueOf(),
-        identity: holmes,
+        }).toSeconds(),
+        identity: bartek,
       },
       {
         id: '6',
@@ -105,8 +105,8 @@ describe('publicChannelsSelectors', () => {
           hour: 6,
           minute: 12,
           second: 2,
-        }).valueOf(),
-        identity: bartek,
+        }).toSeconds(),
+        identity: holmes,
       },
       {
         id: '7',
@@ -116,7 +116,7 @@ describe('publicChannelsSelectors', () => {
           day: 5,
           hour: 18,
           minute: 2,
-        }).valueOf(),
+        }).toSeconds(),
         identity: holmes,
       },
       {
@@ -127,7 +127,18 @@ describe('publicChannelsSelectors', () => {
           day: 5,
           hour: 20,
           minute: 50,
-        }).valueOf(),
+        }).toSeconds(),
+        identity: holmes,
+      },
+      {
+        id: '9',
+        createdAt: DateTime.fromObject({
+          year: DateTime.now().year,
+          month: DateTime.now().month,
+          day: DateTime.now().day,
+          hour: 20,
+          minute: 50,
+        }).toSeconds(),
         identity: holmes,
       },
     ];
@@ -166,12 +177,104 @@ describe('publicChannelsSelectors', () => {
     });
   });
 
-  it.skip('get grouped messages', async () => {
-    const messages = publicChannelsSelectors.currentChannelMessagesGroupedByDay(
-      store.getState()
-    );
-
-    expect(messages).toMatchInlineSnapshot();
+  it('get grouped messages', async () => {
+    const messages = currentChannelMessagesMergedBySender(store.getState());
+    expect(messages).toMatchInlineSnapshot(`
+Object {
+  "Feb 05": Array [
+    Array [
+      Object {
+        "createdAt": 1612558200,
+        "date": "Feb 05, 20:50",
+        "id": "8",
+        "message": "message_8",
+        "nickname": "holmes",
+        "type": 1,
+      },
+    ],
+    Array [
+      Object {
+        "createdAt": 1612548120,
+        "date": "Feb 05, 18:02",
+        "id": "7",
+        "message": "message_7",
+        "nickname": "holmes",
+        "type": 1,
+      },
+    ],
+  ],
+  "Oct 20": Array [
+    Array [
+      Object {
+        "createdAt": 1603174322,
+        "date": "Oct 20, 6:12",
+        "id": "6",
+        "message": "message_6",
+        "nickname": "holmes",
+        "type": 1,
+      },
+    ],
+    Array [
+      Object {
+        "createdAt": 1603174321,
+        "date": "Oct 20, 6:12",
+        "id": "5",
+        "message": "message_5",
+        "nickname": "bartek",
+        "type": 1,
+      },
+    ],
+    Array [
+      Object {
+        "createdAt": 1603174290.002,
+        "date": "Oct 20, 6:11",
+        "id": "4",
+        "message": "message_4",
+        "nickname": "holmes",
+        "type": 1,
+      },
+      Object {
+        "createdAt": 1603174290.001,
+        "date": "Oct 20, 6:11",
+        "id": "3",
+        "message": "message_3",
+        "nickname": "holmes",
+        "type": 1,
+      },
+      Object {
+        "createdAt": 1603174200,
+        "date": "Oct 20, 6:10",
+        "id": "2",
+        "message": "message_2",
+        "nickname": "holmes",
+        "type": 1,
+      },
+    ],
+    Array [
+      Object {
+        "createdAt": 1603173000,
+        "date": "Oct 20, 5:50",
+        "id": "1",
+        "message": "message_1",
+        "nickname": "holmes",
+        "type": 1,
+      },
+    ],
+  ],
+  "Today": Array [
+    Array [
+      Object {
+        "createdAt": 1638391800,
+        "date": "20:50",
+        "id": "9",
+        "message": "message_9",
+        "nickname": "holmes",
+        "type": 1,
+      },
+    ],
+  ],
+}
+`);
   });
 });
 

@@ -30,7 +30,11 @@ import {
   CommunityChannels,
   PublicChannelsState,
 } from '../sagas/publicChannels/publicChannels.slice';
-import { channelMessagesAdapter, communityChannelsAdapter, publicChannelsAdapter } from '../sagas/publicChannels/publicChannels.adapter';
+import {
+  channelMessagesAdapter,
+  communityChannelsAdapter,
+  publicChannelsAdapter,
+} from '../sagas/publicChannels/publicChannels.adapter';
 
 jest.setTimeout(600_000);
 
@@ -304,7 +308,7 @@ describe('registrar', () => {
       id: 'F1141EBCF93387E5A28696C5B41E2177',
       currentChannel: 'general',
       channels: publicChannelsAdapter.getInitialState(),
-      channelMessages: channelMessagesAdapter.getInitialState()
+      channelMessages: channelMessagesAdapter.getInitialState(),
     };
 
     const userCsr: UserCsr = await createUserCsr({

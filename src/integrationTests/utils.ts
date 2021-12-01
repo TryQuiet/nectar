@@ -15,7 +15,7 @@ import { appActions } from '../sagas/app/app.slice';
 import { errorsActions } from '../sagas/errors/errors.slice';
 
 import { StoreKeys } from '../sagas/store.keys';
-import { prepareStore } from 'src/utils/tests/prepareStore';
+import { prepareStore } from '../utils/tests/prepareStore';
 
 const log = logger('tests');
 
