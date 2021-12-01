@@ -97,7 +97,7 @@ const validCurrentChannelMessages = createSelector(
 export const sortedCurrentChannelMessages = createSelector(
   validCurrentChannelMessages,
   (messages) => {
-    return messages.sort((a, b) => b.createdAt - a.createdAt);
+    return messages.sort((a, b) => b.createdAt - a.createdAt).reverse();
   }
 );
 
@@ -150,8 +150,9 @@ export const dailyGroupedCurrentChannelMessages = createSelector(
 export const currentChannelMessagesMergedBySender = createSelector(
   dailyGroupedCurrentChannelMessages,
   (groups) => {
+    let result: { [day: string]: DisplayableMessage[][] } = {};
     for (const day in groups) {
-      groups[day] = groups[day].reduce((merged, message) => {
+      result[day] = groups[day].reduce((merged, message) => {
         // Get last item from collected array for comparison
         const last = merged.length && merged[merged.length - 1][0];
 
@@ -167,7 +168,7 @@ export const currentChannelMessagesMergedBySender = createSelector(
         return merged;
       }, []);
     }
-    return groups;
+    return result;
   }
 );
 
