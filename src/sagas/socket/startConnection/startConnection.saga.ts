@@ -30,6 +30,8 @@ import {
   ResponseRegistrarPayload,
 } from '../../communities/communities.slice';
 import { appMasterSaga } from '../../app/app.master.saga';
+import { connectionActions } from '../../appConnection/connection.slice';
+import { connectionMasterSaga } from '../../appConnection/connection.master.saga';
 
 export function subscribe(socket: Socket) {
   return eventChannel<
@@ -88,6 +90,7 @@ export function subscribe(socket: Socket) {
         log(payload);
         emit(communitiesActions.responseRegistrar(payload));
         emit(identityActions.saveOwnerCertToDb());
+        emit(connectionActions.responseInitializedRegistrars(payload.id));
       }
     );
     socket.on(SocketActionTypes.NETWORK, (payload: any) => {
@@ -103,6 +106,7 @@ export function subscribe(socket: Socket) {
         emit(publicChannelsActions.subscribeForAllTopics(payload.id));
         emit(communitiesActions.launchRegistrar(payload.id));
         emit(communitiesActions.community(payload.id));
+        emit(connectionActions.responseInitializedCommunities(payload.id));
       }
     );
     socket.on(SocketActionTypes.ERROR, (payload: ErrorPayload) => {
@@ -161,5 +165,6 @@ export function* useIO(socket: Socket): Generator {
     fork(communitiesMasterSaga, socket),
     fork(appMasterSaga, socket),
     fork(errorsMasterSaga),
+    fork(connectionMasterSaga),
   ]);
 }
