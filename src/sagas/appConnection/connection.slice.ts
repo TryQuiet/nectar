@@ -25,14 +25,12 @@ export const connectionSlice = createSlice({
         ...state.initializedCommunities,
         action.payload,
       ];
-      console.log(state.initializedCommunities);
     },
     addInitializedRegistrar: (state, action: PayloadAction<RegistrarId>) => {
       state.initializedRegistrars = [
         ...state.initializedRegistrars,
         action.payload,
       ];
-      console.log(state.initializedRegistrars);
     },
   },
 });
