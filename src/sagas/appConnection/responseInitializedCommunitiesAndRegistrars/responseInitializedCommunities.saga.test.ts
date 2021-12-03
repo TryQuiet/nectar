@@ -8,8 +8,8 @@ import {
 } from '../connection.slice';
 import { responseInitializedCommunitiesSaga } from './responseInitializedCommunities';
 
-describe('responseInitializedCommunities', () => {
-  test('response initialized communities', async () => {
+describe('responseInitializedCommunitiesSaga works correctly', () => {
+  test('add data from response initialized communities into the store', async () => {
     const communityId = 'communityId';
 
     await expectSaga(

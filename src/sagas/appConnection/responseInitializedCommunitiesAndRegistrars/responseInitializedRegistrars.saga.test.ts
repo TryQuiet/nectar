@@ -8,8 +8,8 @@ import {
 } from '../connection.slice';
 import { responseInitializedRegistrarsSaga } from './responseInitializedRegistrars.saga';
 
-describe('responseInitializedRegistrars', () => {
-  test('response initialized registrars', async () => {
+describe('responseInitializedRegistrarsSaga works correctly', () => {
+  test('add data from response initialized registrars into the store', async () => {
     const registrarId = 'registrarId';
 
     await expectSaga(
