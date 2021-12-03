@@ -30,8 +30,11 @@ import {
   CommunityChannels,
   PublicChannelsState,
 } from '../sagas/publicChannels/publicChannels.slice';
-import { channelsByCommunityAdapter } from '../sagas/publicChannels/publicChannels.adapter';
-import SingleResponse from 'pkijs/src/SingleResponse';
+import {
+  channelMessagesAdapter,
+  communityChannelsAdapter,
+  publicChannelsAdapter,
+} from '../sagas/publicChannels/publicChannels.adapter';
 
 jest.setTimeout(3600_000);
 
@@ -309,11 +312,12 @@ describe('registrar', () => {
       userCertificate: '',
     };
 
-    let communityChannels = new CommunityChannels(
-      'F1141EBCF93387E5A28696C5B41E2177'
-    );
-
-    communityChannels.currentChannel = 'general';
+    let communityChannels: CommunityChannels = {
+      id: 'F1141EBCF93387E5A28696C5B41E2177',
+      currentChannel: 'general',
+      channels: publicChannelsAdapter.getInitialState(),
+      channelMessages: channelMessagesAdapter.getInitialState(),
+    };
 
     const userCsr: UserCsr = await createUserCsr({
       zbayNickname: 'fgdgfg',
@@ -353,8 +357,8 @@ describe('registrar', () => {
 
       [StoreKeys.PublicChannels]: {
         ...new PublicChannelsState(),
-        channels: channelsByCommunityAdapter.setAll(
-          channelsByCommunityAdapter.getInitialState(),
+        channels: communityChannelsAdapter.setAll(
+          communityChannelsAdapter.getInitialState(),
           [communityChannels]
         ),
       },
