@@ -94,6 +94,10 @@ describe('sendMessageSaga', () => {
       [publicChannel]
     ),
     channelMessages: channelMessagesAdapter.getInitialState(),
+<<<<<<< HEAD
+=======
+    channelLoadingSlice: 0,
+>>>>>>> 9722e56fe86af737c0ef2b357060a05895f09c8b
   };
 
   test('sign and send message', async () => {
