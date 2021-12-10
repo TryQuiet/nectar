@@ -28,7 +28,7 @@ export function* registerCertificateSaga(
 
     const identity = yield* select(identitySelectors.currentIdentity);
 
-    const channelGeneral = {
+    const channel = {
       name: 'general',
       description: 'general',
       owner: identity.zbayNickname,
@@ -39,10 +39,9 @@ export function* registerCertificateSaga(
     yield* put(
       publicChannelsActions.addChannel({
         communityId: action.payload.communityId,
-        channel: channelGeneral,
+        channel: channel,
       })
     );
-
   } else {
     const registrarUrl = action.payload.registrarAddress.includes(':')
       ? `http://${action.payload.registrarAddress}`

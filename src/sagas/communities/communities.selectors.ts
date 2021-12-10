@@ -39,14 +39,12 @@ export const currentCommunity = createSelector(
   }
 );
 
-export const communityById = (communityId: string) => createSelector(
-  communitiesSlice,
-  (reducerState) => {
+export const communityById = (communityId: string) =>
+  createSelector(communitiesSlice, (reducerState) => {
     return communitiesAdapter
       .getSelectors()
       .selectById(reducerState.communities, communityId);
-  }
-);
+  });
 
 export const currentCommunityId = createSelector(
   communitiesSlice,
@@ -55,20 +53,21 @@ export const currentCommunityId = createSelector(
   }
 );
 
-export const registrarUrl = (communityId: string) => createSelector(communityById(communityId), (community) => {
-  let registrarAddress: string = '';
-  if (!community) {
-    return;
-  }
-  if (community.onionAddress) {
-    registrarAddress = community.port
-      ? `${community.onionAddress}:${community.port}`
-      : `${community.onionAddress}`;
-  } else if (community.registrarUrl) {
-    registrarAddress = community.registrarUrl;
-  }
-  return registrarAddress;
-});
+export const registrarUrl = (communityId: string) =>
+  createSelector(communityById(communityId), (community) => {
+    let registrarAddress: string = '';
+    if (!community) {
+      return;
+    }
+    if (community.onionAddress) {
+      registrarAddress = community.port
+        ? `${community.onionAddress}:${community.port}`
+        : `${community.onionAddress}`;
+    } else if (community.registrarUrl) {
+      registrarAddress = community.registrarUrl;
+    }
+    return registrarAddress;
+  });
 
 export const isOwner = createSelector(currentCommunity, (community) => {
   return community && community.CA !== null;

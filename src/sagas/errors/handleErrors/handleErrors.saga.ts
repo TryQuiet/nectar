@@ -11,19 +11,21 @@ export function* handleErrorsSaga(
   action: PayloadAction<ReturnType<typeof errorsActions.addError>['payload']>
 ): Generator {
   log('received error', action.payload);
-  
+
   if (action.payload.type === 'registrar') {
-    const communityId = action.payload.communityId
-    const identity = yield* select(identitySelectors.selectById(communityId))
-    const registrarAddress = yield* select(communitiesSelectors.registrarUrl(communityId))
+    const communityId = action.payload.communityId;
+    const identity = yield* select(identitySelectors.selectById(communityId));
+    const registrarAddress = yield* select(
+      communitiesSelectors.registrarUrl(communityId)
+    );
 
     const payload = {
       communityId,
       userCsr: identity.userCsr,
-      registrarAddress
+      registrarAddress,
     };
     yield* put(identityActions.storeUserCsr(payload));
-    log(`registering certificate failed, trying again`)
+    log(`registering certificate failed, trying again`);
   }
 
   const communityId = action.payload.communityId
