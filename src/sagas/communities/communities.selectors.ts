@@ -21,12 +21,12 @@ export const allCommunities = createSelector(
   (reducerState) => {
     return communitiesAdapter
       .getSelectors()
-      .selectAll(reducerState.communities);
+      .selectEntities(reducerState.communities);
   }
 );
 
 export const ownCommunities = createSelector(allCommunities, (communities) => {
-  return communities?.filter((community) => community.CA !== null) || [];
+  return Object.values(communities).filter((community) => community.CA !== null) || [];
 });
 
 export const currentCommunity = createSelector(
@@ -54,7 +54,8 @@ export const currentCommunityId = createSelector(
 );
 
 export const registrarUrl = (communityId: string) =>
-  createSelector(communityById(communityId), (community) => {
+  createSelector(allCommunities, (communities) => {
+    const community = communities[communityId]
     let registrarAddress: string = '';
     if (!community) {
       return;
