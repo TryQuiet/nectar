@@ -6,17 +6,15 @@ const connectionSlice: CreatedSelectors[StoreKeys.Connection] = (
   state: StoreState
 ) => state[StoreKeys.Connection];
 
-export const initializedCommunities = () =>
-  createSelector(
-    connectionSlice,
-    (reducerState) => reducerState.initializedCommunities
-  );
+export const initializedCommunities = createSelector(
+  connectionSlice,
+  (reducerState) => reducerState.initializedCommunities
+);
 
-export const initializedRegistrars = () =>
-  createSelector(
-    connectionSlice,
-    (reducerState) => reducerState.initializedRegistrars
-  );
+export const initializedRegistrars = createSelector(
+  connectionSlice,
+  (reducerState) => reducerState.initializedRegistrars
+);
 
 export const connectionSelectors = {
   initializedCommunities,

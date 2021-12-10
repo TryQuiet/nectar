@@ -12,14 +12,6 @@ export const connectionSlice = createSlice({
   initialState: { ...new ConnectionState() },
   name: StoreKeys.Connection,
   reducers: {
-    responseInitializedCommunities: (
-      state,
-      _action: PayloadAction<CommunityId>
-    ) => state,
-    responseInitializedRegistrars: (
-      state,
-      _action: PayloadAction<RegistrarId>
-    ) => state,
     addInitializedCommunity: (state, action: PayloadAction<CommunityId>) => {
       state.initializedCommunities = [
         ...state.initializedCommunities,
