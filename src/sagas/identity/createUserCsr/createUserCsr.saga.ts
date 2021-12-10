@@ -25,7 +25,7 @@ export function* createUserCsrSaga(
   const payload = {
     communityId: currentCommunity.id,
     userCsr: csr,
-    registrarAddress: yield* select(communitiesSelectors.registrarUrl),
+    registrarAddress: yield* select(communitiesSelectors.registrarUrl(currentCommunity.id)),
   };
 
   log('createUserCsrSaga');

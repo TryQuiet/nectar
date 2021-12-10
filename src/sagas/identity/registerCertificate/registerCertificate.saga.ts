@@ -28,19 +28,21 @@ export function* registerCertificateSaga(
 
     const identity = yield* select(identitySelectors.currentIdentity);
 
-    const channel = {
+    const channelGeneral = {
       name: 'general',
       description: 'general',
       owner: identity.zbayNickname,
       timestamp: Date.now(),
       address: 'general',
     };
+
     yield* put(
       publicChannelsActions.addChannel({
         communityId: action.payload.communityId,
-        channel: channel,
+        channel: channelGeneral,
       })
     );
+
   } else {
     const registrarUrl = action.payload.registrarAddress.includes(':')
       ? `http://${action.payload.registrarAddress}`

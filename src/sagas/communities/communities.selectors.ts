@@ -39,6 +39,15 @@ export const currentCommunity = createSelector(
   }
 );
 
+export const communityById = (communityId: string) => createSelector(
+  communitiesSlice,
+  (reducerState) => {
+    return communitiesAdapter
+      .getSelectors()
+      .selectById(reducerState.communities, communityId);
+  }
+);
+
 export const currentCommunityId = createSelector(
   communitiesSlice,
   (reducerState) => {
@@ -46,7 +55,7 @@ export const currentCommunityId = createSelector(
   }
 );
 
-export const registrarUrl = createSelector(currentCommunity, (community) => {
+export const registrarUrl = (communityId: string) => createSelector(communityById(communityId), (community) => {
   let registrarAddress: string = '';
   if (!community) {
     return;
