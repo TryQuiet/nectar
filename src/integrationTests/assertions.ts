@@ -4,19 +4,16 @@ import { communitiesActions } from '../sagas/communities/communities.slice';
 import logger from '../utils/logger';
 import { assertNoErrors } from './utils';
 import { publicChannelsActions } from '../sagas/publicChannels/publicChannels.slice';
-import {createApp} from './utils'
+import { createApp } from './utils';
 import { AsyncReturnType } from 'src/utils/types/AsyncReturnType.interface';
 
 const log = logger('tests');
-const App: AsyncReturnType<typeof createApp> = null
-type Store = typeof App.store
+const App: AsyncReturnType<typeof createApp> = null;
+type Store = typeof App.store;
 
-export async function assertStateIsCorrect(
-  oldState,
-  currentState
-) {
- log('checking state')
- log('state correct')
+export async function assertStateIsCorrect(oldState, currentState) {
+  log('checking state');
+  log('state correct');
 }
 
 export async function assertReceivedCertificates(
@@ -56,16 +53,13 @@ export async function assertReceivedChannelsAndSubscribe(
   }, maxTime);
 
   store.dispatch(
-    publicChannelsActions.setCurrentChannel(
-      {communityId, 
-      channel: store.getState().PublicChannels.channels.entities[communityId].channels
-      .ids[0] as string
-    }
-    )
+    publicChannelsActions.setCurrentChannel({
+      communityId,
+      channel: store.getState().PublicChannels.channels.entities[communityId]
+        .channels.ids[0] as string,
+    })
   );
-  store.dispatch(
-    publicChannelsActions.subscribeForAllTopics(communityId)
-  );
+  store.dispatch(publicChannelsActions.subscribeForAllTopics(communityId));
 
   log(
     `User ${userName} received ${
@@ -132,9 +126,7 @@ export async function assertReceivedMessagesAreValid(
   }, maxTime);
 }
 
-
-
-// Change to standard test, we already have this in store. 
+// Change to standard test, we already have this in store.
 export function* launchCommunitiesOnStartupSaga(): Generator {
   yield* spawn(assertNoErrors);
   yield* take(communitiesActions.launchRegistrar);

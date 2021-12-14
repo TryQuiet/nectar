@@ -25,12 +25,9 @@ export const _allCommunities = createSelector(
   }
 );
 
-export const allCommunities = createSelector(
-  _allCommunities,
-  (communities) => {
-    return Object.values(communities)
-  }
-);
+export const allCommunities = createSelector(_allCommunities, (communities) => {
+  return Object.values(communities);
+});
 
 export const ownCommunities = createSelector(_allCommunities, (communities) => {
   return (

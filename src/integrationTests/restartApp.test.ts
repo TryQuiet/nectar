@@ -4,14 +4,14 @@ import {
   assertReceivedChannelsAndSubscribe,
   assertReceivedMessages,
   assertReceivedMessagesAreValid,
-  assertStateIsCorrect
+  assertStateIsCorrect,
 } from './assertions';
 import {
   createCommunity,
   joinCommunity,
   getCommunityOwnerData,
   sendMessage,
-} from './appActions'
+} from './appActions';
 import { createApp, sleep } from './utils';
 import { AsyncReturnType } from '../utils/types/AsyncReturnType.interface';
 import logger from '../utils/logger';
@@ -24,10 +24,9 @@ const crypto = new Crypto();
 global.crypto = crypto;
 
 describe('relaunch app without doing anything', () => {
-
-    let owner: AsyncReturnType<typeof createApp>;
-  let store: typeof owner.store
-  let oldState: ReturnType<typeof owner.store.getState>
+  let owner: AsyncReturnType<typeof createApp>;
+  let store: typeof owner.store;
+  let oldState: ReturnType<typeof owner.store.getState>;
 
   beforeAll(async () => {
     owner = await createApp();
@@ -39,44 +38,42 @@ describe('relaunch app without doing anything', () => {
 
   test('Owner creates community', async () => {
     await createCommunity({ userName: 'Owner', store: owner.store });
-    store = owner.store
+    store = owner.store;
   });
-  
+
   test('Owner successfully closes app', async () => {
     await owner.manager.closeAllServices();
-  })
-  
+  });
+
   test('Owner relaunch application with previous state', async () => {
-    oldState = store.getState()
-    owner = await createApp(oldState)
+    oldState = store.getState();
+    owner = await createApp(oldState);
     // Wait before checking state in case some unwanted actions are executing and manipulating store
-    await sleep(20_000)
-    store = owner.store
+    await sleep(20_000);
+    store = owner.store;
   });
 
   test('Assert that owner store is correct', async () => {
-    const currentState = store.getState()
-    await assertStateIsCorrect(oldState, currentState)
-  })
-  })
-
-
+    const currentState = store.getState();
+    await assertStateIsCorrect(oldState, currentState);
+  });
+});
 
 //   describe('registrar', () => {
 //     let owner;
-  
+
 //     beforeAll(async () => {
 //       owner = await createAppWithoutTor();
 //     });
-  
+
 //     afterAll(async () => {
 //       await owner.manager.closeAllServices();
 //     });
-  
+
 //     test('try to join offline registrar', async () => {
 //       await tryToJoinOfflineRegistrar(owner.store);
 //     });
-  
+
 //     test('launch communities and registrars on startup', async () => {
 //       // TODO: Move store mock into separate module and share between all the tests across nectar
 //       const community: Community = {
@@ -99,7 +96,7 @@ describe('relaunch app without doing anything', () => {
 //         privateKey: '',
 //         port: 0,
 //       };
-  
+
 //       const identity: Identity = {
 //         id: 'F1141EBCF93387E5A28696C5B41E2177',
 //         hiddenService: {
@@ -125,7 +122,7 @@ describe('relaunch app without doing anything', () => {
 //         userCsr: undefined,
 //         userCertificate: '',
 //       };
-  
+
 //       let communityChannels: CommunityChannels = {
 //         id: 'F1141EBCF93387E5A28696C5B41E2177',
 //         currentChannel: 'general',
@@ -133,7 +130,7 @@ describe('relaunch app without doing anything', () => {
 //         channelMessages: channelMessagesAdapter.getInitialState(),
 //         channelLoadingSlice: 0,
 //       };
-  
+
 //       const userCsr: UserCsr = await createUserCsr({
 //         zbayNickname: 'fgdgfg',
 //         commonName: 'ybrmqwsudwxjpzugnl66hx2526nox5nzgmrtzveteud5f7anpjw62zqd',
@@ -143,14 +140,14 @@ describe('relaunch app without doing anything', () => {
 //         signAlg: config.signAlg,
 //         hashAlg: config.hashAlg,
 //       });
-  
+
 //       userCsr.userKey =
 //         'MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgrSJ366ji2AfRNC9BDnViHl5V+A+fnjiUdUuPav3G8rygCgYIKoZIzj0DAQehRANCAAQpI18Np+59RC7UXkAfcl8mu8mrtgAwjv5pN18RmzGw2vV6iHbJ8RrujJZF9Z5rDqGYZAP2UCTyKzWTOC6740RD';
-  
+
 //       identity.userCsr = userCsr;
 //       identity.userCertificate =
 //         'MIICDTCCAbMCBgF9Lq/VWDAKBggqhkjOPQQDAjASMRAwDgYDVQQDEwdaYmF5IENBMB4XDTIxMTExNzE2MTY1NVoXDTMwMDEzMTIzMDAwMFowSTFHMEUGA1UEAxM+eWJybXF3c3Vkd3hqcHp1Z25sNjZoeDI1MjZub3g1bnpnbXJ0enZldGV1ZDVmN2FucGp3NjJ6cWQub25pb24wWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAAQpI18Np+59RC7UXkAfcl8mu8mrtgAwjv5pN18RmzGw2vV6iHbJ8RrujJZF9Z5rDqGYZAP2UCTyKzWTOC6740RDo4HCMIG/MAkGA1UdEwQCMAAwCwYDVR0PBAQDAgCOMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATAvBgkqhkiG9w0BCQwEIgQgFzGXNQSk2IzgcI35nT9GmfKunA1jJHOdV6ZWRhOADhIwFgYKKwYBBAGDjBsCAQQIEwZmZ2RnZmcwPQYJKwYBAgEPAwEBBDATLlFtWFJKYjVnZGpjcmI5Vk4xVUVFbmM1VllVSGNEcHBKWXlrcGY1UUhXU3JHakMwCgYIKoZIzj0EAwIDSAAwRQIhAJmsMNFbttx9i0OMYIzKsALrfCUU8rX70S8Oj2IZp/vWAiA0b+6MR0ANnJkjW6HcClS6K2XHvOizmzQab+8rJNJVag==';
-  
+
 //       const app = await createApp({
 //         [StoreKeys.Communities]: {
 //           ...new CommunitiesState(),
@@ -169,7 +166,7 @@ describe('relaunch app without doing anything', () => {
 //             ]),
 //           },
 //         },
-  
+
 //         [StoreKeys.PublicChannels]: {
 //           ...new PublicChannelsState(),
 //           channels: communityChannelsAdapter.setAll(
@@ -178,10 +175,9 @@ describe('relaunch app without doing anything', () => {
 //           ),
 //         },
 //       });
-  
+
 //       await app.runSaga(launchCommunitiesOnStartupSaga).toPromise();
-  
+
 //       await app.manager.closeAllServices();
 //     });
 //   });
-  

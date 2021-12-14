@@ -1,4 +1,4 @@
-test.skip('sadf', () => {})
+test.skip('sadf', () => {});
 
 // import { Crypto } from '@peculiar/webcrypto';
 // import {
@@ -79,15 +79,15 @@ test.skip('sadf', () => {})
 //     await createCommunity({ userName: 'Owner', store: owner.store });
 //     store = owner.store
 //   });
-  
+
 //   test('Owner successfully closes app', async () => {
 //     await owner.manager.closeAllServices();
 //   })
-  
+
 //   test('Owner relaunch application with previous state', async () => {
 //     oldState = store.getState()
 //     owner = await createApp(oldState)
-    
+
 //     // Wait before checking state in case some unwanted actions are executing and manipulating store
 //     await sleep(20_000)
 //     store = owner.store

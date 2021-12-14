@@ -44,7 +44,7 @@ export function* sendMessageSaga(
 
   const channelAddress = yield* select(publicChannelsSelectors.currentChannel);
 
-  log(channelAddress, 'channelAddress')
+  log(channelAddress, 'channelAddress');
 
   const messageId = yield* call(generateMessageId);
   const currentTime = yield* call(getCurrentTime);
