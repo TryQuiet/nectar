@@ -7,6 +7,7 @@ import { createApp } from './utils';
 import { AsyncReturnType } from 'src/utils/types/AsyncReturnType.interface';
 
 import { keyFromCertificate, parseCertificate } from '@zbayapp/identity/lib';
+import { connectionActions } from '../sagas/appConnection/connection.slice';
 
 const log = logger('tests');
 const App: AsyncReturnType<typeof createApp> = null;
@@ -74,6 +75,16 @@ export async function createCommunity({ userName, store }: CreateCommunity) {
   await waitForExpect(() => {
     expect(store.getState().Users.certificates.ids).toHaveLength(1);
   }, timeout);
+  await waitForExpect(() => {
+    expect(
+      store.getState().Connection.initializedCommunities[communityId]
+    ).toBeTruthy();
+  });
+  await waitForExpect(() => {
+    expect(
+      store.getState().Connection.initializedRegistrars[communityId]
+    ).toBeTruthy();
+  });
 }
 
 export async function joinCommunity(payload: JoinCommunity) {
@@ -247,4 +258,56 @@ export const getCommunityOwnerData = (ownerStore: Store) => {
     ownerRootCA: community.rootCa,
     registrarPort: community.port,
   };
+};
+
+export const clearInitializedCommunitiesAndRegistrars = (store: Store) => {
+  store.dispatch(connectionActions.removeInitializedCommunities);
+  store.dispatch(connectionActions.removeInitializedRegistrars);
+};
+
+interface SendRegistrationRequest {
+  registrarAddress: string;
+  userName: string;
+  store: Store;
+  registrarPort?: number;
+}
+
+export const sendRegistrationRequest = async (
+  payload: SendRegistrationRequest
+) => {
+  const { registrarAddress, userName, registrarPort, store } = payload;
+
+  const timeout = 120_000;
+
+  let address: string;
+  if (registrarAddress === '0.0.0.0') {
+    address = `${registrarAddress}:${registrarPort}`;
+  } else {
+    address = registrarAddress;
+  }
+
+  store.dispatch(communitiesActions.joinCommunity(address));
+
+  await waitForExpect(() => {
+    expect(store.getState().Identity.identities.ids).toHaveLength(1);
+  }, timeout);
+  await waitForExpect(() => {
+    expect(store.getState().Communities.communities.ids).toHaveLength(1);
+  }, timeout);
+
+  const communityId = store.getState().Communities.communities.ids[0];
+
+  await waitForExpect(() => {
+    expect(
+      store.getState().Identity.identities.entities[communityId].hiddenService
+        .onionAddress
+    ).toBeTruthy();
+  }, timeout);
+  await waitForExpect(() => {
+    expect(
+      store.getState().Identity.identities.entities[communityId].peerId.id
+    ).toHaveLength(46);
+  }, timeout);
+
+  store.dispatch(identityActions.registerUsername(userName));
 };

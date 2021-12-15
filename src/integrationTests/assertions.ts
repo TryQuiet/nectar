@@ -1,20 +1,12 @@
-import { take, spawn } from 'typed-redux-saga';
 import waitForExpect from 'wait-for-expect';
-import { communitiesActions } from '../sagas/communities/communities.slice';
 import logger from '../utils/logger';
-import { assertNoErrors } from './utils';
 import { publicChannelsActions } from '../sagas/publicChannels/publicChannels.slice';
-import { createApp } from './utils';
+import { createApp, sleep } from './utils';
 import { AsyncReturnType } from 'src/utils/types/AsyncReturnType.interface';
 
 const log = logger('tests');
 const App: AsyncReturnType<typeof createApp> = null;
 type Store = typeof App.store;
-
-export async function assertStateIsCorrect(oldState, currentState) {
-  log('checking state');
-  log('state correct');
-}
 
 export async function assertReceivedCertificates(
   userName: string,
@@ -94,12 +86,12 @@ export async function assertReceivedMessages(
   );
 }
 
-export async function assertReceivedMessagesAreValid(
+export const assertReceivedMessagesAreValid = async (
   userName: string,
   messages: any[],
   maxTime: number = 600000,
   store: Store
-) {
+) => {
   log(`User ${userName} checks is messages are valid`);
 
   const communityId = store.getState().Communities.communities.ids[0];
@@ -124,12 +116,37 @@ export async function assertReceivedMessagesAreValid(
   await waitForExpect(() => {
     expect(validMessages).toHaveLength(messages.length);
   }, maxTime);
-}
+};
 
-// Change to standard test, we already have this in store.
-export function* launchCommunitiesOnStartupSaga(): Generator {
-  yield* spawn(assertNoErrors);
-  yield* take(communitiesActions.launchRegistrar);
-  yield* take(communitiesActions.community);
-  yield* take(communitiesActions.responseRegistrar);
-}
+export const assertInitializedExistingCommunitiesAndRegistrars = async (
+  store: Store
+) => {
+  const communityId = store.getState().Communities.communities.ids[0];
+
+  await waitForExpect(() => {
+    expect(
+      store.getState().Connection.initializedCommunities[communityId]
+    ).toBeTruthy();
+  });
+  await waitForExpect(() => {
+    expect(
+      store.getState().Connection.initializedRegistrars[communityId]
+    ).toBeTruthy();
+  });
+};
+
+export const assertReceivedRegistrationError = async (store: Store) => {
+  await sleep(20_000);
+  const errors = store.getState().Errors;
+  // TODO: Finish after errors slice will be fixed
+  log(errors, 'errors');
+};
+
+export const assertReceivedCertificate = async (store: Store) => {
+  const communityId = store.getState().Communities.communities.ids[0];
+  await waitForExpect(() => {
+    expect(
+      store.getState().Identity.identities.entities[communityId].userCertificate
+    ).toBeTruthy();
+  }, 150_000);
+};
