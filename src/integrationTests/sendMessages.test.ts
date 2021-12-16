@@ -11,7 +11,7 @@ import {
   getCommunityOwnerData,
   sendMessage,
 } from './appActions';
-import { createApp, createAppWithoutTor } from './utils';
+import { createApp, createAppWithoutTor, sleep } from './utils';
 import { AsyncReturnType } from '../utils/types/AsyncReturnType.interface';
 import logger from '../utils/logger';
 
@@ -149,7 +149,6 @@ describe.skip('send message - users go offline and online', () => {
   });
 
   test('Replicated messages are valid', async () => {
-    log(`ownerMessage`);
     await assertReceivedMessagesAreValid(
       'owner',
       allMessages,
@@ -171,7 +170,7 @@ describe.skip('send message - users go offline and online', () => {
   });
 });
 
-describe.skip('Send message - users are online', () => {
+describe('Send message - users are online', () => {
   let owner: AsyncReturnType<typeof createApp>;
   let userOne: AsyncReturnType<typeof createApp>;
   let userTwo: AsyncReturnType<typeof createApp>;
@@ -238,37 +237,38 @@ describe.skip('Send message - users are online', () => {
 
   test('Every user sends one message to general channel', async () => {
     ownerMessageData = await sendMessage('owner says hi', owner.store);
+    await sleep(5000)
     userOneMessageData = await sendMessage('userOne says hi', userOne.store);
+    await sleep(5000)
     userTwoMessageData = await sendMessage('userTwo says hi', userTwo.store);
   });
 
   test('Every user replicated all messages', async () => {
-    await assertReceivedMessages('owner', 3, 120_000, owner.store);
-    await assertReceivedMessages('userOne', 3, 120_000, userOne.store);
-    await assertReceivedMessages('userTwo', 3, 120_000, userTwo.store);
+    await assertReceivedMessages('owner', 3, 40_000, owner.store);
+    await assertReceivedMessages('userOne', 3, 40_000, userOne.store);
+    await assertReceivedMessages('userTwo', 3, 40_000, userTwo.store);
   });
 
-  test('Replicated messages are valid', async () => {
-    log(`ownerMessage`);
-    await assertReceivedMessagesAreValid(
-      'owner',
-      [ownerMessageData, userOneMessageData, userTwoMessageData],
-      20000,
-      owner.store
-    );
-    await assertReceivedMessagesAreValid(
-      'userOne',
-      [ownerMessageData, userOneMessageData, userTwoMessageData],
-      20000,
-      owner.store
-    );
-    await assertReceivedMessagesAreValid(
-      'userTwo',
-      [ownerMessageData, userOneMessageData, userTwoMessageData],
-      20000,
-      owner.store
-    );
-  });
+  // test('Replicated messages are valid', async () => {
+  //   await assertReceivedMessagesAreValid(
+  //     'owner',
+  //     [ownerMessageData, userOneMessageData, userTwoMessageData],
+  //     20000,
+  //     owner.store
+  //   );
+  //   await assertReceivedMessagesAreValid(
+  //     'userOne',
+  //     [ownerMessageData, userOneMessageData, userTwoMessageData],
+  //     20000,
+  //     userOne.store
+  //   );
+  //   await assertReceivedMessagesAreValid(
+  //     'userTwo',
+  //     [userTwoMessageData, ownerMessageData, userOneMessageData],
+  //     20000,
+  //     userTwo.store
+  //   );
+  // });
 });
 
 describe.skip('send message - without tor', () => {
@@ -337,13 +337,9 @@ describe.skip('send message - without tor', () => {
   let userTwoMessageData;
 
   test('Every user sends one message to general channel', async () => {
-    log('users send messages');
     ownerMessageData = await sendMessage('owner says hi', owner.store);
     userOneMessageData = await sendMessage('userOne says hi', userOne.store);
     userTwoMessageData = await sendMessage('userTwo says hi', userTwo.store);
-    log(ownerMessageData.message, 'usermessage');
-    log(userOneMessageData.message, 'usermessage');
-    log(userTwoMessageData.message, 'usermessage');
   });
 
   test('Every user replicated all messages', async () => {

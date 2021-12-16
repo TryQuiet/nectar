@@ -80,9 +80,6 @@ describe.skip('create community and restart app', () => {
     // Wait before checking state in case some unwanted actions are executing and manipulating store
     await sleep(20_000);
     store = owner.store;
-  });
-
-  test('Assert that owner store is correct', async () => {
     const currentState = store.getState();
     expect(currentState).toMatchObject(oldState);
   });

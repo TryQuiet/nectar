@@ -70,14 +70,18 @@ export async function assertReceivedMessages(
   log(`User ${userName} starts waiting ${maxTime}ms for messages`);
 
   const communityId = store.getState().Communities.communities.ids[0];
+await sleep(maxTime)
 
-  await waitForExpect(() => {
-    expect(
-      store.getState().PublicChannels.channels.entities[communityId]
-        .channelMessages.ids
-    ).toHaveLength(expectedCount);
-  }, maxTime);
 
+const publicChannels = store.getState().PublicChannels.channels.entities[communityId]
+console.log(publicChannels)
+
+    // await waitForExpect(() => {
+    //   expect(
+    //     store.getState().PublicChannels.channels.entities[communityId]
+    //     .channelMessages.ids
+    //     ).toHaveLength(expectedCount);
+    //   }, maxTime);
   log(
     `User ${userName} received ${
       store.getState().PublicChannels.channels.entities[communityId]
@@ -108,8 +112,8 @@ export const assertReceivedMessagesAreValid = async (
       // @ts-ignorets-ignore
       (message) => message.publicKey === receivedMessage.pubKey
     );
-    if (msg) {
-      validMessages.push(msg);
+    if (msg[0]) {
+      validMessages.push(msg[0]);
     }
   }
 
@@ -136,10 +140,10 @@ export const assertInitializedExistingCommunitiesAndRegistrars = async (
 };
 
 export const assertReceivedRegistrationError = async (store: Store) => {
-  await sleep(20_000);
-  const errors = store.getState().Errors;
-  // TODO: Finish after errors slice will be fixed
-  log(errors, 'errors');
+  const communityId = store.getState().Communities.communities.ids[0];
+  await waitForExpect(() => {
+    expect(store.getState().Errors[communityId]?.ids[0]).toEqual('registrar')
+  })
 };
 
 export const assertReceivedCertificate = async (store: Store) => {

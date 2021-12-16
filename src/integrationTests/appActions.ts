@@ -27,6 +27,13 @@ interface JoinCommunity {
   store: Store;
 }
 
+interface SendRegistrationRequest {
+  registrarAddress: string;
+  userName: string;
+  store: Store;
+  registrarPort?: number;
+}
+
 export async function createCommunity({ userName, store }: CreateCommunity) {
   const timeout = 120_000;
   const communityName = 'CommunityName';
@@ -264,13 +271,6 @@ export const clearInitializedCommunitiesAndRegistrars = (store: Store) => {
   store.dispatch(connectionActions.removeInitializedCommunities);
   store.dispatch(connectionActions.removeInitializedRegistrars);
 };
-
-interface SendRegistrationRequest {
-  registrarAddress: string;
-  userName: string;
-  store: Store;
-  registrarPort?: number;
-}
 
 export const sendRegistrationRequest = async (
   payload: SendRegistrationRequest

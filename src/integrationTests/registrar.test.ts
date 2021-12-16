@@ -77,7 +77,7 @@ describe.skip('registrar is offline, user tries to join, then registrar goes onl
   });
 
   test('user get error message', async () => {
-    await assertReceivedRegistrationError(store);
+    await assertReceivedRegistrationError(user.store);
   });
 
   test('registrar goes online', async () => {

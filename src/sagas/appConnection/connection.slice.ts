@@ -21,7 +21,7 @@ export const connectionSlice = createSlice({
     addInitializedRegistrar: (state, action: PayloadAction<RegistrarId>) => {
       state.initializedRegistrars = {
         ...state.initializedRegistrars,
-        [action.payload]: false,
+        [action.payload]: true,
       };
     },
     removeInitializedCommunities: (

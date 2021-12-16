@@ -30,8 +30,6 @@ export function* sendMessageSaga(
 
   const certificate = identity.userCertificate;
 
-  log('sendMessageSaga-1');
-
   const parsedCertificate = yield* call(parseCertificate, certificate);
   const pubKey = yield* call(keyFromCertificate, parsedCertificate);
   const keyObject = yield* call(
@@ -43,8 +41,6 @@ export function* sendMessageSaga(
   const signature = yield* call(arrayBufferToString, signatureArrayBuffer);
 
   const channelAddress = yield* select(publicChannelsSelectors.currentChannel);
-
-  log(channelAddress, 'channelAddress');
 
   const messageId = yield* call(generateMessageId);
   const currentTime = yield* call(getCurrentTime);
