@@ -70,18 +70,13 @@ export async function assertReceivedMessages(
   log(`User ${userName} starts waiting ${maxTime}ms for messages`);
 
   const communityId = store.getState().Communities.communities.ids[0];
-await sleep(maxTime)
 
-
-const publicChannels = store.getState().PublicChannels.channels.entities[communityId]
-console.log(publicChannels)
-
-    // await waitForExpect(() => {
-    //   expect(
-    //     store.getState().PublicChannels.channels.entities[communityId]
-    //     .channelMessages.ids
-    //     ).toHaveLength(expectedCount);
-    //   }, maxTime);
+    await waitForExpect(() => {
+      expect(
+        store.getState().PublicChannels.channels.entities[communityId]
+        .channelMessages.ids
+        ).toHaveLength(expectedCount);
+      }, maxTime);
   log(
     `User ${userName} received ${
       store.getState().PublicChannels.channels.entities[communityId]
