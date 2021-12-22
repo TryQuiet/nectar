@@ -31,7 +31,7 @@ describe('connectionReducer', () => {
     const communities = connectionSelectors.initializedCommunities(
       store.getState()
     );
-    expect(communities).toEqual({[communityId]: true});
+    expect(communities).toEqual({ [communityId]: true });
   });
 
   it('add initialized registrar should add correctly data into the store', () => {
@@ -41,6 +41,6 @@ describe('connectionReducer', () => {
     const registrars = connectionSelectors.initializedRegistrars(
       store.getState()
     );
-    expect(registrars).toEqual({[registrarId]: true});
+    expect(registrars).toEqual({ [registrarId]: true });
   });
 });
