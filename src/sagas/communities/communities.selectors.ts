@@ -16,6 +16,7 @@ export const selectEntities = createSelector(communitiesSlice, (reducerState) =>
   communitiesAdapter.getSelectors().selectEntities(reducerState.communities)
 );
 
+// eslint-disable-next-line
 export const _allCommunities = createSelector(
   communitiesSlice,
   (reducerState) => {
@@ -25,12 +26,9 @@ export const _allCommunities = createSelector(
   }
 );
 
-export const allCommunities = createSelector(
-  _allCommunities,
-  (communities) => {
-    return Object.values(communities)
-  }
-);
+export const allCommunities = createSelector(_allCommunities, (communities) => {
+  return Object.values(communities);
+});
 
 export const ownCommunities = createSelector(_allCommunities, (communities) => {
   return (

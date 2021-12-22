@@ -1,168 +1,40 @@
-import { take, spawn } from 'typed-redux-saga';
 import waitForExpect from 'wait-for-expect';
 import { communitiesActions } from '../sagas/communities/communities.slice';
 import { identityActions } from '../sagas/identity/identity.slice';
 import { messagesActions } from '../sagas/messages/messages.slice';
 import logger from '../utils/logger';
-import { assertNoErrors } from './utils';
-import { publicChannelsActions } from '../sagas/publicChannels/publicChannels.slice';
+import { createApp } from './utils';
+import { AsyncReturnType } from 'src/utils/types/AsyncReturnType.interface';
 
 import { keyFromCertificate, parseCertificate } from '@zbayapp/identity/lib';
-import { Store } from 'redux';
+import { connectionActions } from '../sagas/appConnection/connection.slice';
 
 const log = logger('tests');
+const App: AsyncReturnType<typeof createApp> = null;
+type Store = typeof App.store;
 
-export async function assertReceivedCertificates(
-  userName: string,
-  expectedCount: number,
-  maxTime: number = 600000,
-  store
-) {
-  log(`User ${userName} starts waiting ${maxTime}ms for certificates`);
-
-  await waitForExpect(() => {
-    expect(store.getState().Users.certificates.ids).toHaveLength(expectedCount);
-  }, maxTime);
-
-  log(
-    `User ${userName} received ${
-      store.getState().Users.certificates.ids.length
-    } certificates`
-  );
+interface CreateCommunity {
+  userName: string;
+  store: Store;
+}
+interface JoinCommunity {
+  registrarAddress: string;
+  userName: string;
+  ownerPeerId: string;
+  ownerRootCA: string;
+  expectedPeersCount: number;
+  registrarPort: number;
+  store: Store;
 }
 
-export async function assertReceivedChannelsAndSubscribe(
-  userName: string,
-  expectedCount: number,
-  maxTime: number = 600000,
-  store
-) {
-  log(`User ${userName} starts waiting ${maxTime}ms for channels`);
-
-  const communityId = store.getState().Communities.communities.ids[0];
-
-  await waitForExpect(() => {
-    expect(
-      store.getState().PublicChannels.channels.entities[communityId].channels
-        .ids
-    ).toHaveLength(expectedCount);
-  }, maxTime);
-
-  await store.dispatch(
-    publicChannelsActions.setCurrentChannel(
-      store.getState().PublicChannels.channels.entities[communityId].channels
-        .ids[0]
-    )
-  );
-  await store.dispatch(
-    publicChannelsActions.subscribeForAllTopics(communityId)
-  );
-
-  log(
-    `User ${userName} received ${
-      store.getState().PublicChannels.channels.entities[communityId].channels
-        .ids.length
-    } channels`
-  );
+interface SendRegistrationRequest {
+  registrarAddress: string;
+  userName: string;
+  store: Store;
+  registrarPort?: number;
 }
 
-export async function sendMessage(
-  message: string,
-  store: Store
-): Promise<{ message: string; publicKey: string }> {
-  store.dispatch(messagesActions.sendMessage(message));
-
-  const communityId = store.getState().Communities.communities.ids[0];
-  const certificate =
-    store.getState().Identity.identities.entities[communityId].userCertificate;
-
-  const parsedCertificate = await parseCertificate(certificate);
-  const publicKey = keyFromCertificate(parsedCertificate);
-
-  return {
-    message,
-    publicKey,
-  };
-}
-
-export async function assertReceivedMessages(
-  userName: string,
-  expectedCount: number,
-  maxTime: number = 600000,
-  store
-) {
-  log(`User ${userName} starts waiting ${maxTime}ms for messages`);
-
-  const communityId = store.getState().Communities.communities.ids[0];
-
-  await waitForExpect(() => {
-    expect(
-      store.getState().PublicChannels.channels.entities[communityId]
-        .channelMessages.general.ids
-    ).toHaveLength(expectedCount);
-  }, maxTime);
-
-  log(
-    `User ${userName} received ${
-      store.getState().PublicChannels.channels.entities[communityId]
-        .channelMessages.general.ids.length
-    } messages`
-  );
-}
-
-export async function assertReceivedMessagesAreValid(
-  userName: string,
-  messages: any[],
-  maxTime: number = 600000,
-  store
-) {
-  log(`User ${userName} checks is messages are valid`);
-
-  const communityId = store.getState().Communities.communities.ids[0];
-
-  const receivedMessages = Object.values(
-    store.getState().PublicChannels.channels.entities[communityId]
-      .channelMessages.general.messages
-  );
-
-  const validMessages = [];
-
-  for (let receivedMessage of receivedMessages) {
-    const msg = messages.filter(
-      // @ts-ignorets-ignore
-      (message) => message.publicKey === receivedMessage.pubKey
-    );
-    if (msg) {
-      validMessages.push(msg);
-    }
-  }
-
-  await waitForExpect(() => {
-    expect(validMessages).toHaveLength(messages.length);
-  }, maxTime);
-}
-
-export const getCommunityOwnerData = (ownerStore: any) => {
-  const ownerStoreState = ownerStore.getState();
-  const community =
-    ownerStoreState.Communities.communities.entities[
-      ownerStoreState.Communities.currentCommunity
-    ];
-  const registrarAddress = community.onionAddress;
-  const ownerIdentityState = ownerStore.getState().Identity;
-  return {
-    registrarAddress,
-    communityId: community.id,
-    ownerPeerId:
-      ownerIdentityState.identities.entities[
-        ownerIdentityState.identities.ids[0]
-      ].peerId.id,
-    ownerRootCA: community.rootCa,
-    registrarPort: community.port,
-  };
-};
-
-export async function createCommunity({ userName, store }) {
+export async function createCommunity({ userName, store }: CreateCommunity) {
   const timeout = 120_000;
   const communityName = 'CommunityName';
 
@@ -210,9 +82,19 @@ export async function createCommunity({ userName, store }) {
   await waitForExpect(() => {
     expect(store.getState().Users.certificates.ids).toHaveLength(1);
   }, timeout);
+  await waitForExpect(() => {
+    expect(
+      store.getState().Connection.initializedCommunities[communityId]
+    ).toBeTruthy();
+  });
+  await waitForExpect(() => {
+    expect(
+      store.getState().Connection.initializedRegistrars[communityId]
+    ).toBeTruthy();
+  });
 }
 
-export async function joinCommunity(payload) {
+export async function joinCommunity(payload: JoinCommunity) {
   const {
     registrarAddress,
     userName,
@@ -225,7 +107,7 @@ export async function joinCommunity(payload) {
 
   const timeout = 120_000;
 
-  let address;
+  let address: string;
   if (payload.registrarAddress === '0.0.0.0') {
     address = `${registrarAddress}:${registrarPort}`;
   } else {
@@ -290,6 +172,26 @@ export async function joinCommunity(payload) {
   }, timeout);
 }
 
+export async function sendMessage(
+  message: string,
+  store: Store
+): Promise<{ message: string; publicKey: string }> {
+  log(message, 'sendMessage');
+  store.dispatch(messagesActions.sendMessage(message));
+
+  const communityId = store.getState().Communities.communities.ids[0];
+  const certificate =
+    store.getState().Identity.identities.entities[communityId].userCertificate;
+
+  const parsedCertificate = parseCertificate(certificate);
+  const publicKey = keyFromCertificate(parsedCertificate);
+
+  return {
+    message,
+    publicKey,
+  };
+}
+
 export async function tryToJoinOfflineRegistrar(store) {
   const timeout = 120_000;
   const userName = 'userName';
@@ -345,9 +247,67 @@ export async function tryToJoinOfflineRegistrar(store) {
   }, timeout);
 }
 
-export function* launchCommunitiesOnStartupSaga(): Generator {
-  yield* spawn(assertNoErrors);
-  yield* take(communitiesActions.launchRegistrar);
-  yield* take(communitiesActions.community);
-  yield* take(communitiesActions.responseRegistrar);
-}
+export const getCommunityOwnerData = (ownerStore: Store) => {
+  const ownerStoreState = ownerStore.getState();
+  const community =
+    ownerStoreState.Communities.communities.entities[
+      ownerStoreState.Communities.currentCommunity
+    ];
+  const registrarAddress = community.onionAddress;
+  const ownerIdentityState = ownerStore.getState().Identity;
+  return {
+    registrarAddress,
+    communityId: community.id,
+    ownerPeerId:
+      ownerIdentityState.identities.entities[
+        ownerIdentityState.identities.ids[0]
+      ].peerId.id,
+    ownerRootCA: community.rootCa,
+    registrarPort: community.port,
+  };
+};
+
+export const clearInitializedCommunitiesAndRegistrars = (store: Store) => {
+  store.dispatch(connectionActions.removeInitializedCommunities);
+  store.dispatch(connectionActions.removeInitializedRegistrars);
+};
+
+export const sendRegistrationRequest = async (
+  payload: SendRegistrationRequest
+) => {
+  const { registrarAddress, userName, registrarPort, store } = payload;
+
+  const timeout = 120_000;
+
+  let address: string;
+  if (registrarAddress === '0.0.0.0') {
+    address = `${registrarAddress}:${registrarPort}`;
+  } else {
+    address = registrarAddress;
+  }
+
+  store.dispatch(communitiesActions.joinCommunity(address));
+
+  await waitForExpect(() => {
+    expect(store.getState().Identity.identities.ids).toHaveLength(1);
+  }, timeout);
+  await waitForExpect(() => {
+    expect(store.getState().Communities.communities.ids).toHaveLength(1);
+  }, timeout);
+
+  const communityId = store.getState().Communities.communities.ids[0];
+
+  await waitForExpect(() => {
+    expect(
+      store.getState().Identity.identities.entities[communityId].hiddenService
+        .onionAddress
+    ).toBeTruthy();
+  }, timeout);
+  await waitForExpect(() => {
+    expect(
+      store.getState().Identity.identities.entities[communityId].peerId.id
+    ).toHaveLength(46);
+  }, timeout);
+
+  store.dispatch(identityActions.registerUsername(userName));
+};

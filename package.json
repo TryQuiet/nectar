@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "test": "TZ=UTC jest sagas/*",
-    "test-integration": "DEBUG='waggle*, nectar*' jest integrationTests/*",
+    "test-integration": "DEBUG='waggle*, nectar:tests*' jest integrationTests/* --bail --colors",
     "lint": "eslint --ext .ts ./src/",
     "prettier": "prettier"
   },
@@ -59,7 +59,7 @@
     "redux-saga-test-plan": "^4.0.3",
     "tmp": "^0.2.1",
     "typescript": "^4.3.5",
-    "waggle": "^4.3.14"
+    "waggle": "^4.3.15"
   },
   "peerDependencies": {
     "@zbayapp/identity": "*",

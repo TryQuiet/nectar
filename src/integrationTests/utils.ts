@@ -150,3 +150,10 @@ export function* assertNoErrors(): Generator {
   // Use at the beginning of test saga
   yield* all([takeEvery(errorsActions.addError, throwAssertionError)]);
 }
+
+export const sleep = async (time = 1000) =>
+  new Promise<void>((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, time);
+  });
