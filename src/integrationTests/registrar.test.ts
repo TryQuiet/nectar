@@ -12,7 +12,7 @@ const crypto = new Crypto();
 
 global.crypto = crypto;
 
-describe.skip('offline registrar, user tries to join', () => {
+describe('offline registrar, user tries to join', () => {
   let user: AsyncReturnType<typeof createApp>;
 
   beforeAll(async () => {
