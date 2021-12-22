@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "test": "TZ=UTC jest sagas/*",
-    "test-integration": "jest integrationTests/* --bail --colors",
+    "test-integration": "DEBUG='waggle*, nectar:tests*' jest integrationTests/* --bail --colors",
     "lint": "eslint --ext .ts ./src/",
     "prettier": "prettier"
   },

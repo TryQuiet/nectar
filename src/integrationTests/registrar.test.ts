@@ -37,7 +37,7 @@ describe.skip('offline registrar, user tries to join', () => {
   });
 });
 
-describe.skip('registrar is offline, user tries to join, then registrar goes online', () => {
+describe('registrar is offline, user tries to join, then registrar goes online', () => {
   let owner: AsyncReturnType<typeof createApp>;
   let user: AsyncReturnType<typeof createApp>;
   let store: typeof owner.store;

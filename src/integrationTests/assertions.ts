@@ -71,12 +71,12 @@ export async function assertReceivedMessages(
 
   const communityId = store.getState().Communities.communities.ids[0];
 
-    await waitForExpect(() => {
-      expect(
-        store.getState().PublicChannels.channels.entities[communityId]
+  await waitForExpect(() => {
+    expect(
+      store.getState().PublicChannels.channels.entities[communityId]
         .channelMessages.ids
-        ).toHaveLength(expectedCount);
-      }, maxTime);
+    ).toHaveLength(expectedCount);
+  }, maxTime);
   log(
     `User ${userName} received ${
       store.getState().PublicChannels.channels.entities[communityId]
@@ -137,8 +137,8 @@ export const assertInitializedExistingCommunitiesAndRegistrars = async (
 export const assertReceivedRegistrationError = async (store: Store) => {
   const communityId = store.getState().Communities.communities.ids[0];
   await waitForExpect(() => {
-    expect(store.getState().Errors[communityId]?.ids[0]).toEqual('registrar')
-  })
+    expect(store.getState().Errors[communityId]?.ids[0]).toEqual('registrar');
+  });
 };
 
 export const assertReceivedCertificate = async (store: Store) => {

@@ -16,6 +16,7 @@ export const selectEntities = createSelector(communitiesSlice, (reducerState) =>
   communitiesAdapter.getSelectors().selectEntities(reducerState.communities)
 );
 
+// eslint-disable-next-line
 export const _allCommunities = createSelector(
   communitiesSlice,
   (reducerState) => {

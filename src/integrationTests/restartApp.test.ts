@@ -15,7 +15,7 @@ const crypto = new Crypto();
 
 global.crypto = crypto;
 
-describe.skip('restart app without doing anything', () => {
+describe('restart app without doing anything', () => {
   let owner: AsyncReturnType<typeof createApp>;
   let store: typeof owner.store;
   let oldState: ReturnType<typeof owner.store.getState>;
@@ -50,7 +50,7 @@ describe.skip('restart app without doing anything', () => {
   });
 });
 
-describe.skip('create community and restart app', () => {
+describe('create community and restart app', () => {
   let owner: AsyncReturnType<typeof createApp>;
   let store: typeof owner.store;
   let oldState: ReturnType<typeof owner.store.getState>;

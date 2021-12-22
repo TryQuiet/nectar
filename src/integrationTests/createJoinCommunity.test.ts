@@ -13,7 +13,7 @@ const crypto = new Crypto();
 
 global.crypto = crypto;
 
-describe.skip('owner creates community', () => {
+describe('owner creates community', () => {
   let owner: AsyncReturnType<typeof createApp>;
 
   beforeAll(async () => {
@@ -29,7 +29,7 @@ describe.skip('owner creates community', () => {
   });
 });
 
-describe.skip('owner creates community and two users join', () => {
+describe('owner creates community and two users join', () => {
   let owner: AsyncReturnType<typeof createApp>;
   let userOne: AsyncReturnType<typeof createApp>;
   let userTwo: AsyncReturnType<typeof createApp>;

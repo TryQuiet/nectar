@@ -92,12 +92,17 @@ describe('send message - users go offline and online', () => {
 
   test('Every user sends one message to general channel', async () => {
     const ownerMessage = await sendMessage('owner says hi', owner.store);
+    await sleep(5000);
     const userOneMessage = await sendMessage('userOne says hi', userOne.store);
+    await sleep(5000);
     const userTwoMessage = await sendMessage('userTwo says hi', userTwo.store);
 
     ownerMessagesData.push(ownerMessage);
     userOneMessagesData.push(userOneMessage);
     userTwoMessagesData.push(userTwoMessage);
+
+    // Wait 10 seconds before closing the app
+    await sleep(10_000);
   });
 
   test('User one and two go offline', async () => {
@@ -118,6 +123,8 @@ describe('send message - users go offline and online', () => {
   test('users come back online', async () => {
     userOne = await createApp(userOneOldState);
     userTwo = await createApp(userTwoOldState);
+    // Give apps time to launch services
+    await sleep(20000);
   });
 
   test('Every user replicated all messages', async () => {
@@ -130,19 +137,19 @@ describe('send message - users go offline and online', () => {
     await assertReceivedMessages(
       'owner',
       allMessages.length,
-      120_000,
+      360_000,
       owner.store
     );
     await assertReceivedMessages(
       'userOne',
       allMessages.length,
-      120_000,
+      360_000,
       userOne.store
     );
     await assertReceivedMessages(
       'userTwo',
       allMessages.length,
-      120_000,
+      360_000,
       userTwo.store
     );
   });
@@ -169,7 +176,7 @@ describe('send message - users go offline and online', () => {
   });
 });
 
-describe.skip('Send message - users are online', () => {
+describe('Send message - users are online', () => {
   let owner: AsyncReturnType<typeof createApp>;
   let userOne: AsyncReturnType<typeof createApp>;
   let userTwo: AsyncReturnType<typeof createApp>;
@@ -236,9 +243,9 @@ describe.skip('Send message - users are online', () => {
 
   test('Every user sends one message to general channel', async () => {
     ownerMessageData = await sendMessage('owner says hi', owner.store);
-    await sleep(5000)
+    await sleep(5000);
     userOneMessageData = await sendMessage('userOne says hi', userOne.store);
-    await sleep(5000)
+    await sleep(5000);
     userTwoMessageData = await sendMessage('userTwo says hi', userTwo.store);
   });
 
